@@ -1,0 +1,33 @@
+{
+  "name": "harfbuzzjs",
+  "version": "0.0.1",
+  "description": "Minimal version of HarfBuzz for JavaScript use",
+  "main": "hbjs.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "harfbuzz",
+    "opentype",
+    "truetype",
+    "ttf",
+    "otf",
+    "graphics",
+    "complex scripts",
+    "typography",
+    "font rendering",
+    "font",
+    "fonts",
+    "emoji"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harfbuzz/harfbuzzjs.git"
+  },
+  "author": "Ebrahim Byagowi <ebrahim@gnu.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/harfbuzz/harfbuzzjs/issues"
+  },
+  "homepage": "https://github.com/harfbuzz/harfbuzzjs#readme"
+}

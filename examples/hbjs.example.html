@@ -1,0 +1,12 @@
+<script src="harfbuzzjs.js"></script>
+<script src="hbjs.js"></script>
+<script src="hbjs.example.js"></script>
+<script>
+Module().then(function (module) {
+  fetch('DejaVuSans.ttf').then(function (res) {
+    return res.arrayBuffer();
+  }).then(function (blob) {
+    document.body.innerText = JSON.stringify(example(hbjs(module), blob)); 
+  });
+});
+</script>

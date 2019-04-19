@@ -1,0 +1,4 @@
+# Build related files
+harfbuzz/
+harfbuzzjs.js
+harfbuzzjs.wasm
