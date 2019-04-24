@@ -22,3 +22,7 @@ releases tab of the project.
 Even the fact we provide a tiny wrapper around main functionalities of
 harfbuzz, it's easy to use other parts of the using module._hb* functions,
 see example/nohbjs.js to see how that will be possible.
+
+## [wapm](https://wapm.io/)
+The wapm `.wasm` file is build on `/wapm` directory of this project, run ./build.sh of
+that folder to get `.wasm` a full version of harfbuzz for wapm.
