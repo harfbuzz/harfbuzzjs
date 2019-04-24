@@ -22,6 +22,10 @@ Even the fact we provide a tiny wrapper around the main functionalities of
 harfbuzz, it's easy to use other parts using `module._hb*` functions,
 see example/nohbjs.js to see how.
 
+## [npm](https://www.npmjs.com/package/harfbuzzjs)
+Can be added with `npm i harfbuzzjs` or `yarn add harfbuzzjs`, see the examples for
+how to use it.
+
 ## [wapm](https://wapm.io/)
 The wapm's `.wasm` file is build on `/wapm` directory of this project, run ./build.sh of
 that folder to get `.wasm` a full version of harfbuzz for wapm, currently released
