@@ -37,3 +37,8 @@ which is the full version but doesn't have an optimal size.
 
 ## Stability?
 We are [considering](https://github.com/harfbuzz/harfbuzzjs/issues/3) a switch to WASI so may gets broken.
+
+## Use the library in a bigger emscripten project?
+See [harfbuzz port inside emscripten](https://github.com/emscripten-core/emscripten/blob/incoming/tools/ports/harfbuzz.py)
+and [emscripten-ports/HarfBuzz](https://github.com/emscripten-ports/HarfBuzz), basically all you need is to use
+`-s USE_HARFBUZZ=1` in your build.
