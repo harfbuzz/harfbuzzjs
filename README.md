@@ -36,4 +36,4 @@ Another option also is to use `.wasm` and `.js` available at `/wapm` folder of t
 which is the full version but doesn't have an optimal size.
 
 ## Stability?
-We are [considering](https://github.com/harfbuzz/harfbuzzjs/issues/3) a switch to `.wasi` so may gets broken.
+We are [considering](https://github.com/harfbuzz/harfbuzzjs/issues/3) a switch to WASI so may gets broken.
