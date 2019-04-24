@@ -18,8 +18,8 @@ of the project.
 ### Node.js
 1. `node examples/hbjs.example.node.js`
 
-Even the fact we provide a tiny wrapper around main functionalities of
-harfbuzz, it's easy to use other parts of the using `module._hb*` functions,
+Even the fact we provide a tiny wrapper around the main functionalities of
+harfbuzz, it's easy to use other parts using `module._hb*` functions,
 see example/nohbjs.js to see how.
 
 ## [wapm](https://wapm.io/)
@@ -27,10 +27,13 @@ The wapm's `.wasm` file is build on `/wapm` directory of this project, run ./bui
 that folder to get `.wasm` a full version of harfbuzz for wapm, currently released
 [here](https://wapm.io/package/ebraminio/harfbuzz).
 
-## Need more of the API?
-File a bug, mention your usecase and wait for a new release.
+## Need more of the library?
+File a bug and mention your usecase.
 
 You can also add the symbols you like to CMakeLists.txt and compile the pack yourself.
 
-Another option also would be to use `.wasm` and `.js` available at `/wapm` folder of the release
-which is the full version but don't have an optimal size.
+Another option also is to use `.wasm` and `.js` available at `/wapm` folder of the release
+which is the full version but doesn't have an optimal size.
+
+## Stability?
+We are [considering](https://github.com/harfbuzz/harfbuzzjs/issues/3) a switch to `.wasi` so may gets broken.
