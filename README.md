@@ -1,5 +1,5 @@
 # harfbuzzjs
-Providing [harfbuzz](https://github.com/harfbuzz/harfbuzz) shaping
+Providing [HarfBuzz](https://github.com/harfbuzz/harfbuzz) shaping
 library for client/server side JavaScript projects.
 
 ## Building
