@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 project(harfbuzzjs)
 
 # we won't need multithread support in harfbuzzjs
-add_definitions(-DHB_NO_MT)
+#add_definitions(-DHB_NO_MT)
 
 add_definitions(-DHB_NO_OPTIONS -DHB_NO_OT_FONT_CFF -DHB_NO_NAME_TABLE_AAT
   -DHB_NO_OT_FONT_BITMAP -DHB_NO_OT_SHAPE_COMPLEX_HEBREW_FALLBACK
@@ -21,7 +21,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s \"EXPORTED_FUNCTIONS=['_hb_version_s
   '_hb_buffer_set_direction', '_hb_shape', '_hb_buffer_serialize_glyphs', \
   '_hb_buffer_get_length', '_hb_buffer_serialize_glyphs', '_hb_buffer_destroy', \
   '_hb_font_destroy', '_hb_face_destroy', '_hb_blob_destroy', '_hb_blob_get_length', \
-  '_hb_direction_from_string', '_free']\"")
+  '_hb_direction_from_string', '_hb_font_set_scale', '_free']\"")
 
 add_subdirectory(harfbuzz)
 

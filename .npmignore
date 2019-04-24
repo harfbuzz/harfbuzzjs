@@ -1,0 +1,5 @@
+harfbuzz/
+build/
+wapm/harfbuzz
+wapm/build
+*.zip

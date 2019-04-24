@@ -1,5 +1,8 @@
 # Build related files
 harfbuzz/
 build/
+wapm/harfbuzz/
+wapm/build/
 harfbuzzjs.js
 harfbuzzjs.wasm
+*.zip

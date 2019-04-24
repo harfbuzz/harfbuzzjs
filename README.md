@@ -8,12 +8,11 @@ and make sure emcmake (emscripten related) is on your path
 2. ./build.sh
 
 Not able to install all these in order to build `.wasm`? Download
-it from [here](https://github.com/harfbuzz/harfbuzz/files/3099139/harfbuzzjs.zip)
-and put `.wasm`/`.js` in root directory, or, download them from
-releases tab of the project.
+the pack from [releases tab](https://github.com/harfbuzz/harfbuzzjs/releases)
+of the project.
 
 ## Usage and testing
-### Client
+### Browser
 1. `(cd example && node server.js)`
 2. Open the link on browser
 ### Node.js
@@ -26,3 +25,11 @@ see example/nohbjs.js to see how that will be possible.
 ## [wapm](https://wapm.io/)
 The wapm `.wasm` file is build on `/wapm` directory of this project, run ./build.sh of
 that folder to get `.wasm` a full version of harfbuzz for wapm.
+
+## I need more of the API, what should I do?
+Either file a bug, mention your usecase and wait for a new release.
+
+You can also add the symbol you like to CMakeLists.txt and compile the pack yourself.
+
+Another option also would be use .wasm and .js available at `/wapm` folder which is
+the full version but don't have an optimal size.

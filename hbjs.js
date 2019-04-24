@@ -17,7 +17,7 @@ function hbjs(module) {
   }
   
   function createFace(blob, index) {
-    var ptr = module._hb_face_create(blob.ptr || blob, index || 0);
+    var ptr = module._hb_face_create(blob.ptr, index);
     return {
       ptr: ptr,
       free: function () { module._hb_face_destroy(ptr); }
@@ -25,9 +25,12 @@ function hbjs(module) {
   }
 
   function createFont(face) {
-    var ptr = module._hb_font_create(face.ptr || face);
+    var ptr = module._hb_font_create(face.ptr);
     return {
       ptr: ptr,
+      setScale: function (xScale, yScale) {
+        module._hb_font_set_scale(ptr, xScale, yScale);
+      },
       free: function () { module._hb_font_destroy(ptr); }
     };
   }
@@ -75,7 +78,7 @@ function hbjs(module) {
         str.free();
       },
       shape: function (font, features) {
-        // features is not used yet
+        // features are not used yet
         module._hb_shape(font.ptr, ptr, 0, 0);
       },
       json: function (font) {
