@@ -6,7 +6,7 @@ Module().then(function (module) {
   fetch('DejaVuSans.ttf').then(function (res) {
     return res.arrayBuffer();
   }).then(function (blob) {
-    document.body.innerText = JSON.stringify(example(hbjs(module), blob)); 
+    document.body.innerText = JSON.stringify(example(hbjs(module), new Uint8Array(blob)));
   });
 });
 </script>

@@ -7,7 +7,7 @@ function example(hb, fontBlob) {
   var buffer = hb.createBuffer();
   buffer.addText('سلام');
   buffer.guessSegmentProperties();
-  buffer.setDirection('ltr');
+  buffer.setDirection('ltr'); // optional as can be by guessSegmentProperties also
   buffer.shape(font); // features are not supported yet
   var result = buffer.json(font);
 
