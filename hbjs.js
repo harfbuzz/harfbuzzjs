@@ -6,7 +6,7 @@ function hbjs(module) {
   function createBlob(blob) {
     var blobPtr = module._malloc(blob.byteLength);
     module.HEAPU8.set(blob, blobPtr);
-    var ptr = module._hb_blob_create(blobPtr, blob.byteLength, 2, 0, 0);
+    var ptr = module._hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, 0, 0);
     return {
       ptr: ptr,
       free: function () {
@@ -65,7 +65,7 @@ function hbjs(module) {
       ptr: ptr,
       addText: function (text) {
         var str = createCString(text);
-        module._hb_buffer_add_utf8(ptr, str.ptr, -1, 0, -1);
+        module._hb_buffer_add_utf8(ptr, str.ptr, str.length, 0, str.length);
         str.free();
       },
       guessSegmentProperties: function () {
