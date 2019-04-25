@@ -1,0 +1,36 @@
+<p><a href="https://github.com/harfbuzz/harfbuzzjs">harfbuzzjs</a> demo.</p>
+<p>Result:<div id="result"></div></p>
+<script src="harfbuzzjs.js"></script>
+<script src="hbjs.js"></script> <!-- Wrapper, can be used without -->
+<script>
+function example(hb, fontBlob) {
+  var blob = hb.createBlob(fontBlob);
+  var face = hb.createFace(blob, 0);
+  var font = hb.createFont(face);
+  font.setScale(1000, 1000); // Optional, if not given will be in font upem
+
+  var buffer = hb.createBuffer();
+  buffer.addText('abc');
+  buffer.guessSegmentProperties();
+  buffer.setDirection('ltr'); // optional as can be by guessSegmentProperties also
+  buffer.shape(font); // features are not supported yet
+  var result = buffer.json(font);
+
+  buffer.free();
+  font.free();
+  face.free();
+  blob.free();
+
+  return result;
+}
+
+Module().then(function (module) {
+  fetch('Roboto.abc.ttf').then(function (res) {
+    return res.arrayBuffer();
+  }).then(function (fontBlob) {
+    var hb = hbjs(module); // can be used without our wrapper
+    var result = example(hb, new Uint8Array(fontBlob));
+    document.getElementById('result').innerText = JSON.stringify(result); 
+  });
+});
+</script>
