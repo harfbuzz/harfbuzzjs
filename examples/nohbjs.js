@@ -20,7 +20,6 @@ Module().then(module => {
     var face = module._hb_face_create(blob, 0);
     var font = module._hb_font_create(face);
 
-    module._hb_font_create()
     var buffer = module._hb_buffer_create();
     {
       var text = utf8Encoder.encode("سلام!");
