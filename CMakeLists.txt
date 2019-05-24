@@ -8,7 +8,7 @@ add_definitions(-DHB_TINY)
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -s MODULARIZE=1 \
   -s NO_FILESYSTEM=1 -s ALLOW_MEMORY_GROWTH=1 -s NO_EXIT_RUNTIME=1 -s STRICT=1 \
-  -Oz --closure 1")
+  -Oz --closure 1 --llvm-lto 1")
 
 # add_definitions("-DHB_EXTERN=__attribute__((used))")
 # Alternatively, only the needed calls
