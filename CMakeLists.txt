@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
 project(harfbuzzjs)
 
-# we won't need multithread support in harfbuzzjs
-#add_definitions(-DHB_NO_MT)
-
 add_definitions(-DHB_TINY)
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -s MODULARIZE=1 \
@@ -19,6 +16,9 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s \"EXPORTED_FUNCTIONS=['_hb_version_s
   '_hb_buffer_get_length', '_hb_buffer_serialize_glyphs', '_hb_buffer_destroy', \
   '_hb_font_destroy', '_hb_face_destroy', '_hb_blob_destroy', '_hb_blob_get_length', \
   '_hb_direction_from_string', '_hb_font_set_scale', '_free']\"")
+
+SET(HB_BUILD_SUBSET OFF CACHE BOOL "Build harfbuzz-subset" FORCE)
+SET(HB_BUILD_TESTS OFF CACHE BOOL "Build harfbuzz tests" FORCE)
 
 add_subdirectory(harfbuzz)
 
