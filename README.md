@@ -22,14 +22,14 @@ of the project.
 
 Even the fact we provide a tiny wrapper around the main functionalities of
 harfbuzz, it's easy to use other parts using `module._hb*` functions,
-see example/nohbjs.js to see how.
+see example/nohbjs.js to see how, but you may a custom build.
 
 ## [npm](https://www.npmjs.com/package/harfbuzzjs)
 Can be added with `npm i harfbuzzjs` or `yarn add harfbuzzjs`, see the examples for
 how to use it.
 
 ## [wapm](https://wapm.io/)
-The wapm's `.wasm` file is build on `/wapm` directory of this project, run ./build.sh of
+The wapm's `.wasm` file is built on `/wapm` directory of this project, run ./build.sh of
 that folder to get `.wasm` a full version of harfbuzz for wapm, currently released
 [here](https://wapm.io/package/ebraminio/harfbuzz).
 
@@ -38,11 +38,10 @@ File a bug and mention your usecase.
 
 You can also add the symbols you like to CMakeLists.txt and compile the pack yourself.
 
-Another option also is to use `.wasm` and `.js` available at `/wapm` folder of the release
-which is the full version but doesn't have an optimal size.
+Another option also is to use `.wasm` and `.js` available at `/wapm` folder of the release which is the full version but doesn't have an optimal size.
 
 ## Stability?
-We are [considering](https://github.com/harfbuzz/harfbuzzjs/issues/3) a switch to WASI so may gets broken.
+We are [considering](https://github.com/harfbuzz/harfbuzzjs/issues/3) a switch to WASI at least for wapm releases so consider it unstable yet usable for now.
 
 ## Use the library in a bigger emscripten project?
 See [harfbuzz port inside emscripten](https://github.com/emscripten-core/emscripten/blob/incoming/tools/ports/harfbuzz.py)
