@@ -1,7 +1,6 @@
 <p><a href="https://github.com/harfbuzz/harfbuzzjs">harfbuzzjs</a> demo. Supports font drag and drop.</p>
 <p><input type="text" value="abc" id="text"></p>
 <p>Result:<div id="result"></div></p>
-<script src="harfbuzzjs.js"></script>
 <script src="hbjs.js"></script> <!-- Wrapper, can be used without -->
 <script>
 var hb, fontBlob;
@@ -27,8 +26,15 @@ function updateResult() {
   document.getElementById('result').innerText = JSON.stringify(result);
 }
 
-Module().then(function (module) {
-  window.hb = hbjs(module);
+// We could use instantiateStreaming but it's not supported in Safari yet
+// https://bugs.webkit.org/show_bug.cgi?id=173105
+fetch("hb.wasm").then(function (x) {
+  return x.arrayBuffer();
+}).then(function (wasm) {
+  return WebAssembly.instantiate(wasm);
+}).then(function (result) {
+  result.instance.exports.memory.grow(400); // each page is 64kb in size
+  window.hb = hbjs(result.instance);
   fetch('Roboto.abc.ttf').then(function (res) {
     return res.arrayBuffer();
   }).then(function (blob) { // can be used without our wrapper
