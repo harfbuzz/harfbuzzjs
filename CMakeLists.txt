@@ -12,10 +12,10 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -s MODULARIZE=1 \
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s \"EXPORTED_FUNCTIONS=['_hb_version_string', \
   '_malloc', '_hb_blob_create', '_hb_face_create', '_hb_font_create', \
   '_hb_buffer_create', '_hb_buffer_add_utf8', '_hb_buffer_guess_segment_properties', \
-  '_hb_buffer_set_direction', '_hb_shape', '_hb_buffer_serialize_glyphs', \
-  '_hb_buffer_get_length', '_hb_buffer_serialize_glyphs', '_hb_buffer_destroy', \
-  '_hb_font_destroy', '_hb_face_destroy', '_hb_blob_destroy', '_hb_blob_get_length', \
-  '_hb_direction_from_string', '_hb_font_set_scale', '_free']\"")
+  '_hb_buffer_set_direction', '_hb_shape', '_hb_buffer_get_length', \
+  '_hb_buffer_get_glyph_infos', '_hb_buffer_get_glyph_positions', \
+  '_hb_buffer_destroy', '_hb_font_destroy', '_hb_face_destroy', '_hb_blob_destroy', \
+  '_hb_blob_get_length', '_hb_direction_from_string', '_hb_font_set_scale', '_free']\"")
 
 SET(HB_BUILD_SUBSET OFF CACHE BOOL "Build harfbuzz-subset" FORCE)
 SET(HB_BUILD_TESTS OFF CACHE BOOL "Build harfbuzz tests" FORCE)

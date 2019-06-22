@@ -32,22 +32,29 @@ Module().then(module => {
 
     module._hb_shape(font, buffer, 0, 0);
 
-    var out = module._malloc(4096);
-    module._hb_buffer_serialize_glyphs(
-      buffer, 0, module._hb_buffer_get_length(buffer),
-      out, 4096, 0, font, hb_tag('JSON'),
-      4/*HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES*/
-    );
-    var result = module.HEAP8.slice(out, out+4096);
-    var json = JSON.parse('[' + bufferToString(result) + ']');
+    var length = module._hb_buffer_get_length(buffer);
+    var result = [];
+    var infosPtr32 = module._hb_buffer_get_glyph_infos(buffer, 0) / 4;
+    var positionsPtr32 = module._hb_buffer_get_glyph_positions(buffer, 0) / 4;
+    var infos = module.HEAPU32.slice(infosPtr32, infosPtr32 + 5 * length);
+    var positions = module.HEAP32.slice(positionsPtr32, positionsPtr32 + 5 * length);
+    for (var i = 0; i < length; ++i) {
+      result.push({
+        g: infos[i * 5 + 0],
+        cl: infos[i * 5 + 2],
+        ax: positions[i * 5 + 0],
+        ay: positions[i * 5 + 1],
+        dx: positions[i * 5 + 2],
+        dy: positions[i * 5 + 3]
+      });
+    }
 
     module._hb_buffer_destroy(buffer);
     module._hb_font_destroy(font);
     module._hb_face_destroy(face);
     module._hb_blob_create(blob);
-    module._free(out);
     module._free(fontBuffer);
 
-    document.body.innerText = JSON.stringify(json);
+    document.body.innerText = JSON.stringify(result);
   });
 });

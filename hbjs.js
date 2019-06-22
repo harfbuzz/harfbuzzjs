@@ -50,14 +50,6 @@ function hbjs(module) {
   function hb_tag(tag) {
     return tag.split('').reduce((x, y) => (x << 8) + y.charCodeAt(0), 0);
   }
-  var HB_BUFFER_SERIALIZE_FORMAT_JSON = hb_tag('JSON');
-
-  var utf8Decoder = new TextDecoder("utf8");
-  function bufferToString(buffer) {
-    return utf8Decoder.decode(buffer.slice(0, buffer.indexOf(0)));
-  }
-  
-  var HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES = 4;
 
   function createBuffer() {
     var ptr = module._hb_buffer_create();
@@ -82,18 +74,22 @@ function hbjs(module) {
         module._hb_shape(font.ptr, ptr, 0, 0);
       },
       json: function (font) {
-        var bufferLength = module._hb_buffer_get_length(ptr);
-        var serializeMaxLength = bufferLength * 100;
-        var out = module._malloc(serializeMaxLength);
-        module._hb_buffer_serialize_glyphs(
-          ptr, 0, module._hb_buffer_get_length(ptr),
-          out, serializeMaxLength, 0, font.ptr, HB_BUFFER_SERIALIZE_FORMAT_JSON,
-          HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES
-        );
-        var result = JSON.parse('[' + bufferToString(
-          module.HEAP8.slice(out, out+serializeMaxLength)
-        ) + ']');
-        module._free(out);
+        var length = module._hb_buffer_get_length(ptr);
+        var result = [];
+        var infosPtr32 = module._hb_buffer_get_glyph_infos(ptr, 0) / 4;
+        var positionsPtr32 = module._hb_buffer_get_glyph_positions(ptr, 0) / 4;
+        var infos = module.HEAPU32.slice(infosPtr32, infosPtr32 + 5 * length);
+        var positions = module.HEAP32.slice(positionsPtr32, positionsPtr32 + 5 * length);
+        for (var i = 0; i < length; ++i) {
+          result.push({
+            g: infos[i * 5 + 0],
+            cl: infos[i * 5 + 2],
+            ax: positions[i * 5 + 0],
+            ay: positions[i * 5 + 1],
+            dx: positions[i * 5 + 2],
+            dy: positions[i * 5 + 3]
+          });
+        }
         return result;
       },
       free: function () { module._hb_buffer_destroy(ptr); }
