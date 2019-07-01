@@ -1,85 +1,86 @@
-function hbjs(module) {
+function hbjs(instance) {
   'use strict';
-  
+
+  var exports = instance.exports;
+  var heapu8 = new Uint8Array(exports.memory.buffer);
+  var heapu32 = new Uint32Array(exports.memory.buffer);
+  var heapi32 = new Int32Array(exports.memory.buffer);
+
   var HB_MEMORY_MODE_WRITABLE = 2;
 
   function createBlob(blob) {
-    var blobPtr = module._malloc(blob.byteLength);
-    module.HEAPU8.set(blob, blobPtr);
-    var ptr = module._hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, 0, 0);
+    var blobPtr = exports.malloc(blob.byteLength);
+    heapu8.set(blob, blobPtr);
+    var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, 0, 0);
     return {
       ptr: ptr,
       free: function () {
-        module._hb_blob_destroy(ptr);
-        module._free(blobPtr);
+        exports.hb_blob_destroy(ptr);
+        exports.free(blobPtr);
       }
     };
   }
   
   function createFace(blob, index) {
-    var ptr = module._hb_face_create(blob.ptr, index);
+    var ptr = exports.hb_face_create(blob.ptr, index);
     return {
       ptr: ptr,
-      free: function () { module._hb_face_destroy(ptr); }
+      free: function () { exports.hb_face_destroy(ptr); }
     };
   }
 
   function createFont(face) {
-    var ptr = module._hb_font_create(face.ptr);
+    var ptr = exports.hb_font_create(face.ptr);
     return {
       ptr: ptr,
       setScale: function (xScale, yScale) {
-        module._hb_font_set_scale(ptr, xScale, yScale);
+        exports.hb_font_set_scale(ptr, xScale, yScale);
       },
-      free: function () { module._hb_font_destroy(ptr); }
+      free: function () { exports.hb_font_destroy(ptr); }
     };
   }
 
   var utf8Encoder = new TextEncoder("utf8");
   function createCString(text) {
     var bytes = utf8Encoder.encode(text);
-    var ptr = module._malloc(text.byteLength);
-    module.HEAPU8.set(bytes, ptr);
+    var ptr = exports.malloc(text.byteLength);
+    heapu8.set(bytes, ptr);
     return {
       ptr: ptr,
       length: bytes.byteLength,
-      free: function () { module._free(ptr); }
+      free: function () { exports.free(ptr); }
     };
-  }
-  
-  function hb_tag(tag) {
-    return tag.split('').reduce((x, y) => (x << 8) + y.charCodeAt(0), 0);
   }
 
   function createBuffer() {
-    var ptr = module._hb_buffer_create();
+    var ptr = exports.hb_buffer_create();
     return {
       ptr: ptr,
       addText: function (text) {
         var str = createCString(text);
-        module._hb_buffer_add_utf8(ptr, str.ptr, str.length, 0, str.length);
+        exports.hb_buffer_add_utf8(ptr, str.ptr, str.length, 0, str.length);
         str.free();
       },
       guessSegmentProperties: function () {
-        return module._hb_buffer_guess_segment_properties(ptr);
+        return exports.hb_buffer_guess_segment_properties(ptr);
       },
       setDirection: function (dir) {
         var str = createCString(dir);
-        var hbDirection = module._hb_direction_from_string(str.ptr, str.length);
-        module._hb_buffer_set_direction(ptr, hbDirection);
+        var direction = exports.hb_direction_from_string(str.ptr, str.length);
+        exports.hb_buffer_set_direction(ptr, direction);
         str.free();
       },
       shape: function (font, features) {
         // features are not used yet
-        module._hb_shape(font.ptr, ptr, 0, 0);
+        exports.hb_shape(font.ptr, ptr, 0, 0);
       },
       json: function (font) {
-        var length = module._hb_buffer_get_length(ptr);
+        var length = exports.hb_buffer_get_length(ptr);
         var result = [];
-        var infosPtr32 = module._hb_buffer_get_glyph_infos(ptr, 0) / 4;
-        var positionsPtr32 = module._hb_buffer_get_glyph_positions(ptr, 0) / 4;
-        var infos = module.HEAPU32.slice(infosPtr32, infosPtr32 + 5 * length);
-        var positions = module.HEAP32.slice(positionsPtr32, positionsPtr32 + 5 * length);
+        var infosPtr32 = exports.hb_buffer_get_glyph_infos(ptr, 0) / 4;
+        var positionsPtr32 = exports.hb_buffer_get_glyph_positions(ptr, 0) / 4;
+        var infos = heapu32.slice(infosPtr32, infosPtr32 + 5 * length);
+        var positions = heapi32.slice(positionsPtr32, positionsPtr32 + 5 * length);
         for (var i = 0; i < length; ++i) {
           result.push({
             g: infos[i * 5 + 0],
@@ -92,7 +93,7 @@ function hbjs(module) {
         }
         return result;
       },
-      free: function () { module._hb_buffer_destroy(ptr); }
+      free: function () { exports.hb_buffer_destroy(ptr); }
     };
   }
 
@@ -100,8 +101,7 @@ function hbjs(module) {
     createBlob: createBlob,
     createFace: createFace,
     createFont: createFont,
-    createBuffer: createBuffer,
-    _module: module
+    createBuffer: createBuffer
   };
 };
 

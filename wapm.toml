@@ -5,4 +5,4 @@ description = "HarfBuzz text shaping engine"
 
 [[module]]
 name = "harfbuzz"
-source = "build/harfbuzzjs.wasm"
+source = "hb.wasm"

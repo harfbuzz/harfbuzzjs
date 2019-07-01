@@ -1,12 +1,13 @@
-<script src="harfbuzzjs.js"></script>
-<script src="hbjs.js"></script>
+<script src="../hbjs.js"></script>
 <script src="hbjs.example.js"></script>
 <script>
-Module().then(function (module) {
-  fetch('DejaVuSans.ttf').then(function (res) {
-    return res.arrayBuffer();
+// instantiateStreaming isn't supported in Safari yet, see nohbjs.html
+WebAssembly.instantiateStreaming(fetch("../hb.wasm")).then(function (result) {
+  result.instance.exports.memory.grow(400); // each page is 64kb in size
+  fetch('Roboto.abc.ttf').then(function (x) {
+    return x.arrayBuffer();
   }).then(function (blob) {
-    document.body.innerText = JSON.stringify(example(hbjs(module), new Uint8Array(blob)));
+    document.body.innerText = JSON.stringify(example(hbjs(result.instance), new Uint8Array(blob)));
   });
 });
 </script>

@@ -2,9 +2,9 @@
   "name": "harfbuzzjs",
   "version": "0.0.3",
   "description": "Minimal version of HarfBuzz for JavaScript use",
-  "main": "hbjs.js",
+  "main": "index.js",
   "scripts": {
-    "test": "node hbjs.example.node.js"
+    "test": "node examples/hbjs.example.node.js"
   },
   "keywords": [
     "harfbuzz",
