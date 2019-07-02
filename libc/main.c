@@ -15,3 +15,11 @@ void *sbrk(unsigned int inc) {
 }
 
 float roundf(float x) { return (int) (x + .5); }
+
+// FIXME: Needed only in hb-subset builds, to be replaced with something better later
+// or, remove the use in hb-cff-interp-dict-common.hh
+double pow(double x, double y) {
+	double result = x;
+	while (--y > 0) result *= x;
+	return result;
+}
