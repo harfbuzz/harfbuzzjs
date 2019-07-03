@@ -2,6 +2,7 @@ typedef __SIZE_TYPE__ size_t;
 #define NULL ((void*) 0)
 
 // Source: https://github.com/intel/zephyr/blob/master/lib/libc/minimal/source/string/string.c
+// but modified for size optimization
 /* string.c - common string routines */
 /*
  * Copyright (c) 2014 Wind River Systems, Inc.
@@ -230,7 +231,7 @@ void *memchr(const void *s, int c, size_t n)
 	return NULL;
 }
 
-// Following is copied from https://github.com/intel/zephyr/blob/master/lib/libc/minimal/source/string/strstr.c
+// Source: https://github.com/intel/zephyr/blob/master/lib/libc/minimal/source/string/strstr.c
 /*-
  * Copyright (c) 1990, 1993
  *      The Regents of the University of California.  All rights reserved.
