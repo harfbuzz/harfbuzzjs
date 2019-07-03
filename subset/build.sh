@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# [ -d harfbuzz ] || git clone --depth=1 https://github.com/harfbuzz/harfbuzz
-# (cd harfbuzz; git pull)
+(cd ..; [ -d harfbuzz ] || git clone --depth=1 https://github.com/harfbuzz/harfbuzz)
+(cd ../harfbuzz; git pull)
 
-# Or, -DHB_EXTERN=__attribute__((used))
 clang \
     -I../libc/include -Oz \
 	-fno-exceptions -fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden \
@@ -41,5 +40,6 @@ clang \
 	-Wl,--export=hb_subset_input_get_retain_gids \
 	-Wl,--export=hb_subset \
 	-Wl,--export=free \
-	../libc/emmalloc.cpp ../libc/zephyr-string.c ../libc/main.c ../harfbuzz/src/hb-*.cc
+	../libc/emmalloc.cpp ../libc/zephyr-string.c ../libc/main.c ../harfbuzz/src/hb.cc \
+	../harfbuzz/src/hb-subset.cc ../harfbuzz/src/hb-subset-*.cc
 mv a.out hb-subset.wasm
