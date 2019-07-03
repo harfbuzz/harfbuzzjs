@@ -65,10 +65,12 @@ function hbjs(instance) {
         return exports.hb_buffer_guess_segment_properties(ptr);
       },
       setDirection: function (dir) {
-        var str = createCString(dir);
-        var direction = exports.hb_direction_from_string(str.ptr, str.length);
-        exports.hb_buffer_set_direction(ptr, direction);
-        str.free();
+        exports.hb_buffer_set_direction(ptr, {
+          ltr: 4,
+          rtl: 5,
+          ttb: 6,
+          btt: 7
+        }[dir] || 0);
       },
       shape: function (font, features) {
         // features are not used yet
