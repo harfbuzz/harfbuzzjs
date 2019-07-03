@@ -46,11 +46,11 @@ inline int vsnprintf(char *str, size_t n, const char * format, va_list va) { ret
 #define ceil __builtin_ceil
 #define sqrt __builtin_sqrt
 
-#define uint_least8_t uint32_t
-#define uint_least16_t uint32_t
-#define uint_fast8_t uint32_t
-#define uint_fast16_t uint32_t
-#define int_fast16_t uint32_t
+#define uint_least8_t uint8_t
+#define uint_least16_t uint16_t
+#define uint_fast8_t uint8_t
+#define uint_fast16_t uint16_t
+#define int_fast16_t int16_t
 
 #define DBL_MIN __DBL_MIN__
 #define DBL_MAX __DBL_MAX__
