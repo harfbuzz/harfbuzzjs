@@ -155,24 +155,9 @@ void *memmove(void *d, const void *s, size_t n)
 	char *dest = (char *)d;
 	const char *src  = (char *)s;
 
-	if ((size_t) ((char *)d - (char *)s) < n) {
-		/*
-		 * The <src> buffer overlaps with the start of the <dest> buffer.
-		 * Copy backwards to prevent the premature corruption of <src>.
-		 */
-
-		while (n > 0) {
-			n--;
-			dest[n] = src[n];
-		}
-	} else {
-		/* It is safe to perform a forward-copy */
-		while (n > 0) {
-			*dest = *src;
-			dest++;
-			src++;
-			n--;
-		}
+	while (n > 0) {
+		n--;
+		dest[n] = src[n];
 	}
 
 	return d;
@@ -191,32 +176,6 @@ void *memcpy(void *__restrict d, const void *__restrict s, size_t n)
 
 	unsigned char *d_byte = (unsigned char *)d;
 	const unsigned char *s_byte = (const unsigned char *)s;
-
-	if ((((unsigned long)d ^ (unsigned long)s_byte) & 0x3) == 0) {
-
-		/* do byte-sized copying until word-aligned or finished */
-
-		while (((unsigned long)d_byte) & 0x3) {
-			if (n == 0) {
-				return d;
-			}
-			*(d_byte++) = *(s_byte++);
-			n--;
-		};
-
-		/* do word-sized copying as long as possible */
-
-		unsigned int *d_word = (unsigned int *)d_byte;
-		const unsigned int *s_word = (const unsigned int *)s_byte;
-
-		while (n >= sizeof(unsigned int)) {
-			*(d_word++) = *(s_word++);
-			n -= sizeof(unsigned int);
-		}
-
-		d_byte = (unsigned char *)d_word;
-		s_byte = (unsigned char *)s_word;
-	}
 
 	/* do byte-sized copying until finished */
 
@@ -237,35 +196,8 @@ void *memcpy(void *__restrict d, const void *__restrict s, size_t n)
 
 void *memset(void *buf, int c, size_t n)
 {
-	/* do byte-sized initialization until word-aligned or finished */
-
 	unsigned char *d_byte = (unsigned char *)buf;
 	unsigned char c_byte = (unsigned char)c;
-
-	while (((unsigned long)d_byte) & 0x3) {
-		if (n == 0) {
-			return buf;
-		}
-		*(d_byte++) = c_byte;
-		n--;
-	};
-
-	/* do word-sized initialization as long as possible */
-
-	unsigned int *d_word = (unsigned int *)d_byte;
-	unsigned int c_word = (unsigned int)(unsigned char)c;
-
-	c_word |= c_word << 8;
-	c_word |= c_word << 16;
-
-	while (n >= sizeof(unsigned int)) {
-		*(d_word++) = c_word;
-		n -= sizeof(unsigned int);
-	}
-
-	/* do byte-sized initialization until finished */
-
-	d_byte = (unsigned char *)d_word;
 
 	while (n > 0) {
 		*(d_byte++) = c_byte;
