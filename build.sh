@@ -34,5 +34,5 @@ clang \
 	-Wl,--export=hb_blob_get_length \
 	-Wl,--export=hb_font_set_scale \
 	-Wl,--export=free \
-	libc/emmalloc.cpp libc/zephyr-string.c libc/main.c harfbuzz/src/hb.cc
+	libc/emmalloc.cpp libc/zephyr-string.c libc/main.c harfbuzz/src/harfbuzz.cc
 mv a.out hb.wasm
