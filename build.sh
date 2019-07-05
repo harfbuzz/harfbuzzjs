@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ -d harfbuzz ] || git clone --depth=1 https://github.com/harfbuzz/harfbuzz
+[ -d harfbuzz/src ] || git clone --depth=1 https://github.com/harfbuzz/harfbuzz
 (cd harfbuzz; git pull)
 
 # Or, -DHB_EXTERN=__attribute__((used))

@@ -42,6 +42,7 @@ inline int vsnprintf(char *str, size_t n, const char * format, va_list va) { ret
 #define roundf __builtin_roundf
 #define floor __builtin_floor
 #define abs __builtin_abs
+#define fabs __builtin_fabs
 #define pow __builtin_pow
 #define ceil __builtin_ceil
 #define sqrt __builtin_sqrt

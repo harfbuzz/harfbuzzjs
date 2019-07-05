@@ -14,7 +14,7 @@ void *sbrk(unsigned int inc) {
 	return (void *) addr;
 }
 
-float roundf(float x) { return (int) (x + .5); }
+float roundf(float x) { return (int) (x + .5f); }
 
 // FIXME: Needed only in hb-subset builds, to be replaced with something better later
 // or, remove the use in hb-cff-interp-dict-common.hh
@@ -23,3 +23,5 @@ double pow(double x, double y) {
 	while (--y > 0) result *= x;
 	return result;
 }
+
+double fabs(double x) { return x > 0 ? x : -x; }

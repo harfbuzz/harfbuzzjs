@@ -1,15 +1,15 @@
 #!/bin/bash
 
-(cd ..; [ -d harfbuzz ] || git clone --depth=1 https://github.com/harfbuzz/harfbuzz)
+(cd ..; [ -d harfbuzz/src ] || git clone --depth=1 https://github.com/harfbuzz/harfbuzz)
 (cd ../harfbuzz; git pull)
 
 clang \
-    -I../libc/include -Oz \
+    -I../libc/include -I. -Oz \
 	-fno-exceptions -fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden \
 	--target=wasm32 \
 	-nostdlib -nostdinc \
 	-flto \
-	-DHB_TINY -DHB_USE_INTERNAL_QSORT \
+	-DHB_TINY -DHB_USE_INTERNAL_QSORT -DHAVE_CONFIG_OVERRIDE_H \
 	-Wl,--no-entry \
 	-Wl,--strip-all \
 	-Wl,--lto-O3 \
@@ -40,6 +40,6 @@ clang \
 	-Wl,--export=hb_subset_input_get_retain_gids \
 	-Wl,--export=hb_subset \
 	-Wl,--export=free \
-	../libc/emmalloc.cpp ../libc/zephyr-string.c ../libc/main.c ../harfbuzz/src/hb.cc \
-	../harfbuzz/src/hb-subset.cc ../harfbuzz/src/hb-subset-*.cc
+	../libc/emmalloc.cpp ../libc/zephyr-string.c ../libc/main.c ../harfbuzz/src/harfbuzz.cc \
+	../harfbuzz/src/hb-subset*.cc
 mv a.out hb-subset.wasm
