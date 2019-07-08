@@ -24,6 +24,7 @@ int main() {
     hb_subset_input_t *input = hb_subset_input_create_or_fail ();
     hb_set_t *input_glyphs = hb_subset_input_unicode_set (input);
     hb_set_union (input_glyphs, glyphs);
+    hb_set_destroy (glyphs);
     //hb_subset_input_set_drop_hints (input, true);
     hb_face_t *subset = hb_subset (face, input);
 
@@ -43,6 +44,7 @@ int main() {
     /* Clean up */
     hb_blob_destroy (result);
     hb_face_destroy (subset);
+    hb_face_destroy (face);
 
     return 0;
 }
