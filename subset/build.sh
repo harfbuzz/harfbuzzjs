@@ -42,4 +42,4 @@ clang \
 	-Wl,--export=free \
 	../libc/emmalloc.cpp ../libc/zephyr-string.c ../libc/main.c ../harfbuzz/src/harfbuzz.cc \
 	../harfbuzz/src/hb-subset*.cc
-mv a.out hb-subset.wasm
+wasm-opt -Oz a.out -o hb-subset.wasm && rm a.out

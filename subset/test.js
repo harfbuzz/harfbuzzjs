@@ -7,7 +7,7 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
 (async () => {
     const { instance: { exports } } = await WebAssembly.instantiate(await readFileAsync(__dirname + '/hb-subset.wasm'));
     exports.memory.grow(400); // each page is 64kb in size
-    const fontBlob = await readFileAsync(__dirname + '/Roboto-Black.ttf');
+    const fontBlob = await readFileAsync(__dirname + '/roboto-black.ttf');
 
     const heapu8 = new Uint8Array(exports.memory.buffer);
     const fontBuffer = exports.malloc(fontBlob.byteLength);
@@ -28,7 +28,7 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
     const input = exports.hb_subset_input_create_or_fail();
     const input_glyphs = exports.hb_subset_input_unicode_set(input);
     exports.hb_set_union(input_glyphs, glyphs);
-    exports.hb_subset_input_set_drop_hints(input, true);
+    // exports.hb_subset_input_set_drop_hints(input, true);
     const subset = exports.hb_subset(face, input);
 
     /* Clean up */
@@ -40,7 +40,7 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
     const data = exports.hb_blob_get_data(result, 0);
     const subsetFontBlob = heapu8.slice(data, data + exports.hb_blob_get_length(result));
 
-    await writeFileAsync(__dirname + '/roboto-black-subset.ttf', subsetFontBlob);
+    await writeFileAsync(__dirname + '/roboto-black-subset-js.ttf', subsetFontBlob);
 
     /* Clean up */
     exports.hb_blob_destroy(result);
