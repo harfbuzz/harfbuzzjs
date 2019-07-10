@@ -4,7 +4,7 @@
 (cd ../harfbuzz; git pull)
 
 clang \
-    -I../libc/include -I. -Oz \
+    -I../libc/include -I. -O3 \
 	-fno-exceptions -fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden \
 	--target=wasm32 \
 	-nostdlib -nostdinc \
@@ -42,4 +42,4 @@ clang \
 	-Wl,--export=free \
 	../libc/emmalloc.cpp ../libc/zephyr-string.c ../libc/main.c ../harfbuzz/src/harfbuzz.cc \
 	../harfbuzz/src/hb-subset*.cc
-wasm-opt -Oz a.out -o hb-subset.wasm && rm a.out
+mv a.out hb-subset.wasm
