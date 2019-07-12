@@ -43,7 +43,7 @@ function hbjs(instance) {
   var utf8Encoder = new TextEncoder("utf8");
   function createCString(text) {
     var bytes = utf8Encoder.encode(text);
-    var ptr = exports.malloc(text.byteLength);
+    var ptr = exports.malloc(bytes.byteLength);
     heapu8.set(bytes, ptr);
     return {
       ptr: ptr,
