@@ -35,6 +35,7 @@ clang \
 	-Wl,--export=hb_font_set_scale \
 	-Wl,--export=hb_unicode_script \
 	-Wl,--export=hb_unicode_funcs_get_default \
+	-Wl,--export=hb_script_get_horizontal_direction \
 	-Wl,--export=free \
 	$@ libc/malloc.cc libc/zephyr-string.c libc/main.c harfbuzz/src/harfbuzz.cc
 # wasm-opt is from binaryen package
