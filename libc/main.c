@@ -20,10 +20,12 @@ double fabs(double x) { return x > 0 ? x : -x; }
 
 typedef __SIZE_TYPE__ size_t;
 
+// From harfbuzz hb_bsearch, be removed soon hopefully
+// https://github.com/fribidi/fribidi/pull/113
 void *
 bsearch (const void *key, const void *base,
-	       size_t nmemb, size_t size,
-	       int (*compar)(const void *_key, const void *_item))
+         size_t nmemb, size_t size,
+         int (*compar)(const void *_key, const void *_item))
 {
   int min = 0, max = (int) nmemb - 1;
   while (min <= max)
