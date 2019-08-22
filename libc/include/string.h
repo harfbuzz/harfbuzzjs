@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+typedef __SIZE_TYPE__ size_t;
+
 size_t strlen(const char *s);
 void *memset(void *buf, int c, size_t n);
 void *memcpy(void *__restrict d, const void *__restrict s, size_t n);
