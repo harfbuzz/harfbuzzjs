@@ -99,11 +99,17 @@ function hbjs(instance) {
     };
   }
 
+  function shape(font, buffer, features) {
+    // features are not used yet
+    exports.hb_shape(font.ptr, buffer.ptr, 0, 0);
+  }
+
   return {
     createBlob: createBlob,
     createFace: createFace,
     createFont: createFont,
-    createBuffer: createBuffer
+    createBuffer: createBuffer,
+    shape: shape
   };
 };
 
