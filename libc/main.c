@@ -17,28 +17,3 @@ double pow(double x, double y) {
 }
 
 double fabs(double x) { return x > 0 ? x : -x; }
-
-typedef __SIZE_TYPE__ size_t;
-
-// From harfbuzz hb_bsearch, be removed soon hopefully
-// https://github.com/fribidi/fribidi/pull/113
-void *
-bsearch (const void *key, const void *base,
-         size_t nmemb, size_t size,
-         int (*compar)(const void *_key, const void *_item))
-{
-  int min = 0, max = (int) nmemb - 1;
-  while (min <= max)
-  {
-    int mid = ((unsigned int) min + (unsigned int) max) / 2;
-    const void *p = (const void *) (((const char *) base) + (mid * size));
-    int c = compar (key, p);
-    if (c < 0)
-      max = mid - 1;
-    else if (c > 0)
-      min = mid + 1;
-    else
-      return (void *) p;
-  }
-  return 0;
-}
