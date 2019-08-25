@@ -17,13 +17,12 @@ clang \
     -Wl,--lto-O3 \
     -Wl,--strip-all \
     -Wl,--gc-sections \
-    -Wl,--export=malloc \
+    -Wl,--export=calloc \
     -Wl,--export=free \
-    -Wl,--export=fribidi_charset_to_unicode \
     -Wl,--export=fribidi_get_bidi_types \
     -Wl,--export=fribidi_get_bracket_types \
     -Wl,--export=fribidi_get_par_embedding_levels_ex \
-    -Wl,--export=fribidi_unicode_to_charset \
+    -Wl,--export=fribidi_utf8_to_unicode \
     -I../libc/include -DSTDC_HEADERS -DHAVE_STDLIB_H -DFRIBIDI_NO_DEPRECATED
 wasm-opt -Oz a.out -o fribidi.wasm && rm a.out
 #mv a.out fribidi.wasm
