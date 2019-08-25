@@ -1,0 +1,57 @@
+<h1>fribidi.js demo</h1>
+<input type="text" style="width: 100%" id="input" value="abcششa234 سیبسی ۲۳۴ سیشبسبbc">
+<div id="result"></div>
+
+<script>
+var utf8Encoder = new TextEncoder("utf8");
+
+// We could use instantiateStreaming but it's not supported in Safari yet
+// https://bugs.webkit.org/show_bug.cgi?id=173105
+fetch("fribidi.wasm").then(function (x) {
+  return x.arrayBuffer();
+}).then(function (wasm) {
+  return WebAssembly.instantiate(wasm);
+}).then(function (result) {
+  var exports = result.instance.exports;
+  exports.memory.grow(400); // each page is 64kb in size
+  
+  var inputElement = document.getElementById('input');
+  var resultElement = document.getElementById('result');
+  function update() {
+    var utf8 = inputElement.value;
+
+    var heapu8 = new Uint8Array(exports.memory.buffer);
+    var heapu32 = new Uint32Array(exports.memory.buffer);
+    var heapi32 = new Int32Array(exports.memory.buffer);
+
+    var text = utf8Encoder.encode(utf8);
+    var str = exports.calloc(utf8.length * 4, 4);
+    var text_ptr = exports.calloc(text.byteLength, 1);
+    heapu8.set(text, text_ptr);
+    var str_len = exports.fribidi_utf8_to_unicode(text_ptr, text.byteLength, str);
+
+    var par_type = exports.calloc (1, 4);
+    var types = exports.calloc(str_len, 4);
+    var btypes = exports.calloc(str_len, 4);
+    var levels = exports.calloc(str_len, 1);
+
+    exports.fribidi_get_bidi_types (str, str_len, types);
+    exports.fribidi_get_bracket_types (str, str_len, types, btypes);
+    console.log('Max Level:', exports.fribidi_get_par_embedding_levels_ex(types, btypes, str_len,
+      par_type, levels));
+
+    resultElement.innerText = heapu8.slice(levels, levels + str_len);
+
+    exports.free(str);
+    exports.free(text_ptr);
+    exports.free(par_type);
+    exports.free(types);
+    exports.free(btypes);
+    exports.free(levels);
+  }
+  document.getElementById('input').addEventListener('keyup', update);
+  update();
+});
+</script>
+
+<small style="position: absolute; top: 95%;">(fribidi is released under GPL v2.1 terms)</small>
