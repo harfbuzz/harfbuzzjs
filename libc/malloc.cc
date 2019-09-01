@@ -5,7 +5,7 @@ extern unsigned char __heap_base;
 typedef __UINTPTR_TYPE__ uintptr_t;
 uintptr_t bump_pointer = (uintptr_t) &__heap_base;
 
-void *sbrk(unsigned int inc) {
+extern "C" void *sbrk(unsigned int inc) {
 	uintptr_t addr = bump_pointer;
 	bump_pointer += inc;
 	return (void *) addr;
