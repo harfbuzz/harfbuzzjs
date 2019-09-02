@@ -1,0 +1,93 @@
+<p><a href="https://github.com/harfbuzz/harfbuzzjs">harfbuzzjs-subset</a> demo. Supports font drag and drop.</p>
+<p><input type="text" value="abc" id="text"></p>
+<p><a download="subset.ttf" id="result"></a></p>
+<script>
+function updateResult() {
+  var heapu8 = new Uint8Array(exports.memory.buffer);
+  var text = document.getElementById('text').value;
+
+  var fontBuffer = exports.malloc(fontBlob.byteLength);
+  heapu8.set(new Uint8Array(fontBlob), fontBuffer);
+
+  /* Creating a face */
+  var blob = exports.hb_blob_create(fontBuffer, fontBlob.byteLength, 2/*HB_MEMORY_MODE_WRITABLE*/, 0, 0);
+  var face = exports.hb_face_create(blob, 0);
+  exports.hb_blob_destroy(blob);
+
+  /* Add your glyph indices here and subset */
+  var glyphs = exports.hb_set_create();
+
+  text.split('').forEach(function (c) { exports.hb_set_add(glyphs, c.charCodeAt(0)); });
+
+  var input = exports.hb_subset_input_create_or_fail();
+  var input_glyphs = exports.hb_subset_input_unicode_set(input);
+  exports.hb_set_union(input_glyphs, glyphs);
+  // exports.hb_subset_input_set_drop_hints(input, true);
+  var t0 = performance.now();
+  var subset = exports.hb_subset(face, input);
+  var t1 = performance.now();
+
+  /* Get result blob */
+  var result = exports.hb_face_reference_blob(subset);
+
+  var data = exports.hb_blob_get_data(result, 0);
+  var resultLength = exports.hb_blob_get_length(result);
+  var subsetFontBlob = heapu8.slice(data, data + resultLength);  
+
+  var link = URL.createObjectURL(new Blob([subsetFontBlob.buffer]));
+
+  document.getElementById('result').href = link;
+  document.getElementById('result').innerText = 'Download (' + resultLength + 'bytes, ' + (t1 - t0) + 'ms)';
+
+  /* Clean up */
+  exports.hb_subset_input_destroy(input);
+  exports.hb_blob_destroy(result);
+  exports.hb_face_destroy(subset);
+  exports.free(fontBuffer);
+}
+
+// We could use instantiateStreaming but it's not supported in Safari yet
+// https://bugs.webkit.org/show_bug.cgi?id=173105
+fetch("hb-subset.wasm").then(function (x) {
+  return x.arrayBuffer();
+}).then(function (wasm) {
+  return WebAssembly.instantiate(wasm);
+}).then(function (result) {
+  result.instance.exports.memory.grow(400); // each page is 64kb in size
+  window.exports = result.instance.exports;
+  fetch('Roboto-Regular.ttf').then(function (res) {
+    return res.arrayBuffer();
+  }).then(function (blob) { // can be used without our wrapper
+    window.fontBlob = new Uint8Array(blob);
+    updateResult();
+  });
+});
+
+document.getElementById('text').addEventListener('keyup', function(e) {
+  updateResult();
+});
+
+document.addEventListener('dragover', function (e) {
+  e.stopPropagation(); e.preventDefault();
+}, false);
+document.addEventListener('dragleave', function (e) {
+  e.stopPropagation(); e.preventDefault();
+}, false);
+document.addEventListener('drop', function (e) {
+  e.stopPropagation(); e.preventDefault();
+  handleFontUpdate(e.dataTransfer.files[0]);
+});
+// document.addEventListener('paste', function (e) {
+//   handleFontUpdate(e.clipboardData.files[0]);
+// });
+
+function handleFontUpdate(file) {
+  if (!file) return;
+  var reader = new FileReader();
+  reader.addEventListener("load", function () {
+    window.fontBlob = new Uint8Array(reader.result);
+    updateResult();
+  });
+  reader.readAsArrayBuffer(file);
+}
+</script>
