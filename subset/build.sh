@@ -9,7 +9,7 @@ clang \
 	--target=wasm32 \
 	-nostdlib -nostdinc \
 	-flto \
-	-DHB_TINY -DHB_USE_INTERNAL_QSORT -DHAVE_CONFIG_OVERRIDE_H \
+	-DHB_TINY -DHB_USE_INTERNAL_QSORT -DHAVE_CONFIG_OVERRIDE_H -DHAVE_ROUNDF \
 	-Wl,--no-entry \
 	-Wl,--strip-all \
 	-Wl,--lto-O3 \
@@ -40,6 +40,6 @@ clang \
 	-Wl,--export=hb_subset_input_get_retain_gids \
 	-Wl,--export=hb_subset \
 	-Wl,--export=free \
-	../libc/malloc.cc ../libc/zephyr-string.c ../libc/main.c ../libc/pow.cc ../harfbuzz/src/harfbuzz.cc \
+	../libc/malloc.cc ../libc/zephyr-string.c ../libc/main.c ../harfbuzz/src/harfbuzz.cc \
 	../harfbuzz/src/hb-subset*.cc
 mv a.out hb-subset.wasm
