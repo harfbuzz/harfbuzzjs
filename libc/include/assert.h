@@ -5,8 +5,7 @@
 extern "C" {
 #endif
 
-extern unsigned int errno;
-#define assert(test) errno = !!(test)
+#define assert(test) do { if (!(test)) __builtin_trap (); } while (0)
 
 #ifdef __cplusplus
 }

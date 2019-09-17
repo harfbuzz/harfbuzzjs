@@ -3,7 +3,6 @@
 unsigned long strtoul(const char *nptr, char **endptr, int base) { return 0; }
 long strtol(const char *nptr, char **endptr, int base) { return 0; }
 int abs(int a) { return (a > int(0)) ? a : -a; }
-float roundf(float x) { return (int) (x >= 0.f ? x + .5f : x + -.5f); }
 
 // Integrate with kmalloc instead
 char heap[4096 * 16];

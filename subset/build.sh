@@ -9,7 +9,7 @@ clang \
 	--target=wasm32 \
 	-nostdlib -nostdinc \
 	-flto \
-	-DHB_TINY -DHB_USE_INTERNAL_QSORT -DHAVE_CONFIG_OVERRIDE_H -DHAVE_ROUNDF \
+	-DHB_TINY -DHB_USE_INTERNAL_QSORT -DHAVE_CONFIG_OVERRIDE_H \
 	-Wl,--no-entry \
 	-Wl,--strip-all \
 	-Wl,--lto-O3 \
