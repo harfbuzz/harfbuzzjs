@@ -1,7 +1,7 @@
 export KERNEL_MODULE  := harfbuzz
 
 obj-m                 := ${KERNEL_MODULE}.o
-${KERNEL_MODULE}-objs := module.o main.o
+${KERNEL_MODULE}-objs := module.o main.o zephyr-string.o
 
 all: main.o
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
@@ -19,7 +19,8 @@ test: ${KERNEL_MODULE}.ko
 	sudo insmod "${KERNEL_MODULE}.ko"; sudo rmmod  "${KERNEL_MODULE}"; dmesg | tail -3
 
 main.o: main.cc
-	clang main.cc -DHB_USE_INTERNAL_QSORT -DHB_TINY -fno-exceptions -fno-rtti -fno-stack-protector -nostdlib
+	clang main.cc -c -DHB_USE_INTERNAL_QSORT -DHB_TINY -fno-exceptions -fno-rtti -fno-stack-protector -nostdlib
+	clang ../libc/zephyr-string.c -c -DHB_USE_INTERNAL_QSORT -DHB_TINY -fno-exceptions -fno-rtti -fno-stack-protector -nostdlib
 
 #clang ../harfbuzz/src/harfbuzz.cc -c -fno-exceptions -fno-rtti -fno-stack-protector \
 #  -nostdlib -nostdinc -I../libc/include \

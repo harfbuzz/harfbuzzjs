@@ -3,6 +3,11 @@
 unsigned long strtoul(const char *nptr, char **endptr, int base) { return 0; }
 long strtol(const char *nptr, char **endptr, int base) { return 0; }
 int abs(int a) { return (a > int(0)) ? a : -a; }
+inline int snprintf(char *str, size_t n, const char *format, ...) { return 0; }
+
+/* Sure are super accurate! */
+double floor(double x) { return (int) x; }
+double ceil(double x) { return (double) (int) x < x ? x + 1 : x; }
 
 // Integrate with kmalloc instead
 char heap[4096 * 16];
