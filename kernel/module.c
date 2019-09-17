@@ -106,27 +106,42 @@ static int harfbuzz_init(void)
     kernel_fpu_begin ();
     {
         unsigned int upem;
-        // unsigned int buffer_length;
+        unsigned int buffer_length;
         hb_face_t *face;
-        // hb_font_t *font;
-        // hb_buffer_t *buffer;
+        hb_font_t *font;
+        hb_buffer_t *buffer;
+        hb_glyph_info_t *info;
+        hb_glyph_position_t *pos;
+        unsigned int i;
         hb_blob_t *blob = hb_blob_create (
             (const char *) __examples_Roboto_abc_ttf,
             __examples_Roboto_abc_ttf_len,
             HB_MEMORY_MODE_READONLY, NULL, NULL);
         face = hb_face_create (blob, 0);
         hb_blob_destroy (blob);
-        // font = hb_font_create (face);
+        font = hb_font_create (face);
         upem = hb_face_get_upem (face);
         hb_face_destroy (face);
-        // buffer = hb_buffer_create ();
-        // hb_buffer_add_utf8 (buffer, "abc", -1, 0, -1);
-        // hb_buffer_guess_segment_properties (buffer);
-        // hb_shape (font, buffer, NULL, 0);
-        // buffer_length = hb_buffer_get_length (buffer);
-        // hb_font_destroy (font);
+        buffer = hb_buffer_create ();
+        hb_buffer_add_utf8 (buffer, "abc", -1, 0, -1);
+        hb_buffer_guess_segment_properties (buffer);
+        hb_shape (font, buffer, NULL, 0);
+
         printk(KERN_INFO "upem: %d", upem);
-        // printk(KERN_INFO "buffer size: %d", buffer_length);
+
+        info = hb_buffer_get_glyph_infos (buffer, &buffer_length);
+        pos = hb_buffer_get_glyph_positions (buffer, &buffer_length);
+        printk(KERN_INFO "buffer size: %d", buffer_length);
+
+        for (i = 0; i < buffer_length; ++i) {
+            printk(KERN_INFO "glyph #%d: ax: %d, ay: %d, dx: %d, dy: %d",
+                info[i].codepoint,
+                pos[i].x_advance, pos[i].y_advance,
+                pos[i].x_offset, pos[i].y_offset);
+        }
+
+        hb_font_destroy (font);
+        hb_buffer_destroy (buffer);
     }
     kernel_fpu_end ();
     return 0;

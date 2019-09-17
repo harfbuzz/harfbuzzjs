@@ -25,7 +25,7 @@ void *malloc(size_t size) { return sbrk(((size - 1) | 3) + 1); }
 void *calloc(size_t nmemb, size_t size) { return malloc(nmemb * size); }
 void *realloc(void* ptr, size_t size) {
 	void *addr = malloc(size);
-	__builtin_memcpy(addr, ptr, size); // roughly
+	// __builtin_memcpy(addr, ptr, size); // roughly
 	return addr;
 }
 void free(void* ptr) { /* lol */ }
