@@ -69,10 +69,24 @@ fetch("raqm.wasm").then(function (x) {
         font_index:  fonts.indexOf(heapu32[glyphs + i * 7 + 6])
       });
 
+    var glyph_path_len_ptr = exports.malloc(4);
+    heapu32[glyph_path_len_ptr / 4] = 200;
+    var glyph_path_ptr = exports.malloc(12 * 200);
+
+    console.log(exports.hb_ot_glyph_get_outline_path(font, 1, 0, glyph_path_len_ptr, glyph_path_ptr));
+    var pathLength = heapu32[glyph_path_len_ptr / 4];
+    var path = [];
+    for (var i = 0; i < pathLength; ++i) {
+      var cmd = String.fromCharCode(heapu8[glyph_path_ptr + i * 12]);
+      if (cmd == "Z") path.push(cmd);
+      else path.push(cmd + heapi32[glyph_path_ptr / 4 + i * 3 + 1] + "," + heapi32[glyph_path_ptr / 4 + i * 3 + 2]);
+    }
+    path = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="' + path.join('') + '"/></svg>';
+
     exports.raqm_destroy(rq);
     exports.free(fontBuffer);
 
-    document.body.innerText = JSON.stringify(result);
+    document.body.innerHTML = JSON.stringify(result) + ' ' + path;
   });
 });
 </script>
