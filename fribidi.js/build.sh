@@ -23,6 +23,7 @@ clang \
     -Wl,--export=fribidi_get_bracket_types \
     -Wl,--export=fribidi_get_par_embedding_levels_ex \
     -Wl,--export=fribidi_utf8_to_unicode \
+    -Wl,--export=__heap_base \
     -I../libc/include -DSTDC_HEADERS -DHAVE_STDLIB_H -DFRIBIDI_NO_DEPRECATED
 wasm-opt -Oz a.out -o fribidi.wasm && rm a.out
 #mv a.out fribidi.wasm
