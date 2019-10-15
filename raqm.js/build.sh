@@ -46,6 +46,8 @@ clang \
     -Wl,--export=raqm_position_to_index \
     -Wl,--export=__heap_base \
     -Wl,--export=hb_ot_glyph_get_outline_path \
+    -Wl,--export=hb_face_get_upem \
+    -Wl,--export=hb_font_get_h_extents \
     -I../libc/include -DSTDC_HEADERS -DHAVE_STDLIB_H -DFRIBIDI_NO_DEPRECATED
 # TODO: Add raqm_add_font_feature and strtol to libc
 wasm-opt -Oz a.out -o raqm.wasm && rm a.out

@@ -23,8 +23,13 @@ fetch("raqm.wasm").then(function (x) {
 
     var blob = exports.hb_blob_create(fontBuffer, fontBlob.byteLength, 2/*HB_MEMORY_MODE_WRITABLE*/, 0, 0);
     var face = exports.hb_face_create(blob, 0); // second parameter is ttc index
+    var extra = 'upem: ' + exports.hb_face_get_upem(face);
     exports.hb_blob_destroy(blob);
     var font = exports.hb_font_create(face);
+    var font_extents_ptr = exports.malloc(12 * 4);
+    exports.hb_font_get_h_extents(font, font_extents_ptr);
+    extra += ' Ascender: ' + heapi32[font_extents_ptr / 4] + ' Descender: ' + heapi32[font_extents_ptr / 4 + 1];
+    exports.free(font_extents_ptr);
     exports.hb_face_destroy(face);
     exports.hb_font_set_scale(font, 20 * 64, 20 * 64); // remove this line if you want to have unscaled
 
@@ -86,7 +91,7 @@ fetch("raqm.wasm").then(function (x) {
     exports.raqm_destroy(rq);
     exports.free(fontBuffer);
 
-    document.body.innerHTML = JSON.stringify(result) + ' ' + path;
+    document.body.innerHTML = JSON.stringify(result) + '<div>' + extra + '</div> ' + path;
   });
 });
 </script>
