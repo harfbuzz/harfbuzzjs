@@ -4,6 +4,7 @@
 
 clang \
     -Oz \
+    -DHAVE_CONFIG_OVERRIDE_H -I. \
     -I../fribidi.js/fribidi/lib -I../fribidi.js/fribidi/build/lib \
     ../fribidi.js/fribidi/lib/fribidi*.c -I../fribidi.js/fribidi/build/gen.tab/ \
     ../libc/zephyr-string.c ../libc/malloc.cc ../libc/main.c \
@@ -45,7 +46,10 @@ clang \
     -Wl,--export=raqm_index_to_position \
     -Wl,--export=raqm_position_to_index \
     -Wl,--export=__heap_base \
-    -Wl,--export=hb_ot_glyph_get_outline_path \
+    -Wl,--export=hb_ot_glyph_path_create_from_font \
+    -Wl,--export=hb_ot_glyph_path_destroy \
+    -Wl,--export=hb_ot_glyph_path_get_commands \
+    -Wl,--export=hb_ot_glyph_path_get_coords \
     -Wl,--export=hb_face_get_upem \
     -Wl,--export=hb_font_get_h_extents \
     -I../libc/include -DSTDC_HEADERS -DHAVE_STDLIB_H -DFRIBIDI_NO_DEPRECATED
