@@ -11,13 +11,10 @@ function hbjs(instance) {
   function createBlob(blob) {
     var blobPtr = exports.malloc(blob.byteLength);
     heapu8.set(blob, blobPtr);
-    var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, 0, 0);
+    var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, 0, exports.free);
     return {
       ptr: ptr,
-      free: function () {
-        exports.hb_blob_destroy(ptr);
-        exports.free(blobPtr);
-      }
+      destroy: function () { exports.hb_blob_destroy(ptr); }
     };
   }
   
@@ -25,7 +22,7 @@ function hbjs(instance) {
     var ptr = exports.hb_face_create(blob.ptr, index);
     return {
       ptr: ptr,
-      free: function () { exports.hb_face_destroy(ptr); }
+      destroy: function () { exports.hb_face_destroy(ptr); }
     };
   }
 
@@ -36,7 +33,7 @@ function hbjs(instance) {
       setScale: function (xScale, yScale) {
         exports.hb_font_set_scale(ptr, xScale, yScale);
       },
-      free: function () { exports.hb_font_destroy(ptr); }
+      destroy: function () { exports.hb_font_destroy(ptr); }
     };
   }
 
@@ -95,7 +92,7 @@ function hbjs(instance) {
         }
         return result;
       },
-      free: function () { exports.hb_buffer_destroy(ptr); }
+      destroy: function () { exports.hb_buffer_destroy(ptr); }
     };
   }
 
