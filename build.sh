@@ -3,7 +3,6 @@
 [ -d harfbuzz/src ] || git clone --depth=1 https://github.com/harfbuzz/harfbuzz
 (cd harfbuzz; git pull)
 
-# Or, -DHB_EXTERN=__attribute__((used))
 clang \
     -I./libc/include -Oz \
 	-fno-exceptions -fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden \
@@ -36,9 +35,7 @@ clang \
 	-Wl,--export=free \
 	-Wl,--export=__heap_base \
 	$@ libc/malloc.cc libc/zephyr-string.c libc/main.c harfbuzz/src/harfbuzz.cc
-# wasm-opt is from binaryen package
-wasm-opt -Oz a.out -o hb.wasm && rm a.out
-#mv a.out hb.wasm
+mv a.out hb.wasm
 
 # emscripten based
 # --profiling-funcs

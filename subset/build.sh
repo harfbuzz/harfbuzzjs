@@ -40,6 +40,7 @@ clang \
 	-Wl,--export=hb_subset_input_get_retain_gids \
 	-Wl,--export=hb_subset \
 	-Wl,--export=free \
+	-Wl,--export=__heap_base \
 	../libc/malloc.cc ../libc/zephyr-string.c ../libc/main.c ../harfbuzz/src/harfbuzz.cc \
 	../harfbuzz/src/hb-subset*.cc
 mv a.out hb-subset.wasm
