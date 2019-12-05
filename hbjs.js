@@ -11,10 +11,14 @@ function hbjs(instance) {
   function createBlob(blob) {
     var blobPtr = exports.malloc(blob.byteLength);
     heapu8.set(blob, blobPtr);
-    var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, 0, exports.free);
+    var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, 0, 0);
     return {
       ptr: ptr,
-      destroy: function () { exports.hb_blob_destroy(ptr); }
+      /* issue destroy only when you are done with the buffer, not before */
+      destroy: function () {
+        exports.hb_blob_destroy(ptr);
+        exports.free(blobPtr);
+      }
     };
   }
   

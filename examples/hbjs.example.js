@@ -11,11 +11,10 @@ function example(hb, fontBlob) {
   hb.shape(buffer, font); // features are not supported yet
   var result = buffer.json(font);
 
-  buffer.free();
-  font.free();
-  face.free();
-  blob.free();
-
+  buffer.destroy();
+  font.destroy();
+  face.destroy();
+  blob.destroy();
   return result;
 }
 
