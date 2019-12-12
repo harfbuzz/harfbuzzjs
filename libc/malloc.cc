@@ -24,3 +24,6 @@ extern "C" void free(void* ptr) { /* lol */ }
 #else
 #include "emmalloc.cpp"
 #endif
+
+// Hack to use it in hb_blob_create callback
+extern "C" void *free_ptr() { return (void *) free; }

@@ -33,6 +33,7 @@ clang \
 	-Wl,--export=hb_blob_get_length \
 	-Wl,--export=hb_font_set_scale \
 	-Wl,--export=free \
+	-Wl,--export=free_ptr \
 	-Wl,--export=__heap_base \
 	$@ libc/malloc.cc libc/zephyr-string.c libc/main.c harfbuzz/src/harfbuzz.cc
 mv a.out hb.wasm
