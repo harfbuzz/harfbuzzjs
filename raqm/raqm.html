@@ -1,5 +1,6 @@
 <script>
 var utf8Encoder = new TextEncoder("utf8");
+var utf8Decoder = new TextDecoder("utf8");
 
 // We could use instantiateStreaming but it's not supported in Safari yet
 // https://bugs.webkit.org/show_bug.cgi?id=173105
@@ -75,33 +76,12 @@ fetch("raqm.wasm").then(function (x) {
         font_index:  fonts.indexOf(heapu32[glyphs + i * 7 + 6])
       });
 
-    var glyph_path = exports.hb_ot_glyph_path_create_from_font (font, 1);
-    var temp_ptr = exports.malloc(4);
-    var coords = exports.hb_ot_glyph_path_get_coords(glyph_path, temp_ptr);
-    var coords_length = heapu32[temp_ptr / 4];
-    var commands = exports.hb_ot_glyph_path_get_commands(glyph_path, temp_ptr);
-    var commands_length = heapu32[temp_ptr / 4];
-    exports.free(temp_ptr);
-
-    var path = [];
-    for (var i = 0, j = coords / 4; i < commands_length; ++i) {
-      var cmd = String.fromCharCode(heapu8[commands + i]);
-      if (cmd === 'Z') { path.push('Z'); continue; }
-      path.push(cmd + heapi32[j] + "," + heapi32[j + 1]);
-      j += 2;
-      if (cmd === 'Q') {
-        path.push(' ' + heapi32[j] + "," + heapi32[j + 1]);
-        j += 2;
-      }
-      if (cmd === 'C') {
-        path.push(' ' + heapi32[j] + "," + heapi32[j + 1]);
-        j += 2;
-        path.push(' ' + heapi32[j] + "," + heapi32[j + 1]);
-        j += 2;
-      }
-    }
-    exports.hb_ot_glyph_path_destroy (glyph_path);
-    path = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="' + path.join('') + '"/></svg>';
+    var pathBuffer = exports.malloc(2048);
+    var svgLength = exports.hbjs_ot_glyph_svg(font, 1, pathBuffer, 2048);
+    var path = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="' +
+      utf8Decoder.decode(heapu8.slice(pathBuffer, pathBuffer + svgLength)) +
+      '"/></svg>';
+    exports.free(pathBuffer);
 
     exports.raqm_destroy(rq);
     exports.free(fontBuffer);
