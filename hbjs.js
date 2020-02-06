@@ -99,12 +99,23 @@ function hbjs(instance) {
         buffer.destroy();
         return result;
     }
+    function getWidth(text, font, fontSizeInPixel, features) {
+        let scale = fontSizeInPixel / font.unitsPerEM;
+        let shapeResult = shape(text, font, features);
+        let totalWidth = shapeResult.map((glyphInformation) => {
+            return glyphInformation.ax;
+        }).reduce((previous, current, i, arr) => {
+            return previous + current;
+        }, 0.0);
+        return totalWidth * scale;
+    }
     return {
         createBlob: createBlob,
         createFace: createFace,
         createFont: createFont,
         createBuffer: createBuffer,
-        shape: shape
+        shape: shape,
+        getWidth: getWidth
     };
 }
 ;

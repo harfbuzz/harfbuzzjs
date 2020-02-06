@@ -45,6 +45,7 @@ export type HarfBuzzInterface = {
     createFont: (face: HarfBuzzFace) => HarfBuzzFont
     createBuffer: () => HarfBuzzBuffer
     shape: (text: string, font: HarfBuzzFont, features: any) => Array<GlyphInformation>
+    getWidth: (text: string, font: HarfBuzzFont, fontSizeInPixel: number, features: any) => number
 }
 
 function hbjs(instance: WebAssembly.Instance): HarfBuzzInterface {
@@ -158,15 +159,27 @@ function hbjs(instance: WebAssembly.Instance): HarfBuzzInterface {
         return result;
     }
 
+    function getWidth(text: string, font: HarfBuzzFont, fontSizeInPixel: number, features: any): number {
+        let scale = fontSizeInPixel / font.unitsPerEM;
+        let shapeResult = shape(text, font, features);
+        let totalWidth = shapeResult.map((glyphInformation) => {
+            return glyphInformation.ax;
+        }).reduce((previous, current, i, arr) => {
+            return previous + current;
+        }, 0.0);
+
+        return totalWidth * scale;
+    }
+
     return {
         createBlob: createBlob,
         createFace: createFace,
         createFont: createFont,
         createBuffer: createBuffer,
-        shape: shape
+        shape: shape,
+        getWidth: getWidth
     };
 };
-
 
 export function loadHarfbuzz(webAssemblyUrl: string): Promise<HarfBuzzInterface> {
     return fetch(webAssemblyUrl).then(response => {
