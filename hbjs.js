@@ -14,7 +14,6 @@ function hbjs(instance) {
     var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, blobPtr, exports.free_ptr());
     return {
       ptr: ptr,
-      /* issue destroy only when you are done with the buffer, not before */
       destroy: function () { exports.hb_blob_destroy(ptr); }
     };
   }
