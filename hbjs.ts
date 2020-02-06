@@ -1,12 +1,64 @@
-function hbjs(instance) {
+﻿
+export type Pointer = number;
+
+export type HarfBuzzBlob = {
+    ptr: Pointer
+    destroy: () => void
+}
+
+export type HarfBuzzFace = {
+    ptr: Pointer
+    getUnitsPerEM: () => number
+    destroy: () => void
+}
+
+export type HarfBuzzFont = {
+    ptr: Pointer
+    unitsPerEM: number
+    setScale: (xScale: number, yScale: number) => void
+    destroy: () => void
+}
+
+export type HarfBuzzDirection = "ltr" | "rtl" | "ttb" | "btt"
+export type GlyphInformation = {
+    g: number
+    cl: number
+    ax: number
+    ay: number
+    dx: number
+    dy: number
+}
+
+export type HarfBuzzBuffer = {
+    ptr: Pointer
+    addText: (text: string) => void
+    guessSegmentProperties: () => void
+    setDirection: (direction: HarfBuzzDirection) => void
+    shape: (font: HarfBuzzFont, features: any) => void
+    json: () => Array<GlyphInformation>
+    destroy: () => void
+}
+
+export type HarfBuzzInterface = {
+    createBlob: (blob: Uint8Array) => HarfBuzzBlob
+    createFace: (blob: HarfBuzzBlob, index: number) => HarfBuzzFace
+    createFont: (face: HarfBuzzFace) => HarfBuzzFont
+    createBuffer: () => HarfBuzzBuffer
+    shape: (text: string, font: HarfBuzzFont, features: any) => Array<GlyphInformation>
+}
+
+function hbjs(instance: WebAssembly.Instance): HarfBuzzInterface {
     'use strict';
-    var exports = instance.exports;
+
+    var exports: any = instance.exports;
     var heapu8 = new Uint8Array(exports.memory.buffer);
     var heapu32 = new Uint32Array(exports.memory.buffer);
     var heapi32 = new Int32Array(exports.memory.buffer);
     var utf8Encoder = new TextEncoder();
+
     var HB_MEMORY_MODE_WRITABLE = 2;
-    function createCString(text) {
+
+    function createCString(text: string) {
         var bytes = utf8Encoder.encode(text);
         var ptr = exports.malloc(bytes.byteLength);
         heapu8.set(bytes, ptr);
@@ -16,7 +68,8 @@ function hbjs(instance) {
             free: function () { exports.free(ptr); }
         };
     }
-    function createBlob(blob) {
+
+    function createBlob(blob: Uint8Array): HarfBuzzBlob {
         var blobPtr = exports.malloc(blob.byteLength);
         heapu8.set(blob, blobPtr);
         var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, blobPtr, exports.free_ptr());
@@ -26,7 +79,8 @@ function hbjs(instance) {
             destroy: function () { exports.hb_blob_destroy(ptr); }
         };
     }
-    function createFace(blob, index) {
+
+    function createFace(blob: HarfBuzzBlob, index: number): HarfBuzzFace {
         var ptr = exports.hb_face_create(blob.ptr, index);
         return {
             ptr: ptr,
@@ -36,23 +90,26 @@ function hbjs(instance) {
             destroy: function () { exports.hb_face_destroy(ptr); }
         };
     }
-    function createFont(face) {
+
+    function createFont(face: HarfBuzzFace): HarfBuzzFont {
         var ptr = exports.hb_font_create(face.ptr);
         var unitsPerEM = face.getUnitsPerEM();
+
         return {
             ptr: ptr,
             unitsPerEM: unitsPerEM,
-            setScale: function (xScale, yScale) {
+            setScale: function (xScale: number, yScale: number) {
                 exports.hb_font_set_scale(ptr, xScale, yScale);
             },
             destroy: function () { exports.hb_font_destroy(ptr); }
         };
     }
-    function createBuffer() {
+
+    function createBuffer(): HarfBuzzBuffer {
         var ptr = exports.hb_buffer_create();
         return {
             ptr: ptr,
-            addText: function (text) {
+            addText: function (text: string) {
                 var str = createCString(text);
                 exports.hb_buffer_add_utf8(ptr, str.ptr, str.length, 0, str.length);
                 str.free();
@@ -60,11 +117,11 @@ function hbjs(instance) {
             guessSegmentProperties: function () {
                 return exports.hb_buffer_guess_segment_properties(ptr);
             },
-            setDirection: function (dir) {
+            setDirection: function (dir: HarfBuzzDirection) {
                 let direction = { "ltr": 4, "rtl": 5, "ttb": 6, "btt": 7 }[dir];
                 exports.hb_buffer_set_direction(ptr, direction);
             },
-            shape: function (font, features) {
+            shape: function (font: HarfBuzzFont, features: any) {
                 // features are not used yet
                 exports.hb_shape(font.ptr, ptr, 0, 0);
             },
@@ -90,7 +147,8 @@ function hbjs(instance) {
             destroy: function () { exports.hb_buffer_destroy(ptr); }
         };
     }
-    function shape(text, font, features) {
+
+    function shape(text: string, font: HarfBuzzFont, features: any): Array<GlyphInformation> {
         let buffer = createBuffer();
         buffer.addText(text);
         buffer.guessSegmentProperties();
@@ -99,6 +157,7 @@ function hbjs(instance) {
         buffer.destroy();
         return result;
     }
+
     return {
         createBlob: createBlob,
         createFace: createFace,
@@ -106,9 +165,10 @@ function hbjs(instance) {
         createBuffer: createBuffer,
         shape: shape
     };
-}
-;
-export function loadHarfbuzz(webAssemblyUrl) {
+};
+
+
+export function loadHarfbuzz(webAssemblyUrl: string): Promise<HarfBuzzInterface> {
     return fetch(webAssemblyUrl).then(response => {
         return response.arrayBuffer();
     }).then(wasm => {
@@ -119,4 +179,3 @@ export function loadHarfbuzz(webAssemblyUrl) {
         return hbjs(result.instance);
     });
 }
-//# sourceMappingURL=hbjs.js.map
