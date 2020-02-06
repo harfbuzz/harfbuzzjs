@@ -180,6 +180,8 @@ function hbjs(instance: WebAssembly.Instance): HarfBuzzInterface {
     };
 };
 
+export const harfbuzzFonts = new Map<string, HarfBuzzFont>();
+
 export function loadHarfbuzz(webAssemblyUrl: string): Promise<HarfBuzzInterface> {
     return fetch(webAssemblyUrl).then(response => {
         return response.arrayBuffer();
@@ -189,5 +191,20 @@ export function loadHarfbuzz(webAssemblyUrl: string): Promise<HarfBuzzInterface>
         //@ts-ignore
         result.instance.exports.memory.grow(1000); // each page is 64kb in size => 64mb allowed for webassembly, maybe we need more... 
         return hbjs(result.instance);
+    });
+}
+
+export function loadAndCacheFont(harfbuzz: HarfBuzzInterface, fontName: string, fontUrl: string): Promise<void> {
+    return fetch(fontUrl).then((response) => {
+        return response.arrayBuffer().then((blob) => {
+            let fontBlob = new Uint8Array(blob);
+            let harfbuzzBlob = harfbuzz.createBlob(fontBlob);
+            let harfbuzzFace = harfbuzz.createFace(harfbuzzBlob, 0);
+            let harfbuzzFont = harfbuzz.createFont(harfbuzzFace);
+
+            harfbuzzFonts.set(fontName, harfbuzzFont);
+            harfbuzzFace.destroy();
+            harfbuzzBlob.destroy();
+        });
     });
 }
