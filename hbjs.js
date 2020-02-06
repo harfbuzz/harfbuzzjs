@@ -38,6 +38,10 @@ function hbjs(instance) {
     };
   }
 
+  function getUnitsPerEm(face) {
+    return exports.hb_face_get_upem(face.ptr);
+  }
+  
   var utf8Encoder = new TextEncoder("utf8");
   function createCString(text) {
     var bytes = utf8Encoder.encode(text);
@@ -107,6 +111,7 @@ function hbjs(instance) {
     createFace: createFace,
     createFont: createFont,
     createBuffer: createBuffer,
+	getUnitsPerEm: getUnitsPerEm,
     shape: shape
   };
 };
