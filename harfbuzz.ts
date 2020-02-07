@@ -128,13 +128,22 @@ export class HarfBuzzFont {
 
 export type HarfBuzzDirection = "ltr" | "rtl" | "ttb" | "btt"
 
-export type GlyphInformation = {
-  GlyphId: number
-  Cluster: number
-  XAdvance: number
-  YAdvance: number
-  XOffset: number
-  YOffset: number
+class GlyphInformation {
+  readonly GlyphId: number
+  readonly Cluster: number
+  readonly XAdvance: number
+  readonly YAdvance: number
+  readonly XOffset: number
+  readonly YOffset: number
+
+  constructor(glyphId: number, cluster: number, xAdvance: number, yAdvance: number, xOffset: number, yOffset: number) {
+    this.GlyphId = glyphId;
+    this.Cluster = cluster;
+    this.XAdvance = xAdvance;
+    this.YAdvance = yAdvance;
+    this.XOffset = xOffset;
+    this.YOffset = yOffset;
+  }
 }
 
 export class HarfBuzzBuffer {
@@ -165,20 +174,13 @@ export class HarfBuzzBuffer {
 
   json() {
     var length = hb.hb_buffer_get_length(this.ptr);
-    var result = [];
+    var result = new Array<GlyphInformation>();
     var infosPtr32 = hb.hb_buffer_get_glyph_infos(this.ptr, 0) / 4;
     var positionsPtr32 = hb.hb_buffer_get_glyph_positions(this.ptr, 0) / 4;
     var infos = hb.heapu32.slice(infosPtr32, infosPtr32 + 5 * length);
     var positions = hb.heapi32.slice(positionsPtr32, positionsPtr32 + 5 * length);
     for (var i = 0; i < length; ++i) {
-      result.push({
-        GlyphId: infos[i * 5 + 0],
-        Cluster: infos[i * 5 + 2],
-        XAdvance: positions[i * 5 + 0],
-        YAdvance: positions[i * 5 + 1],
-        XOffset: positions[i * 5 + 2],
-        YOffset: positions[i * 5 + 3]
-      });
+      result.push(new GlyphInformation(infos[i * 5 + 0], infos[i * 5 + 2], positions[i * 5 + 0], positions[i * 5 + 1], positions[i * 5 + 2], positions[i * 5 + 3]));
     }
     return result;
   }
