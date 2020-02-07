@@ -180,7 +180,13 @@ export class HarfBuzzBuffer {
     var infos = hb.heapu32.slice(infosPtr32, infosPtr32 + 5 * length);
     var positions = hb.heapi32.slice(positionsPtr32, positionsPtr32 + 5 * length);
     for (var i = 0; i < length; ++i) {
-      result.push(new GlyphInformation(infos[i * 5 + 0], infos[i * 5 + 2], positions[i * 5 + 0], positions[i * 5 + 1], positions[i * 5 + 2], positions[i * 5 + 3]));
+      result.push(new GlyphInformation(
+        infos[i * 5 + 0],
+        infos[i * 5 + 2],
+        positions[i * 5 + 0],
+        positions[i * 5 + 1],
+        positions[i * 5 + 2],
+        positions[i * 5 + 3]));
     }
     return result;
   }
