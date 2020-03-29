@@ -1,0 +1,29 @@
+<script>
+WebAssembly.instantiateStreaming(fetch('stb_image.wasm')).then(wasm => {
+  const exports = wasm.instance.exports;
+  exports.memory.grow(2000); // each page is 64kb in size
+  const heapu8 = new Uint8Array(exports.memory.buffer);
+  const heapi32 = new Int32Array(exports.memory.buffer);
+
+  fetch('a.png').then(x => x.arrayBuffer()).then(image => {
+    const bufferSize = image.byteLength;
+    const buffer = exports.malloc(bufferSize);
+    heapu8.set(new Uint8Array(image), buffer);
+
+    const x = exports.malloc(4), y = exports.malloc(4), n = exports.malloc(4);
+    console.time('jpeg decode');
+    const result = exports.stbi_load_from_memory(buffer, bufferSize, x, y, n, 4);
+    console.timeEnd('jpeg decode');
+    exports.free(buffer);
+
+    const width = heapi32[x / 4], height = heapi32[y / 4], channels = heapi32[n / 4];
+    exports.free(x, y, n);
+    console.log(width, height, channels, heapu8.slice(result, result + x * y * channels));
+
+    exports.free(result);
+
+    imageInfo.innerText = 'a.png = width: ' + width + ', height: ' + height + ', channels: ' + channels + '. See the console also';
+  });
+});
+</script>
+<div id="imageInfo"></div>

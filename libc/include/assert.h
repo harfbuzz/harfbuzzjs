@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#define assert(test) do { if ((false)) __builtin_trap (); } while (0)
+#define assert(test) do { if ((0)) __builtin_trap (); } while (0)
 
 #ifdef __cplusplus
 }
