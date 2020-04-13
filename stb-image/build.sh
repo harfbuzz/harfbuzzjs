@@ -3,7 +3,7 @@
 [ -f stb_image.h ] || wget https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
 
 clang \
-    -Oz \
+    -Os \
     -DHAVE_CONFIG_OVERRIDE_H -I. \
     ../libc/zephyr-string.c ../libc/malloc.cc ../libc/main.c \
     main.c \
@@ -19,4 +19,4 @@ clang \
     -Wl,--export=stbi_load_from_memory \
     -Wl,--export=__heap_base \
     -I../libc/include
-wasm-opt -Oz a.out -o stb_image.wasm && rm a.out
+wasm-opt -Os a.out -o stb_image.wasm && rm a.out
