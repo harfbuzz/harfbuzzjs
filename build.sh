@@ -8,6 +8,7 @@ clang \
 	-fno-exceptions -fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden \
 	--target=wasm32 \
 	-nostdlib -nostdinc \
+	-Wno-builtin-requires-header \
 	-flto \
 	-DHB_TINY -DHB_USE_INTERNAL_QSORT \
 	-Wl,--no-entry \
@@ -36,8 +37,10 @@ clang \
 	-Wl,--export=free \
 	-Wl,--export=free_ptr \
 	-Wl,--export=__heap_base \
+	hbjs.c -DHAVE_CONFIG_OVERRIDE_H -I. -DHB_EXPERIMENTAL_API \
 	$@ libc/malloc.cc libc/zephyr-string.c libc/main.c harfbuzz/src/harfbuzz.cc
-mv a.out hb.wasm
+# add '-Wl,--export=hbjs_glyph_svg \' to expose glyph draw as svg
+wasm-opt -Oz a.out -o harfbuzz.wasm && rm a.out
 
 # emscripten based
 # --profiling-funcs

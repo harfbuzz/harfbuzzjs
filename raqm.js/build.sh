@@ -4,11 +4,9 @@
 
 clang \
     -Oz \
-    -DHAVE_CONFIG_OVERRIDE_H -I. \
     -I../fribidi.js/fribidi/lib -I../fribidi.js/fribidi/build/lib \
     ../fribidi.js/fribidi/lib/fribidi*.c -I../fribidi.js/fribidi/build/gen.tab/ \
     ../libc/zephyr-string.c ../libc/malloc.cc ../libc/main.c \
-    hbjs.c \
     libraqm-nofreetype/src/raqm.c \
     ../harfbuzz/src/harfbuzz.cc -I../harfbuzz/src/ \
 	-DHB_TINY -DHB_USE_INTERNAL_QSORT \
@@ -50,6 +48,7 @@ clang \
     -Wl,--export=hb_face_get_upem \
     -Wl,--export=hb_font_get_h_extents \
     -Wl,--export=hbjs_glyph_svg \
+    ../hbjs.c -DHAVE_CONFIG_OVERRIDE_H -I. -DHB_EXPERIMENTAL_API \
     -I../libc/include -DSTDC_HEADERS -DHAVE_STDLIB_H -DFRIBIDI_NO_DEPRECATED
 # TODO: Add raqm_add_font_feature and strtol to libc
 wasm-opt -Oz a.out -o raqm.wasm && rm a.out

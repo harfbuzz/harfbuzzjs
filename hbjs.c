@@ -1,5 +1,5 @@
-#include "../harfbuzz/src/hb.h"
-#include "../harfbuzz/src/hb-ot.h"
+#include "harfbuzz/src/hb.h"
+#include "harfbuzz/src/hb-ot.h"
 
 typedef struct user_data_t {
   char *str;
