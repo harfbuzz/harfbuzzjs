@@ -35,11 +35,12 @@ clang \
 	-Wl,--export=hb_font_set_scale \
 	-Wl,--export=hb_face_get_upem \
 	-Wl,--export=hbjs_glyph_svg \
+	-Wl,--export=hbjs_shape_with_trace \
 	-Wl,--export=free \
 	-Wl,--export=free_ptr \
 	-Wl,--export=__heap_base \
 	hbjs.c -DHAVE_CONFIG_OVERRIDE_H -I. -DHB_EXPERIMENTAL_API \
-	$@ libc/malloc.cc libc/zephyr-string.c libc/main.c harfbuzz/src/harfbuzz.cc
+	$@ libc/malloc.cc libc/zephyr-string.c libc/prf.c libc/strtol.c libc/sprintf.c libc/main.c harfbuzz/src/harfbuzz.cc
 # add '-Wl,--export=hbjs_glyph_svg \' to expose glyph draw as svg
 wasm-opt -Oz a.out -o harfbuzz.wasm && rm a.out
 

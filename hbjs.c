@@ -1,11 +1,14 @@
 #include "harfbuzz/src/hb.h"
 #include "harfbuzz/src/hb-ot.h"
+#include "string.h"
 
 typedef struct user_data_t {
   char *str;
   unsigned size;
   unsigned consumed;
+  unsigned more_userdata;
 } user_data_t;
+
 
 /* Our modified iota, why not using libc's? it is going to be used
    in harfbuzzjs where libc isn't available */
@@ -122,10 +125,62 @@ hbjs_glyph_svg (hb_font_t *font, hb_codepoint_t glyph, char *buf, unsigned buf_s
   user_data_t user_data = {
     .str = buf,
     .size = buf_size,
-    .consumed = 0
+    .consumed = 0,
+    .more_userdata = 0
   };
   hb_font_draw_glyph (font, glyph, funcs, &user_data);
   buf[user_data.consumed] = '\0';
+  return user_data.consumed;
+}
+
+static hb_bool_t do_trace (hb_buffer_t *buffer,
+                           hb_font_t   *font,
+                           const char  *message,
+                           user_data_t *user_data) {
+  while (*message) {
+    user_data->str[user_data->consumed++] = *message++;
+  }
+  user_data->str[user_data->consumed++] = '\n';
+  return 1;
+}
+
+unsigned
+hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf, char* featurestring, int stop_at, char *outbuf, unsigned buf_size) {
+  user_data_t user_data = {
+    .str = outbuf,
+    .size = buf_size,
+    .consumed = 0,
+    .more_userdata = stop_at
+  };
+
+  int num_features = 0;
+  hb_feature_t* features;
+
+  if (*featurestring) {
+    /* count the features first, so we can allocate memory */
+    char* p = featurestring;
+    do {
+      num_features++;
+      p = strchr (p, ',');
+      if (p)
+        p++;
+    } while (p);
+
+    features = (hb_feature_t *) calloc (num_features, sizeof (*features));
+
+    /* now do the actual parsing */
+    p = featurestring;
+    num_features = 0;
+    while (p && *p) {
+      char *end = strchr (p, ',');
+      if (hb_feature_from_string (p, end ? end - p : -1, &features[num_features]))
+        num_features++;
+      p = end ? end + 1 : NULL;
+    }
+  }
+
+  hb_buffer_set_message_func (buf, (hb_buffer_message_func_t)do_trace, &user_data, NULL);
+  hb_shape(font, buf, features, num_features);
   return user_data.consumed;
 }
 
