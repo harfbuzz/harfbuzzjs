@@ -31,13 +31,9 @@ void* realloc(void* ptr, size_t size);
 #define va_arg __builtin_va_arg
 #define stderr 0
 inline int fprintf(char *str, const char *format, ...);
-inline int fprintf(char *str, const char *format, ...) { return 0; }
 inline int sprintf(char *str, const char *format, ...);
-inline int sprintf(char *str, const char *format, ...) { return 0; }
 inline int snprintf(char *str, size_t n, const char *format, ...);
-inline int snprintf(char *str, size_t n, const char *format, ...) { return 0; }
 inline int vsnprintf(char *str, size_t n, const char * format, va_list va);
-inline int vsnprintf(char *str, size_t n, const char * format, va_list va) { return 0; }
 #define vfprintf(format, ...)
 #define offsetof __builtin_offsetof
 
