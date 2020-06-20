@@ -34,6 +34,7 @@ clang \
 	-Wl,--export=hb_blob_get_length \
 	-Wl,--export=hb_font_set_scale \
 	-Wl,--export=hb_face_get_upem \
+	-Wl,--export=hbjs_glyph_svg \
 	-Wl,--export=free \
 	-Wl,--export=free_ptr \
 	-Wl,--export=__heap_base \

@@ -5,6 +5,7 @@ function hbjs(instance) {
   var heapu8 = new Uint8Array(exports.memory.buffer);
   var heapu32 = new Uint32Array(exports.memory.buffer);
   var heapi32 = new Int32Array(exports.memory.buffer);
+  var utf8Decoder = new TextDecoder("utf8");
 
   var HB_MEMORY_MODE_WRITABLE = 2;
 
@@ -96,6 +97,17 @@ function hbjs(instance) {
     };
   }
 
+  function glyphToSvg(font, glyphId) {
+    var pathBuffer = exports.malloc(2048);
+    var svgLength = exports.hbjs_glyph_svg(font.ptr, glyphId, pathBuffer, 2048);
+    var path = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="' +
+      utf8Decoder.decode(heapu8.slice(pathBuffer, pathBuffer + svgLength)) +
+      '"/></svg>';
+    exports.free(pathBuffer);
+    return path
+  }
+
+
   function shape(font, buffer, features) {
     // features are not used yet
     exports.hb_shape(font.ptr, buffer.ptr, 0, 0);
@@ -106,7 +118,8 @@ function hbjs(instance) {
     createFace: createFace,
     createFont: createFont,
     createBuffer: createBuffer,
-    shape: shape
+    shape: shape,
+    glyphToSvg: glyphToSvg
   };
 };
 
