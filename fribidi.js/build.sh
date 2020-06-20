@@ -1,7 +1,7 @@
 #!/bin/bash
 
 [ -d fribidi/lib ] || git clone --depth=1 https://github.com/fribidi/fribidi
-[ -d fribidi/build/gen.tab ] || (cd fribidi; git pull; rm -rf build; meson build -Ddocs=false; ninja -Cbuild)
+[ -d fribidi/build/gen.tab ] || (cd fribidi; git pull --ff-only; rm -rf build; meson build -Ddocs=false; ninja -Cbuild)
 
 clang \
     -Oz \
