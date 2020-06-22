@@ -36,6 +36,7 @@ clang \
 	-Wl,--export=hb_face_get_upem \
 	-Wl,--export=hbjs_glyph_svg \
 	-Wl,--export=hbjs_shape_with_trace \
+	-Wl,--export=hb_buffer_serialize_glyphs \
 	-Wl,--export=free \
 	-Wl,--export=free_ptr \
 	-Wl,--export=__heap_base \

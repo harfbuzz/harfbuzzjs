@@ -137,9 +137,35 @@ static hb_bool_t do_trace (hb_buffer_t *buffer,
                            hb_font_t   *font,
                            const char  *message,
                            user_data_t *user_data) {
+  unsigned int consumed;
+  unsigned int num_glyphs = hb_buffer_get_length (buffer);
+  user_data->str[user_data->consumed++] = '{';
+  user_data->str[user_data->consumed++] = '"';
+  user_data->str[user_data->consumed++] = 'm';
+  user_data->str[user_data->consumed++] = '"';
+  user_data->str[user_data->consumed++] = ':';
+  user_data->str[user_data->consumed++] = '"';
   while (*message) {
     user_data->str[user_data->consumed++] = *message++;
   }
+  user_data->str[user_data->consumed++] = '"';
+  user_data->str[user_data->consumed++] = ',';
+  user_data->str[user_data->consumed++] = '"';
+  user_data->str[user_data->consumed++] = 't';
+  user_data->str[user_data->consumed++] = '"';
+  user_data->str[user_data->consumed++] = ':';
+  user_data->str[user_data->consumed++] = '[';
+  hb_buffer_serialize_glyphs(buffer, 0, num_glyphs,
+    user_data->str + user_data->consumed,
+    user_data->size - user_data->consumed,
+    &consumed,
+    font,
+    HB_BUFFER_SERIALIZE_FORMAT_JSON,
+    0);
+  user_data->consumed += consumed;
+  user_data->str[user_data->consumed++] = ']';
+  user_data->str[user_data->consumed++] = '}';
+  user_data->str[user_data->consumed++] = ',';
   user_data->str[user_data->consumed++] = '\n';
   return 1;
 }
@@ -180,7 +206,10 @@ hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf, char* featurestring, i
   }
 
   hb_buffer_set_message_func (buf, (hb_buffer_message_func_t)do_trace, &user_data, NULL);
+  user_data.str[user_data.consumed++] = '[';
   hb_shape(font, buf, features, num_features);
+  user_data.str[user_data.consumed-2] = ']';
+  user_data.str[user_data.consumed-1] = '\0';
   return user_data.consumed;
 }
 

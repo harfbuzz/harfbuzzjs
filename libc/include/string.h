@@ -17,6 +17,7 @@ int memcmp(const void *m1, const void *m2, size_t n);
 char *strchr(const char *s, int c);
 char *strncpy(char *__restrict d, const char *__restrict s, size_t n);
 char *strstr(const char *s, const char *find);
+char *strcpy(char * d, const char * s);
 
 #ifdef __cplusplus
 }
