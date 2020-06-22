@@ -168,10 +168,6 @@ export class HarfBuzzBuffer {
     hb.hb_buffer_set_direction(this.ptr, d);
   }
 
-  shape(font: HarfBuzzFont, features: any) {
-    hb.hb_shape(font.ptr, this.ptr, 0, 0);
-  }
-
   json() {
     var length = hb.hb_buffer_get_length(this.ptr);
     var result = new Array<GlyphInformation>();

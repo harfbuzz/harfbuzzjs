@@ -69,10 +69,6 @@ function hbjs(instance) {
           btt: 7
         }[dir] || 0);
       },
-      shape: function (font, features) {
-        // features are not used yet
-        exports.hb_shape(font.ptr, ptr, 0, 0);
-      },
       json: function (font) {
         var length = exports.hb_buffer_get_length(ptr);
         var result = [];
