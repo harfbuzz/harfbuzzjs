@@ -6,7 +6,7 @@ typedef struct user_data_t {
   char *str;
   unsigned size;
   unsigned consumed;
-  unsigned more_userdata;
+  int more_userdata;
 } user_data_t;
 
 
@@ -133,40 +133,39 @@ hbjs_glyph_svg (hb_font_t *font, hb_codepoint_t glyph, char *buf, unsigned buf_s
   return user_data.consumed;
 }
 
+static void _append(user_data_t *user_data, char x) {
+  if (user_data->consumed >= user_data->size) {
+    user_data->more_userdata = -1;
+    return;
+  }
+  user_data->str[user_data->consumed++] = x;
+}
+
+
+static void _strcat(user_data_t *user_data, const char *s) {
+  while (*s) {
+    _append(user_data, *s++);
+  }
+}
+
 static hb_bool_t do_trace (hb_buffer_t *buffer,
                            hb_font_t   *font,
                            const char  *message,
                            user_data_t *user_data) {
   unsigned int consumed;
   unsigned int num_glyphs = hb_buffer_get_length (buffer);
-  user_data->str[user_data->consumed++] = '{';
-  user_data->str[user_data->consumed++] = '"';
-  user_data->str[user_data->consumed++] = 'm';
-  user_data->str[user_data->consumed++] = '"';
-  user_data->str[user_data->consumed++] = ':';
-  user_data->str[user_data->consumed++] = '"';
-  while (*message) {
-    user_data->str[user_data->consumed++] = *message++;
-  }
-  user_data->str[user_data->consumed++] = '"';
-  user_data->str[user_data->consumed++] = ',';
-  user_data->str[user_data->consumed++] = '"';
-  user_data->str[user_data->consumed++] = 't';
-  user_data->str[user_data->consumed++] = '"';
-  user_data->str[user_data->consumed++] = ':';
-  user_data->str[user_data->consumed++] = '[';
+  _strcat(user_data, "{\"m\":\"");
+  _strcat(user_data, message);
+  _strcat(user_data, "\",\"t\":[");
   hb_buffer_serialize_glyphs(buffer, 0, num_glyphs,
     user_data->str + user_data->consumed,
     user_data->size - user_data->consumed,
     &consumed,
     font,
     HB_BUFFER_SERIALIZE_FORMAT_JSON,
-    0);
+    HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES);
   user_data->consumed += consumed;
-  user_data->str[user_data->consumed++] = ']';
-  user_data->str[user_data->consumed++] = '}';
-  user_data->str[user_data->consumed++] = ',';
-  user_data->str[user_data->consumed++] = '\n';
+  _strcat(user_data, "]},\n");
   return 1;
 }
 
@@ -180,7 +179,7 @@ hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf, char* featurestring, i
   };
 
   int num_features = 0;
-  hb_feature_t* features;
+  hb_feature_t* features = NULL;
 
   if (*featurestring) {
     /* count the features first, so we can allocate memory */
