@@ -23,6 +23,7 @@ clang \
 	-Wl,--export=hb_buffer_add_utf8 \
 	-Wl,--export=hb_buffer_guess_segment_properties \
 	-Wl,--export=hb_buffer_set_direction \
+	-Wl,--export=hb_buffer_set_cluster_level \
 	-Wl,--export=hb_shape \
 	-Wl,--export=hb_buffer_get_glyph_infos \
 	-Wl,--export=hb_buffer_get_glyph_positions \

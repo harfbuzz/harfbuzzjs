@@ -70,6 +70,9 @@ function hbjs(instance) {
           btt: 7
         }[dir] || 0);
       },
+      setClusterLevel: function (level) {
+        exports.hb_buffer_set_cluster_level(ptr, level)
+      },
       shape: function (font, features) {
         // features are not used yet
         exports.hb_shape(font.ptr, ptr, 0, 0);
