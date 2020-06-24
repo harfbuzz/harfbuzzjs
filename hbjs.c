@@ -2,11 +2,21 @@
 #include "harfbuzz/src/hb-ot.h"
 #include "string.h"
 
+enum {
+  HB_SHAPE_DONT_STOP,
+  HB_SHAPE_GSUB_PHASE,
+  HB_SHAPE_GPOS_PHASE
+};
+
 typedef struct user_data_t {
   char *str;
   unsigned size;
   unsigned consumed;
-  int more_userdata;
+  hb_bool_t failure;
+  unsigned int stop_at;
+  unsigned int stop_phase;
+  hb_bool_t stopping;
+  unsigned int current_phase;
 } user_data_t;
 
 
@@ -39,6 +49,20 @@ static unsigned _hb_itoa (int32_t num, char *buf)
   return i;
 }
 
+static void _append(user_data_t *user_data, char x) {
+  if (user_data->consumed >= user_data->size) {
+    user_data->failure = 1;
+    return;
+  }
+  user_data->str[user_data->consumed++] = x;
+}
+
+static void _strcat(user_data_t *user_data, const char *s) {
+  while (*s) {
+    _append(user_data, *s++);
+  }
+}
+
 #define ITOA_BUF_SIZE 12 // 10 digits in int32, 1 for negative sign, 1 for \0
 
 static void
@@ -46,9 +70,9 @@ move_to (hb_position_t to_x, hb_position_t to_y, user_data_t *user_data)
 {
   /* 4 = command character space + comma + array starts with 0 index + nul character space */
   if (user_data->consumed + 2 * ITOA_BUF_SIZE + 4 > user_data->size) return;
-  user_data->str[user_data->consumed++] = 'M';
+  _append(user_data, 'M');
   user_data->consumed += _hb_itoa (to_x, user_data->str + user_data->consumed);
-  user_data->str[user_data->consumed++] = ',';
+  _append(user_data, ',');
   user_data->consumed += _hb_itoa (to_y, user_data->str + user_data->consumed);
 }
 
@@ -56,9 +80,9 @@ static void
 line_to (hb_position_t to_x, hb_position_t to_y, user_data_t *user_data)
 {
   if (user_data->consumed + 2 * ITOA_BUF_SIZE + 4 > user_data->size) return;
-  user_data->str[user_data->consumed++] = 'L';
+  _append(user_data, 'L');
   user_data->consumed += _hb_itoa (to_x, user_data->str + user_data->consumed);
-  user_data->str[user_data->consumed++] = ',';
+  _append(user_data, ',');
   user_data->consumed += _hb_itoa (to_y, user_data->str + user_data->consumed);
 }
 
@@ -69,13 +93,13 @@ quadratic_to (hb_position_t control_x, hb_position_t control_y,
 {
 
   if (user_data->consumed + 4 * ITOA_BUF_SIZE + 6 > user_data->size) return;
-  user_data->str[user_data->consumed++] = 'Q';
+  _append(user_data, 'Q');
   user_data->consumed += _hb_itoa (control_x, user_data->str + user_data->consumed);
-  user_data->str[user_data->consumed++] = ',';
+  _append(user_data, ',');
   user_data->consumed += _hb_itoa (control_y, user_data->str + user_data->consumed);
-  user_data->str[user_data->consumed++] = ' ';
+  _append(user_data, ' ');
   user_data->consumed += _hb_itoa (to_x, user_data->str + user_data->consumed);
-  user_data->str[user_data->consumed++] = ',';
+  _append(user_data, ',');
   user_data->consumed += _hb_itoa (to_y, user_data->str + user_data->consumed);
 }
 
@@ -86,30 +110,29 @@ cubic_to (hb_position_t control1_x, hb_position_t control1_y,
 	  user_data_t *user_data)
 {
   if (user_data->consumed + 6 * ITOA_BUF_SIZE + 8 > user_data->size) return;
-  user_data->str[user_data->consumed++] = 'C';
+  _append(user_data, 'C');
   user_data->consumed += _hb_itoa (control1_x, user_data->str + user_data->consumed);
-  user_data->str[user_data->consumed++] = ',';
+  _append(user_data, ',');
   user_data->consumed += _hb_itoa (control1_y, user_data->str + user_data->consumed);
-  user_data->str[user_data->consumed++] = ' ';
+  _append(user_data, ' ');
   user_data->consumed += _hb_itoa (control2_x, user_data->str + user_data->consumed);
-  user_data->str[user_data->consumed++] = ',';
+  _append(user_data, ',');
   user_data->consumed += _hb_itoa (control2_y, user_data->str + user_data->consumed);
-  user_data->str[user_data->consumed++] = ' ';
+  _append(user_data, ' ');
   user_data->consumed += _hb_itoa (to_x, user_data->str + user_data->consumed);
-  user_data->str[user_data->consumed++] = ',';
+  _append(user_data, ',');
   user_data->consumed += _hb_itoa (to_y, user_data->str + user_data->consumed);
 }
 
 static void
 close_path (user_data_t *user_data)
 {
-  if (user_data->consumed + 2 > user_data->size) return;
-  user_data->str[user_data->consumed++] = 'Z';
+  _append(user_data, 'Z');
 }
 
 static hb_draw_funcs_t *funcs = 0;
 
-unsigned
+int
 hbjs_glyph_svg (hb_font_t *font, hb_codepoint_t glyph, char *buf, unsigned buf_size)
 {
   if (funcs == 0) /* not the best pattern for multi-threaded apps which is not a concern here */
@@ -126,26 +149,17 @@ hbjs_glyph_svg (hb_font_t *font, hb_codepoint_t glyph, char *buf, unsigned buf_s
     .str = buf,
     .size = buf_size,
     .consumed = 0,
-    .more_userdata = 0
+    .failure = 0,
+    /* Following members not relevant for SVG */
+    .stop_at = 0,
+    .stop_phase = 0,
+    .stopping = 0,
+    .current_phase = 0
   };
   hb_font_draw_glyph (font, glyph, funcs, &user_data);
+  if (user_data.failure) { return -1; }
   buf[user_data.consumed] = '\0';
   return user_data.consumed;
-}
-
-static void _append(user_data_t *user_data, char x) {
-  if (user_data->consumed >= user_data->size) {
-    user_data->more_userdata = -1;
-    return;
-  }
-  user_data->str[user_data->consumed++] = x;
-}
-
-
-static void _strcat(user_data_t *user_data, const char *s) {
-  while (*s) {
-    _append(user_data, *s++);
-  }
 }
 
 static hb_bool_t do_trace (hb_buffer_t *buffer,
@@ -154,6 +168,35 @@ static hb_bool_t do_trace (hb_buffer_t *buffer,
                            user_data_t *user_data) {
   unsigned int consumed;
   unsigned int num_glyphs = hb_buffer_get_length (buffer);
+
+  if (strcmp(message, "start table GSUB") == 0) {
+    user_data->current_phase = HB_SHAPE_GSUB_PHASE;
+  } else if (strcmp(message, "start table GPOS") == 0) {
+    user_data->current_phase = HB_SHAPE_GPOS_PHASE;
+  }
+
+
+  if (user_data->current_phase != user_data->stop_phase) {
+    user_data->stopping = 0;
+  }
+
+  // If we overflowed, keep going anyway.
+  if (user_data->failure) return 1;
+
+  if (user_data->stop_phase != HB_SHAPE_DONT_STOP) {
+    // Do we need to start stopping?
+    char itoabuf[ITOA_BUF_SIZE];
+    _hb_itoa(user_data->stop_at, itoabuf);
+    if ((user_data->current_phase == user_data->stop_phase) &&
+        (strncmp(message, "end lookup ", 11) == 0) &&
+        (strcmp(message + 11, itoabuf) == 0)) {
+      user_data->stopping = 1;
+    }
+  }
+
+  // If we need to stop, stop.
+  if (user_data->stopping) return 0;
+
   _strcat(user_data, "{\"m\":\"");
   _strcat(user_data, message);
   _strcat(user_data, "\",\"t\":[");
@@ -166,16 +209,25 @@ static hb_bool_t do_trace (hb_buffer_t *buffer,
     HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES);
   user_data->consumed += consumed;
   _strcat(user_data, "]},\n");
+
+
   return 1;
 }
 
 unsigned
-hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf, char* featurestring, int stop_at, char *outbuf, unsigned buf_size) {
+hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf,
+                       char* featurestring,
+                       int stop_at, int stop_phase,
+                       char *outbuf, unsigned buf_size) {
   user_data_t user_data = {
     .str = outbuf,
     .size = buf_size,
     .consumed = 0,
-    .more_userdata = stop_at
+    .failure = 0,
+    .stop_at = stop_at,
+    .stop_phase = stop_phase,
+    .stopping = 0,
+    .current_phase = 0
   };
 
   int num_features = 0;
@@ -207,6 +259,9 @@ hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf, char* featurestring, i
   hb_buffer_set_message_func (buf, (hb_buffer_message_func_t)do_trace, &user_data, NULL);
   user_data.str[user_data.consumed++] = '[';
   hb_shape(font, buf, features, num_features);
+
+  if (user_data.failure) return -1;
+
   user_data.str[user_data.consumed-2] = ']';
   user_data.str[user_data.consumed-1] = '\0';
   return user_data.consumed;
