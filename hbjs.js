@@ -110,13 +110,23 @@ function hbjs(instance) {
   }
 
   function glyphToSvg(font, glyphId) {
-    var pathBuffer = exports.malloc(2048);
-    var svgLength = exports.hbjs_glyph_svg(font.ptr, glyphId, pathBuffer, 2048);
-    var path = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="' +
-      utf8Decoder.decode(heapu8.slice(pathBuffer, pathBuffer + svgLength)) +
-      '"/></svg>';
-    exports.free(pathBuffer);
-    return path
+    var bufSize = 4096;
+    var maxBufSize = 5 * 1024 * 1024;
+    while (bufSize < maxBufSize) {
+      var pathBuffer = exports.malloc(bufSize);
+      var svgLength = exports.hbjs_glyph_svg(font.ptr, glyphId, pathBuffer, bufSize);
+      if (svgLength != -1) {
+        var path = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="' +
+          utf8Decoder.decode(heapu8.slice(pathBuffer, pathBuffer + svgLength)) +
+          '"/></svg>';
+        exports.free(pathBuffer);
+        return path;
+      }
+      // Failed, try again with more
+      exports.free(pathBuffer);
+      bufSize *= 2;
+    }
+    return;
   }
 
 
