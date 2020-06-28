@@ -41,8 +41,8 @@ inline int vsnprintf(char *str, size_t n, const char * format, va_list va) { ret
 #define vfprintf(format, ...)
 #define offsetof __builtin_offsetof
 
-#define ceil __builtin_ceil
-#define floor __builtin_floor
+#define ceilf __builtin_ceilf
+#define floorf __builtin_floorf
 #define abs __builtin_abs
 #define fabs __builtin_fabs
 #define pow __builtin_pow
