@@ -35,7 +35,7 @@ function hbjs(instance) {
 
     function glyphToPath(glyphId) {
       var svgLength = exports.hbjs_glyph_svg(ptr, glyphId, pathBuffer, pathBufferSize);
-      return svgLength > 0 ? utf8Decoder.decode(heapu8.slice(pathBuffer, pathBuffer + svgLength)) : "";
+      return svgLength > 0 ? utf8Decoder.decode(heapu8.subarray(pathBuffer, pathBuffer + svgLength)) : "";
     }
 
     return {
@@ -96,8 +96,8 @@ function hbjs(instance) {
         var result = [];
         var infosPtr32 = exports.hb_buffer_get_glyph_infos(ptr, 0) / 4;
         var positionsPtr32 = exports.hb_buffer_get_glyph_positions(ptr, 0) / 4;
-        var infos = heapu32.slice(infosPtr32, infosPtr32 + 5 * length);
-        var positions = heapi32.slice(positionsPtr32, positionsPtr32 + 5 * length);
+        var infos = heapu32.subarray(infosPtr32, infosPtr32 + 5 * length);
+        var positions = heapi32.subarray(positionsPtr32, positionsPtr32 + 5 * length);
         for (var i = 0; i < length; ++i) {
           result.push({
             g: infos[i * 5 + 0],
@@ -130,7 +130,7 @@ function hbjs(instance) {
     var featurestr = createCString(features);
     var traceLen = exports.hbjs_shape_with_trace(font.ptr, buffer.ptr, featurestr.ptr, stop_at, stop_phase, traceBuffer, bufLen);
     featurestr.free();
-    var trace = utf8Decoder.decode(heapu8.slice(traceBuffer, traceBuffer + traceLen - 1));
+    var trace = utf8Decoder.decode(heapu8.subarray(traceBuffer, traceBuffer + traceLen - 1));
     exports.free(traceBuffer);
     return JSON.parse(trace);
   }
