@@ -5,7 +5,7 @@ library for client/server side JavaScript projects.
 See the demo [here](https://harfbuzz.github.io/harfbuzzjs/).
 
 ## Building
-1. Install clang, lld, binaryen and git
+1. Install clang, lld and git
 2. `./build.sh`
 
 ## Download
@@ -35,3 +35,21 @@ File a bug and mention your usecase.
 See [harfbuzz port inside emscripten](https://github.com/emscripten-core/emscripten/blob/incoming/tools/ports/harfbuzz.py)
 and [emscripten-ports/HarfBuzz](https://github.com/emscripten-ports/HarfBuzz), basically all you need is to use
 `-s USE_HARFBUZZ=1` in your build.
+
+## binaryen
+
+Optionally you can install `binaryen` and use `wasm-opt` like:
+
+```
+wasm-opt -Oz hb.wasm -o hb.wasm
+```
+
+`binaryen` also provides `wasm-dis` which can be used for,
+
+```
+wasm-dis hb.wasm | grep export
+wasm-dis hb.wasm | grep import
+```
+
+with that you can check if the built wasm file only exports things you need and
+doesn't need to import anything, as usual with wasm files built here.
