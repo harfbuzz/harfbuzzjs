@@ -136,8 +136,7 @@ function hbjs(instance) {
     createFont: createFont,
     createBuffer: createBuffer,
     shape: shape,
-    shapeWithTrace: shapeWithTrace,
-    glyphToSvg: glyphToSvg
+    shapeWithTrace: shapeWithTrace
   };
 };
 
