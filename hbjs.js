@@ -114,11 +114,6 @@ function hbjs(instance) {
     };
   }
 
-  function glyphToSvg(font, glyphId) {
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="' +
-      font.glyphToPath(glyphId) + '"/></svg>';
-  }
-
   function shape(font, buffer, features) {
     // features are not used yet
     exports.hb_shape(font.ptr, buffer.ptr, 0, 0);
