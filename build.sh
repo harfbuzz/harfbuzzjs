@@ -1,9 +1,14 @@
 #!/bin/bash
+set -e
+
+[ -x "$(command -v git)" ] || (echo "Please install git from your package manager" && exit 1)
+[ -x "$(command -v clang)" ] || (echo "Please install clang from your package manager" && exit 1)
+[ -x "$(command -v wasm-ld)" ] || (echo "Please install lld (llvm's linker) from your package manager" && exit 1)
+[ -x "$(command -v wasm-opt)" ] || (echo "Please install binaryen from your package manager" && exit 1)
 
 [ -d harfbuzz/src ] || git clone --depth=1 https://github.com/harfbuzz/harfbuzz
 (cd harfbuzz; git pull --ff-only)
 
-# ideally you will only need `clang` `lld` packages be installed to make this work
 clang \
     -I./libc/include -Oz \
 	-fno-exceptions -fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden \
@@ -40,8 +45,7 @@ clang \
 	-Wl,--export=__heap_base \
 	hbjs.c -DHAVE_CONFIG_OVERRIDE_H -I. -DHB_EXPERIMENTAL_API \
 	$@ libc/malloc.cc libc/zephyr-string.c libc/main.c harfbuzz/src/harfbuzz.cc \
-	-o hb.wasm
 # add '-Wl,--export=hbjs_glyph_svg \' to expose glyph draw as svg
 
-# optionally you can install and use wasm-opt
-#wasm-opt -Oz hb.wasm -o hb.wasm
+# an optional step, a.out is already a usable wasm
+wasm-opt -Oz a.out -o hb.wasm && rm a.out

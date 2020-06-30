@@ -5,7 +5,7 @@ library for client/server side JavaScript projects.
 See the demo [here](https://harfbuzz.github.io/harfbuzzjs/).
 
 ## Building
-1. Install clang 8 and git
+1. Install clang, lld, binaryen and git
 2. `./build.sh`
 
 ## Download
