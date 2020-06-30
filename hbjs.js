@@ -127,7 +127,7 @@ function hbjs(instance) {
     var traceBuffer = exports.malloc(bufLen);
     var featurestr = createCString(features);
     var traceLen = exports.hbjs_shape_with_trace(font.ptr, ptr, featurestr.ptr, stop_at, stop_phase, traceBuffer, bufLen);
-    var trace =  utf8Decoder.decode(heapu8.slice(traceBuffer, traceBuffer + traceLen -1))
+    var trace = utf8Decoder.decode(heapu8.slice(traceBuffer, traceBuffer + traceLen - 1));
     exports.free(traceBuffer);
     return JSON.parse(trace);
   }
