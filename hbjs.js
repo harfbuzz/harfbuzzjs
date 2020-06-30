@@ -27,10 +27,28 @@ function hbjs(instance) {
     };
   }
 
+  var pathBufferSize = 65536; // should be enough for most glyphs
+  var pathBuffer = exports.malloc(pathBufferSize); // permanently allocated
+
   function createFont(face) {
     var ptr = exports.hb_font_create(face.ptr);
+
+    function glyphToPath(glyphId) {
+      var svgLength = exports.hbjs_glyph_svg(ptr, glyphId, pathBuffer, pathBufferSize);
+      return svgLength > 0 ? utf8Decoder.decode(heapu8.slice(pathBuffer, pathBuffer + svgLength)) : "";
+    }
+
     return {
       ptr: ptr,
+      glyphToPath: glyphToPath,
+      glyphToJson: function (glyphId) {
+        var path = glyphToPath(glyphId);
+        return path.replace(/([MLQCZ])/g, '|$1 ').split('|').filter(function (x) { return x.length; }).map(function (x) {
+          var row = x.split(/[ ,]/g);
+          // based on format described on https://svgwg.org/specs/paths/#InterfaceSVGPathSegment
+          return { type: row[0], values: row.slice(1).filter(function (x) { return x.length; }).map(function (x) { return +x; }) };
+        });
+      },
       setScale: function (xScale, yScale) {
         exports.hb_font_set_scale(ptr, xScale, yScale);
       },
@@ -96,14 +114,9 @@ function hbjs(instance) {
     };
   }
 
-  var pathBuffer = exports.malloc(65536); // permanently allocated, should be enough for most glyphs
   function glyphToSvg(font, glyphId) {
-    var svgLength = exports.hbjs_glyph_svg(font.ptr, glyphId, pathBuffer, bufSize);
-    if (svgLength != -1) { return ""; }
-    var path = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="' +
-      utf8Decoder.decode(heapu8.slice(pathBuffer, pathBuffer + svgLength)) +
-      '"/></svg>';
-    return path;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="' +
+      font.glyphToPath(glyphId) + '"/></svg>';
   }
 
   function shape(font, buffer, features) {
