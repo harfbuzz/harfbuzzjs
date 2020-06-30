@@ -4,5 +4,3 @@ int main(int argc, char **argv) {
 }
 
 __attribute__((noreturn)) void abort();
-
-double fabs(double x) { return x > 0 ? x : -x; }
