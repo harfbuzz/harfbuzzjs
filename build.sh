@@ -28,6 +28,7 @@ clang \
 	-Wl,--export=hb_buffer_add_utf8 \
 	-Wl,--export=hb_buffer_guess_segment_properties \
 	-Wl,--export=hb_buffer_set_direction \
+	-Wl,--export=hb_buffer_set_cluster_level \
 	-Wl,--export=hb_shape \
 	-Wl,--export=hb_buffer_get_glyph_infos \
 	-Wl,--export=hb_buffer_get_glyph_positions \
@@ -39,10 +40,12 @@ clang \
 	-Wl,--export=hb_blob_get_length \
 	-Wl,--export=hb_font_set_scale \
 	-Wl,--export=hb_face_get_upem \
+	-Wl,--export=hbjs_glyph_svg \
+	-Wl,--export=hbjs_shape_with_trace \
 	-Wl,--export=free \
 	-Wl,--export=free_ptr \
 	-Wl,--export=__heap_base \
 	hbjs.c -DHAVE_CONFIG_OVERRIDE_H -I. -DHB_EXPERIMENTAL_API \
-	$@ libc/malloc.cc libc/zephyr-string.c libc/main.c harfbuzz/src/harfbuzz.cc \
-	-o hb.wasm
+	libc/malloc.cc libc/zephyr-string.c libc/prf.c libc/strtol.c libc/sprintf.c libc/main.c harfbuzz/src/harfbuzz.cc \
+	-o hb.wasm $@
 # add '-Wl,--export=hbjs_glyph_svg \' to expose glyph draw as svg

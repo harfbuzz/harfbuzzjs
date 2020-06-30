@@ -5,12 +5,13 @@ function hbjs(instance) {
   var heapu8 = new Uint8Array(exports.memory.buffer);
   var heapu32 = new Uint32Array(exports.memory.buffer);
   var heapi32 = new Int32Array(exports.memory.buffer);
+  var utf8Decoder = new TextDecoder("utf8");
 
   var HB_MEMORY_MODE_WRITABLE = 2;
 
   function createBlob(blob) {
     var blobPtr = exports.malloc(blob.byteLength);
-    heapu8.set(blob, blobPtr);
+    heapu8.set(new Uint8Array(blob), blobPtr);
     var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, blobPtr, exports.free_ptr());
     return {
       ptr: ptr,
@@ -69,6 +70,18 @@ function hbjs(instance) {
           btt: 7
         }[dir] || 0);
       },
+      setClusterLevel: function (level) {
+        exports.hb_buffer_set_cluster_level(ptr, level)
+      },
+      shapeWithTrace: function (font, features, stop_at, stop_phase) {
+        var bufLen = 1024 * 1024;
+        var traceBuffer = exports.malloc(bufLen);
+        var featurestr = createCString(features);
+        var traceLen = exports.hbjs_shape_with_trace(font.ptr, ptr, featurestr.ptr, stop_at, stop_phase, traceBuffer, bufLen);
+        var trace =  utf8Decoder.decode(heapu8.slice(traceBuffer, traceBuffer + traceLen -1))
+        exports.free(traceBuffer);
+        return JSON.parse(trace);
+      },
       json: function (font) {
         var length = exports.hb_buffer_get_length(ptr);
         var result = [];
@@ -92,6 +105,27 @@ function hbjs(instance) {
     };
   }
 
+  function glyphToSvg(font, glyphId) {
+    var bufSize = 4096;
+    var maxBufSize = 5 * 1024 * 1024;
+    while (bufSize < maxBufSize) {
+      var pathBuffer = exports.malloc(bufSize);
+      var svgLength = exports.hbjs_glyph_svg(font.ptr, glyphId, pathBuffer, bufSize);
+      if (svgLength != -1) {
+        var path = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="' +
+          utf8Decoder.decode(heapu8.slice(pathBuffer, pathBuffer + svgLength)) +
+          '"/></svg>';
+        exports.free(pathBuffer);
+        return path;
+      }
+      // Failed, try again with more
+      exports.free(pathBuffer);
+      bufSize *= 2;
+    }
+    return;
+  }
+
+
   function shape(font, buffer, features) {
     // features are not used yet
     exports.hb_shape(font.ptr, buffer.ptr, 0, 0);
@@ -102,7 +136,8 @@ function hbjs(instance) {
     createFace: createFace,
     createFont: createFont,
     createBuffer: createBuffer,
-    shape: shape
+    shape: shape,
+    glyphToSvg: glyphToSvg
   };
 };
 

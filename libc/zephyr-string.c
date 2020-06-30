@@ -12,6 +12,27 @@ typedef __SIZE_TYPE__ size_t;
 
 /**
  *
+ * @brief Copy a string
+ *
+ * @return pointer to destination buffer <d>
+ */
+
+char *strcpy(char * d, const char * s)
+{
+	char *dest = d;
+
+	while (*s != '\0') {
+		*d = *s;
+		d++;
+		s++;
+	}
+
+	*d = '\0';
+
+	return dest;
+}
+/**
+ *
  * @brief Copy part of a string
  *
  * @return pointer to destination buffer <d>
