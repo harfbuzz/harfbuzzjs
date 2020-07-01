@@ -38,10 +38,11 @@ function updateResult() {
   var ymax = -10000;
   var ax = 0;
   var ay = 0;
-  var previousCommand = { type: '', values: [0, 0] };
-  var path = result.map(function (x) {
-    var result = glyphs[x.g].map(function (command) {
-      if (command.type === 'Z') return '';
+  var path = pathToRelative(result.map(function (x) {
+    var previousCommand = '';
+    var result = glyphs[x.g].filter(function (command) {
+      return command.type != 'Z';
+    }).map(function (command) {
       var result = command.values.map(function (p, i) {
         // apply ax/ay/dx/dy to coords
         return i % 2 ? -(p + ay + x.dy) : p + ax + x.dx;
@@ -56,11 +57,11 @@ function updateResult() {
         }
         return x;
       });
-      return (previousCommand.type === command.type ? '' : command.type) + result.join(' ');
-    }).join(' ');
+      return (previousCommand.type === command.type ? [] : [command.type]).concat(result);
+    });
     ax += x.ax; ay += x.ay;
     return result;
-  }).join('');
+  }).reduce((acc, val) => acc.concat(val), [])).map(x => x[0] + x.slice(1).join(' ')).join('');
   var width = xmax - xmin;
   var height = ymax - ymin;
   // pad it a bit
@@ -125,5 +126,31 @@ function handleFontUpdate(file) {
     updateResult();
   });
   reader.readAsArrayBuffer(file);
+}
+
+// Totally optional, https://github.com/adobe-webplatform/Snap.svg/blob/7abe4d1/src/path.js#L532
+function pathToRelative(pathArray) {
+  var res = [], x = 0, y = 0, mx = 0, my = 0, start = 1;
+  x = pathArray[0][1];
+  y = pathArray[0][2];
+  mx = x;
+  my = y;
+  res.push(["M", x, y]);
+  for (var i = start, ii = pathArray.length; i < ii; i++) {
+    var r = res[i] = [], pa = pathArray[i];
+    r[0] = pa[0].toLowerCase();
+    switch (r[0]) {
+      case "m":
+        mx = pa[1];
+        my = pa[2];
+      default:
+        for (var j = 1, jj = pa.length; j < jj; j++)
+          r[j] = pa[j] - ((j % 2) ? x : y);
+    }
+    var len = res[i].length;
+    x += res[i][len - 2];
+    y += res[i][len - 1];
+  }
+  return res;
 }
 </script>
