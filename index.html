@@ -39,9 +39,8 @@ function updateResult() {
   var ax = 0;
   var ay = 0;
   var path = pathToRelative(result.map(function (x) {
-    var previousCommand = '';
     var result = glyphs[x.g].filter(function (command) {
-      return command.type != 'Z';
+      return command.type !== 'Z';
     }).map(function (command) {
       var result = command.values.map(function (p, i) {
         // apply ax/ay/dx/dy to coords
@@ -57,11 +56,11 @@ function updateResult() {
         }
         return x;
       });
-      return (previousCommand.type === command.type ? [] : [command.type]).concat(result);
+      return [command.type].concat(result);
     });
     ax += x.ax; ay += x.ay;
     return result;
-  }).reduce((acc, val) => acc.concat(val), [])).map(x => x[0] + x.slice(1).join(' ')).join('');
+  }).reduce((acc, val) => acc.concat(val), [])).map(x => x[0] + x.slice(1).join(' ')).join('').replace(/ -/g, '-');
   var width = xmax - xmin;
   var height = ymax - ymin;
   // pad it a bit
@@ -136,6 +135,7 @@ function pathToRelative(pathArray) {
   mx = x;
   my = y;
   res.push(["M", x, y]);
+  var previousCommand = '';
   for (var i = start, ii = pathArray.length; i < ii; i++) {
     var r = res[i] = [], pa = pathArray[i];
     r[0] = pa[0].toLowerCase();
@@ -150,6 +150,9 @@ function pathToRelative(pathArray) {
     var len = res[i].length;
     x += res[i][len - 2];
     y += res[i][len - 1];
+    var t = r[0];
+    if (previousCommand === res[i][0]) res[i][0] = ' ';
+    previousCommand = t;
   }
   return res;
 }
