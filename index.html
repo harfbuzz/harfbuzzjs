@@ -1,19 +1,18 @@
 <p><a href="https://github.com/harfbuzz/harfbuzzjs">harfbuzzjs</a> demo. Supports font drag and drop.</p>
 <p><input type="text" value="abc" id="text"></p>
-<p><div id="svgResult"></div></p>
+<p><a id="svgResult" href="#" title="Click to download"></a></p>
 <p>Result:<div id="shapeResult"></div></p>
 <script src="hbjs.js"></script> <!-- Wrapper, can be used without -->
 <script>
 var hb, fontBlob;
 function updateResult() {
-  var text = document.getElementById('text').value;
   var blob = hb.createBlob(fontBlob);
   var face = hb.createFace(blob, 0);
   var font = hb.createFont(face);
   font.setScale(1000, 1000); // Optional, if not given will be in font upem
 
   var buffer = hb.createBuffer();
-  buffer.addText(text);
+  buffer.addText(text.value);
   buffer.guessSegmentProperties();
   // buffer.setDirection('ltr'); // optional as can be by guessSegmentProperties also
   hb.shape(font, buffer); // features are not supported yet
@@ -39,7 +38,8 @@ function updateResult() {
   var ay = 0;
   var path = result.map(function (x) {
     var result = glyphs[x.g].map(function (command) {
-      return command.type + command.values.map(function (p, i) {
+      if (command.type === 'Z') return '';
+      var result = command.values.map(function (p, i) {
         // apply ax/ay/dx/dy to coords
         return i % 2 ? -(p + ay + x.dy) : p + ax + x.dx;
       }).map(function (x, i) {
@@ -53,6 +53,7 @@ function updateResult() {
         }
         return x;
       });
+      return command.type + result.join(' ');
     }).join(' ');
     ax += x.ax; ay += x.ay;
     return result;
@@ -70,11 +71,13 @@ function updateResult() {
 
   svgResult.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="128" viewBox="' + bbox + '">' +
     '<path d="' + path + '" /></svg>';
+  svgResult.download = text.value + '.svg';
+  // revoke previous URL
+  if (svgResult.href) URL.revokeObjectURL(svgResult.href);
+  svgResult.href = URL.createObjectURL(new Blob([svgResult.innerHTML.replace(' height="128"', '')], { type: 'text/plain' }));
+
   shapeResult.innerText = JSON.stringify(result);
 }
-svgResult.onclick = function () {
-
-};
 
 // We could use instantiateStreaming but it's not supported in Safari yet
 // https://bugs.webkit.org/show_bug.cgi?id=173105
