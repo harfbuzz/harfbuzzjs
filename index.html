@@ -1,9 +1,11 @@
+<meta charset="utf-8">
 <p><a href="https://github.com/harfbuzz/harfbuzzjs">harfbuzzjs</a> demo. Supports font drag and drop.</p>
 <p><input type="text" value="abc" id="text"></p>
 <p><a id="svgResult" href="#" title="Click to download"></a></p>
 <p>Result:<div id="shapeResult"></div></p>
 <script src="hbjs.js"></script> <!-- Wrapper, can be used without -->
 <script>
+'use strict';
 var hb, fontBlob;
 function updateResult() {
   var blob = hb.createBlob(fontBlob);
@@ -36,6 +38,7 @@ function updateResult() {
   var ymax = -10000;
   var ax = 0;
   var ay = 0;
+  var previousCommand = { type: '', values: [0, 0] };
   var path = result.map(function (x) {
     var result = glyphs[x.g].map(function (command) {
       if (command.type === 'Z') return '';
@@ -53,7 +56,7 @@ function updateResult() {
         }
         return x;
       });
-      return command.type + result.join(' ');
+      return (previousCommand.type === command.type ? '' : command.type) + result.join(' ');
     }).join(' ');
     ax += x.ax; ay += x.ay;
     return result;
@@ -61,7 +64,7 @@ function updateResult() {
   var width = xmax - xmin;
   var height = ymax - ymin;
   // pad it a bit
-  var pad = Math.min(width / 10, height / 10);
+  var pad = Math.round(Math.min(width / 10, height / 10));
   xmin -= pad;
   ymin -= pad;
   width += pad * 2;
