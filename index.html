@@ -1,6 +1,7 @@
 <p><a href="https://github.com/harfbuzz/harfbuzzjs">harfbuzzjs</a> demo. Supports font drag and drop.</p>
 <p><input type="text" value="abc" id="text"></p>
-<p>Result:<div id="result"></div></p>
+<p><div id="svgResult"></div></p>
+<p>Result:<div id="shapeResult"></div></p>
 <script src="hbjs.js"></script> <!-- Wrapper, can be used without -->
 <script>
 var hb, fontBlob;
@@ -15,16 +16,65 @@ function updateResult() {
   buffer.addText(text);
   buffer.guessSegmentProperties();
   // buffer.setDirection('ltr'); // optional as can be by guessSegmentProperties also
-  buffer.shape(font); // features are not supported yet
+  hb.shape(font, buffer); // features are not supported yet
   var result = buffer.json(font);
 
-  buffer.free();
-  font.free();
-  face.free();
-  blob.free();
+  // returns glyphs paths, totally optional
+  var glyphs = {};
+  result.forEach(function (x) {
+    if (glyphs[x.g]) return;
+    glyphs[x.g] = font.glyphToJson(x.g);
+  });
 
-  document.getElementById('result').innerText = JSON.stringify(result);
+  buffer.destroy();
+  font.destroy();
+  face.destroy();
+  blob.destroy();
+
+  var xmin = 10000;
+  var xmax = -10000;
+  var ymin = 10000;
+  var ymax = -10000;
+  var ax = 0;
+  var ay = 0;
+  var path = result.map(function (x) {
+    var result = glyphs[x.g].map(function (command) {
+      return command.type + command.values.map(function (p, i) {
+        // apply ax/ay/dx/dy to coords
+        return i % 2 ? -(p + ay + x.dy) : p + ax + x.dx;
+      }).map(function (x, i) {
+        // bbox calc
+        if (i % 2) {
+          if (x < ymin) ymin = x;
+          if (x > ymax) ymax = x;
+        } else {
+          if (x < xmin) xmin = x;
+          if (x > xmax) xmax = x;
+        }
+        return x;
+      });
+    }).join(' ');
+    ax += x.ax; ay += x.ay;
+    return result;
+  }).join('');
+  var width = xmax - xmin;
+  var height = ymax - ymin;
+  // pad it a bit
+  var pad = Math.min(width / 10, height / 10);
+  xmin -= pad;
+  ymin -= pad;
+  width += pad * 2;
+  height += pad * 2;
+
+  var bbox = xmin + ' ' + ymin + ' ' + width + ' ' + height;
+
+  svgResult.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="128" viewBox="' + bbox + '">' +
+    '<path d="' + path + '" /></svg>';
+  shapeResult.innerText = JSON.stringify(result);
 }
+svgResult.onclick = function () {
+
+};
 
 // We could use instantiateStreaming but it's not supported in Safari yet
 // https://bugs.webkit.org/show_bug.cgi?id=173105
