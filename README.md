@@ -22,27 +22,20 @@ demo source is in [gh-pages](https://github.com/harfbuzz/harfbuzzjs/tree/gh-page
 ### TDLR
 
 ```javascript
-hbjs = require("hbjs.js")
+hb = require("hbjs.js")
 WebAssembly.instantiateStreaming(fetch("hb.wasm")).then(function (result) {
   // WebAssembly needs its own heap - allocate 400 16k pages to do our work in.
   result.instance.exports.memory.grow(400);
   fetch('myfont.ttf').then(function (data) {
     return data.arrayBuffer();
   }).then(function (fontdata) {
-    // Load the font data into something Harfbuzz can use
-    var blob = hb.createBlob(fontdata);
-    // Select the first font in the file (there's normally only one!)
-    var face = hb.createFace(blob, 0);
-    // Create a Harfbuzz font object from the face
-    var font = hb.createFont(face);
-    // Make a buffer to hold some text
-    var buffer = hb.createBuffer();
-    // Fill it with some stuff
-    buffer.addText('abc');
-    // Set script, language and direction
-    buffer.guessSegmentProperties();
-    // Shape the text, determining glyph IDs and positions
-    hb.shape(font, buffer);
+    var blob = hb.createBlob(fontdata); // Load the font data into something Harfbuzz can use
+    var face = hb.createFace(blob, 0);  // Select the first font in the file (there's normally only one!)
+    var font = hb.createFont(face);     // Create a Harfbuzz font object from the face
+    var buffer = hb.createBuffer();     // Make a buffer to hold some text
+    buffer.addText('abc');              // Fill it with some stuff
+    buffer.guessSegmentProperties();    // Set script, language and direction
+    hb.shape(font, buffer);             // Shape the text, determining glyph IDs and positions
     var output = shape.json();
 
     // Enumerate the glyphs
