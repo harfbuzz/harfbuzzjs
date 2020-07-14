@@ -142,6 +142,25 @@ function hbjs(instance) {
         }[dir] || 0);
       },
       /**
+      * Set buffer language explicitly.
+      * @param {string} language: The buffer language
+      */
+      setLanguage: function (language) {
+        var str = createCString(language);
+        exports.hb_buffer_set_language(ptr, exports.hb_language_from_string(str.ptr,-1));
+        str.free();
+      },
+      /**
+      * Set buffer script explicitly.
+      * @param {string} script: The buffer script
+      */
+      setScript: function (script) {
+        var str = createCString(script);
+        exports.hb_buffer_set_script(ptr, exports.hb_script_from_string(str.ptr,-1));
+        str.free();
+      },
+
+      /**
       * Set the Harfbuzz clustering level.
       *
       * Affects the cluster values returned from shaping.

@@ -6,7 +6,7 @@ set -e
 [ -x "$(command -v wasm-ld)" ] || (echo "Please install lld (llvm's linker) from your package manager" && exit 1)
 
 [ -d harfbuzz/src ] || git clone --depth=1 https://github.com/harfbuzz/harfbuzz
-(cd harfbuzz; git pull --ff-only)
+#(cd harfbuzz; git pull --ff-only)
 
 clang \
     -I./libc/include -Oz \
@@ -29,6 +29,10 @@ clang \
 	-Wl,--export=hb_buffer_guess_segment_properties \
 	-Wl,--export=hb_buffer_set_direction \
 	-Wl,--export=hb_buffer_set_cluster_level \
+	-Wl,--export=hb_buffer_set_script \
+	-Wl,--export=hb_script_from_string \
+	-Wl,--export=hb_buffer_set_language \
+	-Wl,--export=hb_language_from_string \
 	-Wl,--export=hb_shape \
 	-Wl,--export=hb_buffer_get_glyph_infos \
 	-Wl,--export=hb_buffer_get_glyph_positions \
