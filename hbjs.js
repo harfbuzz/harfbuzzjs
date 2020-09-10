@@ -9,6 +9,15 @@ function hbjs(instance) {
 
   var HB_MEMORY_MODE_WRITABLE = 2;
 
+  function hb_tag (s) {
+    return (
+      ( s.charCodeAt(0) & 0xFF ) << 24 |
+      ( s.charCodeAt(1) & 0xFF ) << 16 |
+      ( s.charCodeAt(2) & 0xFF ) << 8  |
+      ( s.charCodeAt(3) & 0xFF ) << 0
+    )
+  }
+
   /**
   * Create an object representing a Harfbuzz blob.
   * @param {string} blob A blob of binary data (usually the contents of a font file).
@@ -37,9 +46,24 @@ function hbjs(instance) {
     return {
       ptr: ptr,
       /**
-      * Free the object.
-      */
-      destroy: function () { exports.hb_face_destroy(ptr); }
+       * Return the binary contents of an OpenType table.
+       * @param {string} table Table name
+       */
+      reference_table: function(table) {
+        var blob = exports.hb_face_reference_table(ptr, hb_tag(table));
+        var length = exports.hb_blob_get_length(blob);
+        if (!length) { return; }
+        var lengthptr =  exports.malloc(4);
+        var blobptr = exports.hb_blob_get_data(blob, lengthptr);
+        var table_string = heapu8.subarray(blobptr, blobptr+length);
+        return table_string;
+      },
+      /**
+       * Free the object.
+       */
+      destroy: function () {
+        exports.hb_face_destroy(ptr);
+      },
     };
   }
 

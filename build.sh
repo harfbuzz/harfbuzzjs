@@ -22,7 +22,10 @@ clang \
 	-Wl,--gc-sections \
 	-Wl,--export=malloc \
 	-Wl,--export=hb_blob_create \
+	-Wl,--export=hb_blob_get_data \
+	-Wl,--export=hb_blob_get_length \
 	-Wl,--export=hb_face_create \
+	-Wl,--export=hb_face_reference_table \
 	-Wl,--export=hb_font_create \
 	-Wl,--export=hb_buffer_create \
 	-Wl,--export=hb_buffer_add_utf8 \
