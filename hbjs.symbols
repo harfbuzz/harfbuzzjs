@@ -21,6 +21,7 @@ _hb_face_get_upem
 _hb_face_reference_table
 _hb_font_create
 _hb_font_destroy
+_hb_font_get_glyph_name
 _hb_font_set_scale
 _hb_font_set_variations
 _hb_glyph_info_get_glyph_flags

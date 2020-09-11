@@ -124,10 +124,29 @@ function hbjs(instance) {
     function glyphToPath(glyphId) {
       var svgLength = exports.hbjs_glyph_svg(ptr, glyphId, pathBuffer, pathBufferSize);
       return svgLength > 0 ? utf8Decoder.decode(heapu8.subarray(pathBuffer, pathBuffer + svgLength)) : "";
+    /**
+     * Return glyph name.
+     * @param {number} glyphId ID of the requested glyph in the font.
+     **/
+    function glyphName(glyphId) {
+      var ok = exports.hb_font_get_glyph_name(
+        ptr,
+        glyphId,
+        nameBuffer,
+        nameBufferSize
+      );
+      if (!ok) {
+        return '';
+      }
+      var decoded = utf8Decoder.decode(
+        heapu8.subarray(nameBuffer, nameBuffer + nameBufferSize)
+      );
+      return decoded.replace(/\0.*/, '');
     }
 
     return {
       ptr: ptr,
+      glyphName: glyphName,
       glyphToPath: glyphToPath,
       /**
       * Return a glyph as a JSON path string
