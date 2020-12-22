@@ -32,6 +32,7 @@ clang \
 	-Wl,--export=hb_buffer_guess_segment_properties \
 	-Wl,--export=hb_buffer_set_direction \
 	-Wl,--export=hb_buffer_set_cluster_level \
+	-Wl,--export=hb_buffer_set_flags \
 	-Wl,--export=hb_buffer_set_script \
 	-Wl,--export=hb_script_from_string \
 	-Wl,--export=hb_buffer_set_language \
