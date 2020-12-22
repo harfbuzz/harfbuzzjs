@@ -199,7 +199,7 @@ static hb_bool_t do_trace (hb_buffer_t *buffer,
 
   _strcat(user_data, "{\"m\":\"");
   _strcat(user_data, message);
-  _strcat(user_data, "\",\"t\":[");
+  _strcat(user_data, "\",\"t\":");
   hb_buffer_serialize_glyphs(buffer, 0, num_glyphs,
     user_data->str + user_data->consumed,
     user_data->size - user_data->consumed,
@@ -208,7 +208,7 @@ static hb_bool_t do_trace (hb_buffer_t *buffer,
     HB_BUFFER_SERIALIZE_FORMAT_JSON,
     HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES);
   user_data->consumed += consumed;
-  _strcat(user_data, "]},\n");
+  _strcat(user_data, "},\n");
 
 
   return 1;
