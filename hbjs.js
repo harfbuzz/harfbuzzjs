@@ -18,6 +18,15 @@ function hbjs(instance) {
     )
   }
 
+  function _buffer_flag(s) {
+    if (s == "BOT") { return 0x1; }
+    if (s == "EOT") { return 0x2; }
+    if (s == "PRESERVE_DEFAULT_IGNORABLES") { return 0x4; }
+    if (s == "REMOVE_DEFAULT_IGNORABLES") { return 0x8; }
+    if (s == "DO_NOT_INSERT_DOTTED_CIRCLE") { return 0x10; }
+    return 0x0;
+  }
+
   /**
   * Create an object representing a Harfbuzz blob.
   * @param {string} blob A blob of binary data (usually the contents of a font file).
@@ -163,6 +172,23 @@ function hbjs(instance) {
           ttb: 6,
           btt: 7
         }[dir] || 0);
+      },
+      /**
+      * Set buffer flags explicitly.
+      * @param {string[]} flags: A list of strings which may be either:
+      * "BOT"
+      * "EOT"
+      * "PRESERVE_DEFAULT_IGNORABLES"
+      * "REMOVE_DEFAULT_IGNORABLES"
+      * "DO_NOT_INSERT_DOTTED_CIRCLE"
+      */
+      setFlags: function (flags) {
+        var flagValue = 0
+        flags.forEach(function (s) {
+          flagValue |= _buffer_flag(s);
+        })
+
+        exports.hb_buffer_set_flags(ptr,flagValue);
       },
       /**
       * Set buffer language explicitly.
