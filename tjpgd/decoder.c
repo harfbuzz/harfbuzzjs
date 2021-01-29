@@ -36,7 +36,8 @@ int out_func(JDEC *jd, void *bitmap, JRECT *rect) {
     return 1;
 }
 
-uint8_t *decode(uint8_t *buf, unsigned buf_size) {
+uint8_t *decode(uint8_t *buf, unsigned buf_size, unsigned *width, unsigned *height) {
+    *width = 0; *height = 0;
     JDEC jdec;
     void *work = (void*) malloc(3100); /* Pointer to the work area */
     IODEV devid;
@@ -48,6 +49,7 @@ uint8_t *decode(uint8_t *buf, unsigned buf_size) {
     devid.wfbuf = jdec.width;
     if (jd_decomp(&jdec, out_func, 0) != JDR_OK) goto free_and_fail;
     free(work);
+    *width = jdec.width; *height = jdec.height;
     return devid.fbuf;
 
 free_and_fail:
@@ -67,9 +69,11 @@ int main() {
     rewind(f);
     uint8_t *buf = (uint8_t *) malloc(len);
     len = fread(buf, 1, len, f);
-    uint8_t *res = decode(buf, len);
+    unsigned width, height;
+    uint8_t *res = decode(buf, len, &width, &height);
     printf("%d\n", len);
     printf("%p\n", res);
+    printf("w: %d, h: %d\n", width, height);
     free(res);
     return 0;
 }
