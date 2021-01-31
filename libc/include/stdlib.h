@@ -21,6 +21,18 @@ typedef __INT64_TYPE__ int64_t;
 typedef __INTPTR_TYPE__ intptr_t;
 typedef __UINTPTR_TYPE__ uintptr_t;
 
+typedef struct FILE FILE;
+#define EOF -1
+#ifndef stdin
+#define stdin (FILE *) 0
+#endif
+#ifndef stdout
+#define stdout (FILE *) 1
+#endif
+#ifndef stderr
+#define stderr (FILE *) 2
+#endif
+
 void* malloc(size_t n);
 void free(void* ptr);
 void* calloc(size_t n, size_t size);
@@ -29,9 +41,16 @@ void* realloc(void* ptr, size_t size);
 #define va_start __builtin_va_start
 #define va_end __builtin_va_end
 #define va_arg __builtin_va_arg
-#define stderr 0
-inline int fprintf(char *str, const char *format, ...);
+inline char *getenv(const char *name);
+inline char *getenv(const char *name) { return 0; }
+inline int sscanf(const char *str, const char *format, ...);
+inline int sscanf(const char *str, const char *format, ...) { return 0; }
+inline int fprintf(FILE *stream, const char *format, ...);
+inline int fprintf(FILE *stream, const char *format, ...) { return 0; }
 inline int sprintf(char *str, const char *format, ...);
+#ifdef NO_SPRINTF
+inline int sprintf(char *str, const char *format, ...) { return 0; }
+#endif
 inline int snprintf(char *str, size_t n, const char *format, ...);
 inline int vsnprintf(char *str, size_t n, const char * format, va_list va);
 #define vfprintf(format, ...)
