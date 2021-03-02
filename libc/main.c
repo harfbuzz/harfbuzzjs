@@ -4,4 +4,4 @@ int main(int argc, char **argv) {
 }
 
 __attribute__((noreturn)) void abort();
-__attribute__((noreturn)) void exit(unsigned i) {}
+__attribute__((noreturn)) void exit(int i);
