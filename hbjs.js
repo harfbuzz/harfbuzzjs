@@ -5,17 +5,27 @@ function hbjs(instance) {
   var heapu8 = new Uint8Array(exports.memory.buffer);
   var heapu32 = new Uint32Array(exports.memory.buffer);
   var heapi32 = new Int32Array(exports.memory.buffer);
+  var heapf32 = new Float32Array(exports.memory.buffer);
   var utf8Decoder = new TextDecoder("utf8");
 
   var HB_MEMORY_MODE_WRITABLE = 2;
 
-  function hb_tag (s) {
+  function hb_tag(s) {
     return (
-      ( s.charCodeAt(0) & 0xFF ) << 24 |
-      ( s.charCodeAt(1) & 0xFF ) << 16 |
-      ( s.charCodeAt(2) & 0xFF ) << 8  |
-      ( s.charCodeAt(3) & 0xFF ) << 0
-    )
+      (s.charCodeAt(0) & 0xFF) << 24 |
+      (s.charCodeAt(1) & 0xFF) << 16 |
+      (s.charCodeAt(2) & 0xFF) <<  8 |
+      (s.charCodeAt(3) & 0xFF) <<  0
+    );
+  }
+
+  function _hb_untag(tag) {
+    return [
+      String.fromCharCode((tag >> 24) & 0xFF),
+      String.fromCharCode((tag >> 16) & 0xFF),
+      String.fromCharCode((tag >>  8) & 0xFF),
+      String.fromCharCode((tag >>  0) & 0xFF)
+    ].join('');
   }
 
   function _buffer_flag(s) {
@@ -65,6 +75,26 @@ function hbjs(instance) {
         var blobptr = exports.hb_blob_get_data(blob, null);
         var table_string = heapu8.subarray(blobptr, blobptr+length);
         return table_string;
+      },
+      /**
+       * Return variation axis infos
+       */
+      getAxisInfos: function() {
+        var axis = exports.malloc(64 * 32);
+        var c = exports.malloc(4);
+        heapu32[c / 4] = 64;
+        exports.hb_ot_var_get_axis_infos(ptr, 0, c, axis);
+        var result = {};
+        Array.from({ length: heapu32[c / 4] }).forEach(function (_, i) {
+          result[_hb_untag(heapu32[axis / 4 + i * 8 + 1])] = {
+            min: heapf32[axis / 4 + i * 8 + 4],
+            default: heapf32[axis / 4 + i * 8 + 5],
+            max: heapf32[axis / 4 + i * 8 + 6]
+          };
+        });
+        exports.free(c);
+        exports.free(axis);
+        return result;
       },
       /**
        * Free the object.
@@ -117,6 +147,20 @@ function hbjs(instance) {
       **/
       setScale: function (xScale, yScale) {
         exports.hb_font_set_scale(ptr, xScale, yScale);
+      },
+      /**
+       * Set the font's variations.
+       * @param {object} variations Dictionary of variations to set
+       **/
+      setVariations: function (variations) {
+        var entries = Object.entries(variations);
+        var vars = exports.malloc(8 * entries.length);
+        entries.forEach(function (entry, i) {
+          heapu32[vars / 4 + i * 2 + 0] = hb_tag(entry[0]);
+          heapf32[vars / 4 + i * 2 + 1] = entry[1];
+        });
+        exports.hb_font_set_variations(ptr, vars, entries.length);
+        exports.free(vars);
       },
       /**
       * Free the object.

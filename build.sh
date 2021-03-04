@@ -50,6 +50,8 @@ clang \
 	-Wl,--export=hb_face_get_upem \
 	-Wl,--export=hbjs_glyph_svg \
 	-Wl,--export=hbjs_shape_with_trace \
+	-Wl,--export=hb_ot_var_get_axis_infos \
+	-Wl,--export=hb_font_set_variations \
 	-Wl,--export=free \
 	-Wl,--export=free_ptr \
 	-Wl,--export=__heap_base \
