@@ -1,3 +1,6 @@
 harfbuzz/
 fribidi.js/
 raqm.js/
+libjpeg/
+tjpgd/
+zstd/
