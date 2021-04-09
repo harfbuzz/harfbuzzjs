@@ -2,6 +2,15 @@
 <p><input type="text" value="abc" id="text"></p>
 <p><a download="subset.ttf" id="result"></a></p>
 <script>
+function hb_tag(s) {
+  return (
+    (s.charCodeAt(0) & 0xFF) << 24 |
+    (s.charCodeAt(1) & 0xFF) << 16 |
+    (s.charCodeAt(2) & 0xFF) <<  8 |
+    (s.charCodeAt(3) & 0xFF) <<  0
+  );
+}
+
 function updateResult() {
   var heapu8 = new Uint8Array(exports.memory.buffer);
   var text = document.getElementById('text').value;
@@ -23,6 +32,10 @@ function updateResult() {
   var input_glyphs = exports.hb_subset_input_unicode_set(input);
   exports.hb_set_union(input_glyphs, glyphs);
   // exports.hb_subset_input_set_drop_hints(input, true);
+  // Enable subset of GSUB/GPOS/GDEF, drop once it is enabled upstream
+  exports.hb_set_del(exports.hb_subset_input_drop_tables_set(input), hb_tag('GSUB'));
+  exports.hb_set_del(exports.hb_subset_input_drop_tables_set(input), hb_tag('GPOS'));
+  exports.hb_set_del(exports.hb_subset_input_drop_tables_set(input), hb_tag('GDEF'));
   var t0 = performance.now();
   var subset = exports.hb_subset(face, input);
   var t1 = performance.now();
