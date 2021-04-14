@@ -45,4 +45,5 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
     /* Clean up */
     exports.hb_blob_destroy(result);
     exports.hb_face_destroy(subset);
+    exports.free(fontBuffer);
 })();
