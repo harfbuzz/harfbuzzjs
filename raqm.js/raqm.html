@@ -79,7 +79,7 @@ fetch("raqm.wasm").then(function (x) {
     var pathBuffer = exports.malloc(2048);
     var svgLength = exports.hbjs_glyph_svg(font, 1, pathBuffer, 2048);
     var path = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="' +
-      utf8Decoder.decode(heapu8.slice(pathBuffer, pathBuffer + svgLength)) +
+      utf8Decoder.decode(heapu8.subarray(pathBuffer, pathBuffer + svgLength)) +
       '"/></svg>';
     exports.free(pathBuffer);
 

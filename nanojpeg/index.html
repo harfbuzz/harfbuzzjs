@@ -14,7 +14,7 @@ WebAssembly.instantiateStreaming(fetch('nanojpeg.wasm')).then(wasm => {
     exports.free(buffer);
 
     console.log(exports.njIsColor() ? 6 : 5, exports.njGetWidth(), exports.njGetHeight());
-    console.log(heapu8.slice(exports.njGetImage(), exports.njGetImage() + exports.njGetImageSize()))
+    console.log(heapu8.subarray(exports.njGetImage(), exports.njGetImage() + exports.njGetImageSize()))
     exports.njDone();
 
     exports.free(exports.njGetImage());

@@ -49,8 +49,8 @@ int main () {
 //   exports.free(text_ptr);
 
 //   document.body.innerText = JSON.stringify([]);
-//   console.log(heapu8.slice(types, types + text.byteLength * 4));
-//   console.log(heapu8.slice(levels, levels + text.byteLength));
+//   console.log(heapu8.subarray(types, types + text.byteLength * 4));
+//   console.log(heapu8.subarray(levels, levels + text.byteLength));
 //   exports.free(types);
 //   exports.free(levels);
 //   exports.free(levels);
