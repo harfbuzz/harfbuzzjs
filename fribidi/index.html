@@ -40,7 +40,7 @@ fetch("fribidi.wasm").then(function (x) {
     console.log('Max Level:', exports.fribidi_get_par_embedding_levels_ex(types, btypes, str_len,
       par_type, levels));
 
-    resultElement.innerText = heapu8.slice(levels, levels + str_len);
+    resultElement.innerText = heapu8.subarray(levels, levels + str_len);
 
     exports.free(str);
     exports.free(text_ptr);

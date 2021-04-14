@@ -18,7 +18,7 @@ WebAssembly.instantiateStreaming(fetch('stb_image.wasm')).then(wasm => {
 
     const width = heapi32[x / 4], height = heapi32[y / 4], channels = heapi32[n / 4];
     exports.free(x, y, n);
-    console.log(width, height, channels, heapu8.slice(result, result + x * y * channels));
+    console.log(width, height, channels, heapu8.subarray(result, result + x * y * channels));
 
     exports.free(result);
 

@@ -24,18 +24,17 @@ function updateResult() {
   exports.hb_blob_destroy(blob);
 
   /* Add your glyph indices here and subset */
-  var glyphs = exports.hb_set_create();
-
-  text.split('').forEach(function (c) { exports.hb_set_add(glyphs, c.charCodeAt(0)); });
-
   var input = exports.hb_subset_input_create_or_fail();
+
   var input_glyphs = exports.hb_subset_input_unicode_set(input);
-  exports.hb_set_union(input_glyphs, glyphs);
+  [...text].forEach(function (c) { exports.hb_set_add(input_glyphs, c.codePointAt(0)); });
+
   // exports.hb_subset_input_set_drop_hints(input, true);
   // Enable subset of GSUB/GPOS/GDEF, drop once it is enabled upstream
-  exports.hb_set_del(exports.hb_subset_input_drop_tables_set(input), hb_tag('GSUB'));
-  exports.hb_set_del(exports.hb_subset_input_drop_tables_set(input), hb_tag('GPOS'));
-  exports.hb_set_del(exports.hb_subset_input_drop_tables_set(input), hb_tag('GDEF'));
+  var drop_tables = exports.hb_subset_input_drop_tables_set(input);
+  exports.hb_set_del(drop_tables, hb_tag('GSUB'));
+  exports.hb_set_del(drop_tables, hb_tag('GPOS'));
+  exports.hb_set_del(drop_tables, hb_tag('GDEF'));
   var t0 = performance.now();
   var subset = exports.hb_subset(face, input);
   var t1 = performance.now();
@@ -45,7 +44,7 @@ function updateResult() {
 
   var data = exports.hb_blob_get_data(result, 0);
   var resultLength = exports.hb_blob_get_length(result);
-  var subsetFontBlob = heapu8.slice(data, data + resultLength);  
+  var subsetFontBlob = heapu8.subarray(data, data + resultLength);
 
   var link = URL.createObjectURL(new Blob([subsetFontBlob.buffer]));
 
