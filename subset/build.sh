@@ -20,6 +20,7 @@ clang \
 	-Wl,--export=hb_set_create \
 	-Wl,--export=hb_set_add \
 	-Wl,--export=hb_set_del \
+	-Wl,--export=hb_set_destroy \
 	-Wl,--export=hb_set_union \
 	-Wl,--export=hb_face_reference_blob \
 	-Wl,--export=hb_blob_get_data \
