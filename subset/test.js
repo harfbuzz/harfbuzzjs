@@ -19,15 +19,12 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
     exports.hb_blob_destroy(blob);
 
     /* Add your glyph indices here and subset */
-    const glyphs = exports.hb_set_create();
-
-    exports.hb_set_add(glyphs, 'a'.charCodeAt(0));
-    exports.hb_set_add(glyphs, 'b'.charCodeAt(0));
-    exports.hb_set_add(glyphs, 'c'.charCodeAt(0));
-
     const input = exports.hb_subset_input_create_or_fail();
-    const input_glyphs = exports.hb_subset_input_unicode_set(input);
-    exports.hb_set_union(input_glyphs, glyphs);
+    const unicode_set = exports.hb_subset_input_unicode_set(input);
+    exports.hb_set_add(unicode_set, 'a'.charCodeAt(0));
+    exports.hb_set_add(unicode_set, 'b'.charCodeAt(0));
+    exports.hb_set_add(unicode_set, 'c'.charCodeAt(0));
+
     // exports.hb_subset_input_set_drop_hints(input, true);
     const subset = exports.hb_subset(face, input);
 
