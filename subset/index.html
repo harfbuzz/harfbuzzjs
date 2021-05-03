@@ -30,11 +30,6 @@ function updateResult() {
   [...text].forEach(function (c) { exports.hb_set_add(input_glyphs, c.codePointAt(0)); });
 
   // exports.hb_subset_input_set_drop_hints(input, true);
-  // Enable subset of GSUB/GPOS/GDEF, drop once it is enabled upstream
-  var drop_tables = exports.hb_subset_input_drop_tables_set(input);
-  exports.hb_set_del(drop_tables, hb_tag('GSUB'));
-  exports.hb_set_del(drop_tables, hb_tag('GPOS'));
-  exports.hb_set_del(drop_tables, hb_tag('GDEF'));
   var t0 = performance.now();
   var subset = exports.hb_subset(face, input);
   var t1 = performance.now();
