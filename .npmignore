@@ -2,5 +2,7 @@ harfbuzz/
 fribidi.js/
 raqm.js/
 libjpeg/
+nanojpeg/
+stb-image/
 tjpgd/
 zstd/
