@@ -3,10 +3,9 @@ set -e
 
 [ -x "$(command -v git)" ] || (echo "Please install git from your package manager" && exit 1)
 [ -x "$(command -v clang)" ] || (echo "Please install clang from your package manager" && exit 1)
-[ -x "$(command -v wasm-ld)" ] || (echo "Please install lld (llvm's linker) from your package manager" && exit 1)
 
 [ -d harfbuzz/src ] || git clone --depth=1 https://github.com/harfbuzz/harfbuzz
-#(cd harfbuzz; git pull --ff-only)
+(cd harfbuzz; git pull --ff-only)
 
 clang \
     -I./libc/include -Oz \
@@ -58,4 +57,3 @@ clang \
 	hbjs.c -DHAVE_CONFIG_OVERRIDE_H -I. -DHB_EXPERIMENTAL_API \
 	libc/malloc.cc libc/zephyr-string.c libc/prf.c libc/strtol.c libc/sprintf.c libc/main.c harfbuzz/src/harfbuzz.cc \
 	-o hb.wasm $@
-# add '-Wl,--export=hbjs_glyph_svg \' to expose glyph draw as svg
