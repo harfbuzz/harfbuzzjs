@@ -43,6 +43,7 @@ clang \
 	-Wl,--export=hb_buffer_destroy \
 	-Wl,--export=hb_font_destroy \
 	-Wl,--export=hb_face_destroy \
+	-Wl,--export=hb_face_get_upem \
 	-Wl,--export=hb_blob_destroy \
 	-Wl,--export=hb_blob_get_length \
 	-Wl,--export=hb_font_set_scale \
