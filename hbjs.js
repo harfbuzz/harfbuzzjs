@@ -52,8 +52,10 @@ function hbjs(instance) {
   **/
   function createFace(blob, index) {
     var ptr = exports.hb_face_create(blob.ptr, index);
+    const upem = exports.hb_face_get_upem(ptr);
     return {
       ptr: ptr,
+      upem,
       /**
        * Return the binary contents of an OpenType table.
        * @param {string} table Table name
