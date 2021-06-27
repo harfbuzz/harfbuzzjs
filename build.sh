@@ -29,6 +29,7 @@ clang \
 	-Wl,--export=hb_font_create \
 	-Wl,--export=hb_buffer_create \
 	-Wl,--export=hb_buffer_add_utf8 \
+	-Wl,--export=hb_buffer_add_utf16 \
 	-Wl,--export=hb_buffer_guess_segment_properties \
 	-Wl,--export=hb_buffer_set_direction \
 	-Wl,--export=hb_buffer_set_cluster_level \
