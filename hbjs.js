@@ -183,6 +183,17 @@ function hbjs(instance) {
     };
   }
 
+  function createJsString(text) {
+    const ptr = exports.malloc(text.length * 2);
+    const words = new Uint16Array(exports.memory.buffer, ptr, text.length);
+    for (let i = 0; i < words.length; ++i) words[i] = text.charCodeAt(i);
+    return {
+      ptr: ptr,
+      length: words.length,
+      free: function () { exports.free(ptr); }
+    };
+  }
+
   /**
   * Create an object representing a Harfbuzz buffer.
   **/
@@ -195,8 +206,8 @@ function hbjs(instance) {
       * @param {string} text Text to be added to the buffer.
       **/
       addText: function (text) {
-        var str = createCString(text);
-        exports.hb_buffer_add_utf8(ptr, str.ptr, str.length, 0, str.length);
+        const str = createJsString(text);
+        exports.hb_buffer_add_utf16(ptr, str.ptr, str.length, 0, str.length);
         str.free();
       },
       /**
