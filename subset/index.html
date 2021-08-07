@@ -39,7 +39,7 @@ function updateResult() {
 
   var data = exports.hb_blob_get_data(result, 0);
   var resultLength = exports.hb_blob_get_length(result);
-  var subsetFontBlob = heapu8.subarray(data, data + resultLength);
+  var subsetFontBlob = heapu8.slice(data, data + resultLength);
 
   var link = URL.createObjectURL(new Blob([subsetFontBlob.buffer]));
 
