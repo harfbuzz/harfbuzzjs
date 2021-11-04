@@ -1,7 +1,7 @@
 #!/bin/bash
 
-(cd ..; [ -d harfbuzz/src ] || git clone --depth=1 https://github.com/harfbuzz/harfbuzz)
-(cd ../harfbuzz; git pull --ff-only)
+(cd ..; [ -d harfbuzz/src ] || git clone https://github.com/harfbuzz/harfbuzz)
+(cd ../harfbuzz; git checkout 3.0.0)
 
 clang \
     -I../libc/include -I. -O3 \
@@ -30,17 +30,14 @@ clang \
 	-Wl,--export=hb_subset_input_create_or_fail \
 	-Wl,--export=hb_subset_input_reference \
 	-Wl,--export=hb_subset_input_destroy \
+	-Wl,--export=hb_subset_input_set_user_data \
+	-Wl,--export=hb_subset_input_get_user_data \
 	-Wl,--export=hb_subset_input_unicode_set \
 	-Wl,--export=hb_subset_input_glyph_set \
-	-Wl,--export=hb_subset_input_nameid_set \
-	-Wl,--export=hb_subset_input_drop_tables_set \
-	-Wl,--export=hb_subset_input_set_drop_hints \
-	-Wl,--export=hb_subset_input_get_drop_hints \
-	-Wl,--export=hb_subset_input_set_desubroutinize \
-	-Wl,--export=hb_subset_input_get_desubroutinize \
-	-Wl,--export=hb_subset_input_set_retain_gids \
-	-Wl,--export=hb_subset_input_get_retain_gids \
-	-Wl,--export=hb_subset \
+	-Wl,--export=hb_subset_input_set \
+	-Wl,--export=hb_subset_input_get_flags \
+	-Wl,--export=hb_subset_input_set_flags \
+	-Wl,--export=hb_subset_or_fail \
 	-Wl,--export=free \
 	-Wl,--export=__heap_base \
 	../libc/malloc.cc ../libc/zephyr-string.c ../libc/main.c ../harfbuzz/src/harfbuzz.cc \
