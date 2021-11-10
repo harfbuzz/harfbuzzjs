@@ -22,10 +22,13 @@ clang \
 	-Wl,--export=hb_set_del \
 	-Wl,--export=hb_set_destroy \
 	-Wl,--export=hb_set_union \
+	-Wl,--export=hb_set_clear \
+	-Wl,--export=hb_set_invert \
 	-Wl,--export=hb_face_reference_blob \
 	-Wl,--export=hb_blob_get_data \
 	-Wl,--export=hb_blob_get_length \
 	-Wl,--export=hb_blob_destroy \
+	-Wl,--export=hb_face_get_empty \
 	-Wl,--export=hb_face_destroy \
 	-Wl,--export=hb_subset_input_create_or_fail \
 	-Wl,--export=hb_subset_input_reference \
