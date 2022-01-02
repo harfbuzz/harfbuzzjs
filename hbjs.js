@@ -287,12 +287,14 @@ function hbjs(instance) {
       *   - ax: Advance width (width to advance after this glyph is painted)
       *   - ay: Advance height (height to advance after this glyph is painted)
       *   - dx: X displacement (adjustment in X dimension when painting this glyph)
-      *   - d5: Y displacement (adjustment in Y dimension when painting this glyph)
+      *   - dy: Y displacement (adjustment in Y dimension when painting this glyph)
+      *   - flags: Glyph flags like `HB_GLYPH_FLAG_UNSAFE_TO_BREAK` (0x1)
       **/
-      json: function (font) {
+      json: function () {
         var length = exports.hb_buffer_get_length(ptr);
         var result = [];
-        var infosPtr32 = exports.hb_buffer_get_glyph_infos(ptr, 0) / 4;
+        var infosPtr = exports.hb_buffer_get_glyph_infos(ptr, 0);
+        var infosPtr32 = infosPtr / 4;
         var positionsPtr32 = exports.hb_buffer_get_glyph_positions(ptr, 0) / 4;
         var infos = heapu32.subarray(infosPtr32, infosPtr32 + 5 * length);
         var positions = heapi32.subarray(positionsPtr32, positionsPtr32 + 5 * length);
@@ -303,7 +305,8 @@ function hbjs(instance) {
             ax: positions[i * 5 + 0],
             ay: positions[i * 5 + 1],
             dx: positions[i * 5 + 2],
-            dy: positions[i * 5 + 3]
+            dy: positions[i * 5 + 3],
+            flags: exports.hb_glyph_info_get_glyph_flags(infosPtr + i * 20)
           });
         }
         return result;
