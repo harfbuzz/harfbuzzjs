@@ -8,7 +8,7 @@ See the demo [here](https://harfbuzz.github.io/harfbuzzjs/).
 1. Install clang, lld and git
 2. `./build.sh`
 
-Note that if building on Mac OS X, clang 11.0 needs to be installed from Homebrew (`brew install clang`). Also note that Homebrew clang is not in
+Note that if building on Mac OS X, clang 11.0 needs to be installed from Homebrew (`brew install llvm`). Also note that Homebrew clang is not in
 the path by default, so you need to add `/usr/local/opt/llvm/bin` to your
 path or you will get weird compiled errors.
 
