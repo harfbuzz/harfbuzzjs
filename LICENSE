@@ -1,6 +1,5 @@
 Apache license for Zephyr libc implementations (zephyr-string.c),
 emmalloc.cpp (from emscripten project) and MIT for rest of the project
-raqm.js uses fribidi (GPLv3) and libraqm (MIT)
 
 Copyright (c) 2019 Ebrahim Byagowi
 
