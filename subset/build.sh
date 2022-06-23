@@ -1,8 +1,5 @@
 #!/bin/bash
 
-(cd ..; [ -d harfbuzz/src ] || git clone https://github.com/harfbuzz/harfbuzz)
-(cd ../harfbuzz; git checkout 3.0.0)
-
 clang \
     -I../libc/include -I. -O3 \
 	-fno-exceptions -fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden \
