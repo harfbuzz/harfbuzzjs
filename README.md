@@ -24,8 +24,6 @@ demo source is in [gh-pages](https://github.com/harfbuzz/harfbuzzjs/tree/gh-page
 ```javascript
 hb = require("hbjs.js")
 WebAssembly.instantiateStreaming(fetch("hb.wasm")).then(function (result) {
-  // WebAssembly needs its own heap - allocate 400 16k pages to do our work in.
-  result.instance.exports.memory.grow(400);
   fetch('myfont.ttf').then(function (data) {
     return data.arrayBuffer();
   }).then(function (fontdata) {

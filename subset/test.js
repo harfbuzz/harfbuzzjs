@@ -6,7 +6,7 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
 
 (async () => {
     const { instance: { exports } } = await WebAssembly.instantiate(await readFileAsync(__dirname + '/hb-subset.wasm'));
-    exports.memory.grow(400); // each page is 64kb in size
+    //exports.memory.grow(400); // each page is 64kb in size
     const fontBlob = await readFileAsync(__dirname + '/roboto-black.ttf');
 
     const heapu8 = new Uint8Array(exports.memory.buffer);
@@ -26,7 +26,7 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
     exports.hb_set_add(unicode_set, 'c'.charCodeAt(0));
 
     // exports.hb_subset_input_set_drop_hints(input, true);
-    const subset = exports.hb_subset(face, input);
+    const subset = exports.hb_subset_or_fail(face, input);
 
     /* Clean up */
     exports.hb_subset_input_destroy(input);

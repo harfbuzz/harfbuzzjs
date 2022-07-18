@@ -1,6 +1,22 @@
-#include "harfbuzz/src/hb.h"
-#include "harfbuzz/src/hb-ot.h"
-#include "string.h"
+#include "harfbuzz/src/harfbuzz.cc"
+
+HB_BEGIN_DECLS
+
+int
+hbjs_glyph_svg (hb_font_t *font, hb_codepoint_t glyph, char *buf, unsigned buf_size);
+
+unsigned
+hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf,
+                       char* featurestring,
+                       unsigned int stop_at, unsigned int stop_phase,
+                       char *outbuf, unsigned buf_size);
+
+void *free_ptr(void);
+
+HB_END_DECLS
+
+
+void *free_ptr(void) { return (void *) free; }
 
 enum {
   HB_SHAPE_DONT_STOP,
@@ -217,7 +233,7 @@ static hb_bool_t do_trace (hb_buffer_t *buffer,
 unsigned
 hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf,
                        char* featurestring,
-                       int stop_at, int stop_phase,
+                       unsigned int stop_at, unsigned int stop_phase,
                        char *outbuf, unsigned buf_size) {
   user_data_t user_data = {
     .str = outbuf,
@@ -231,7 +247,7 @@ hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf,
   };
 
   int num_features = 0;
-  hb_feature_t* features = NULL;
+  hb_feature_t* features = nullptr;
 
   if (*featurestring) {
     /* count the features first, so we can allocate memory */
@@ -252,11 +268,11 @@ hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf,
       char *end = strchr (p, ',');
       if (hb_feature_from_string (p, end ? end - p : -1, &features[num_features]))
         num_features++;
-      p = end ? end + 1 : NULL;
+      p = end ? end + 1 : nullptr;
     }
   }
 
-  hb_buffer_set_message_func (buf, (hb_buffer_message_func_t)do_trace, &user_data, NULL);
+  hb_buffer_set_message_func (buf, (hb_buffer_message_func_t)do_trace, &user_data, nullptr);
   user_data.str[user_data.consumed++] = '[';
   hb_shape(font, buf, features, num_features);
 

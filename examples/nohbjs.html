@@ -9,7 +9,7 @@ fetch("../hb.wasm").then(function (x) {
   return WebAssembly.instantiate(wasm);
 }).then(function (result) {
   var exports = result.instance.exports;
-  exports.memory.grow(400); // each page is 64kb in size
+  //exports.memory.grow(400); // each page is 64kb in size
 
   fetch('Roboto.abc.ttf').then(function (x) {
     return x.arrayBuffer();
