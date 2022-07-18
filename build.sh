@@ -1,11 +1,7 @@
 #!/bin/bash
 set -e
 
-[ -x "$(command -v git)" ] || (echo "Please install git from your package manager" && exit 1)
 [ -x "$(command -v clang)" ] || (echo "Please install clang from your package manager" && exit 1)
-
-[ -d harfbuzz/src ] || git clone https://github.com/harfbuzz/harfbuzz
-(cd harfbuzz; git checkout 3.0.0)
 
 clang \
     -I./libc/include -Oz \
