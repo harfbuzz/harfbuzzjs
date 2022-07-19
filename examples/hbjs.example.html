@@ -3,7 +3,6 @@
 <script>
 // instantiateStreaming isn't supported in Safari yet, see nohbjs.html
 WebAssembly.instantiateStreaming(fetch("../hb.wasm")).then(function (result) {
-  //result.instance.exports.memory.grow(400); // each page is 64kb in size
   fetch('Roboto.abc.ttf').then(function (x) {
     return x.arrayBuffer();
   }).then(function (blob) {

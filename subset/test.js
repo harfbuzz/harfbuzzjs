@@ -6,7 +6,6 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
 
 (async () => {
     const { instance: { exports } } = await WebAssembly.instantiate(await readFileAsync(__dirname + '/hb-subset.wasm'));
-    //exports.memory.grow(400); // each page is 64kb in size
     const fontBlob = await readFileAsync(__dirname + '/roboto-black.ttf');
 
     const heapu8 = new Uint8Array(exports.memory.buffer);
