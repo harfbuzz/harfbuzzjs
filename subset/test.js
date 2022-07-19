@@ -38,6 +38,7 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
     const subsetFontBlob = heapu8.subarray(data, data + exports.hb_blob_get_length(result));
 
     await writeFileAsync(__dirname + '/roboto-black-subset-js.ttf', subsetFontBlob);
+    console.log(`Wrote subset to: ${__dirname}/roboto-black-subset-js.ttf`);
 
     /* Clean up */
     exports.hb_blob_destroy(result);
