@@ -24,16 +24,25 @@ enum {
   HB_SHAPE_GPOS_PHASE
 };
 
-typedef struct user_data_t {
-  char *str;
-  unsigned size;
-  unsigned consumed;
-  hb_bool_t failure;
-  unsigned int stop_at;
-  unsigned int stop_phase;
-  hb_bool_t stopping;
-  unsigned int current_phase;
-} user_data_t;
+struct user_data_t {
+  user_data_t(char *str_,
+              unsigned size_,
+              unsigned stop_at_ = 0,
+              unsigned stop_phase_ = 0)
+    : str(str_)
+    , size(size_)
+    , stop_at(stop_at_)
+    , stop_phase(stop_phase_)
+  {}
+  char *str = nullptr;
+  unsigned size = 0;
+  unsigned consumed = 0;
+  hb_bool_t failure = false;
+  unsigned stop_at = 0;
+  unsigned stop_phase = 0;
+  hb_bool_t stopping = false;
+  unsigned current_phase = 0;
+};
 
 
 static void
@@ -128,18 +137,7 @@ hbjs_glyph_svg (hb_font_t *font, hb_codepoint_t glyph, char *buf, unsigned buf_s
     hb_draw_funcs_set_close_path_func (funcs, (hb_draw_close_path_func_t) close_path, nullptr, nullptr);
   }
 
-  user_data_t draw_data = {
-    .str = buf,
-    .size = buf_size,
-    .consumed = 0,
-    .failure = 0,
-    /* Following members not relevant for SVG */
-    .stop_at = 0,
-    .stop_phase = 0,
-    .stopping = 0,
-    .current_phase = 0
-  };
-
+  user_data_t draw_data(buf, buf_size);
   hb_font_get_glyph_shape (font, glyph, funcs, &draw_data);
   if (draw_data.failure)
     return -1;
@@ -163,7 +161,7 @@ static hb_bool_t do_trace (hb_buffer_t *buffer,
 
 
   if (user_data->current_phase != user_data->stop_phase) {
-    user_data->stopping = 0;
+    user_data->stopping = false;
   }
 
   // If we overflowed, keep going anyway.
@@ -176,7 +174,7 @@ static hb_bool_t do_trace (hb_buffer_t *buffer,
     if ((user_data->current_phase == user_data->stop_phase) &&
         (strncmp(message, "end lookup ", 11) == 0) &&
         (strcmp(message + 11, buf) == 0)) {
-      user_data->stopping = 1;
+      user_data->stopping = true;
     }
   }
 
@@ -202,16 +200,7 @@ hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf,
                        char* featurestring,
                        unsigned int stop_at, unsigned int stop_phase,
                        char *outbuf, unsigned buf_size) {
-  user_data_t user_data = {
-    .str = outbuf,
-    .size = buf_size,
-    .consumed = 0,
-    .failure = 0,
-    .stop_at = stop_at,
-    .stop_phase = stop_phase,
-    .stopping = 0,
-    .current_phase = 0
-  };
+  user_data_t user_data(outbuf, buf_size, stop_at, stop_phase);
 
   int num_features = 0;
   hb_feature_t* features = nullptr;
