@@ -65,85 +65,91 @@ static unsigned _hb_itoa (int32_t num, char *buf)
   return i;
 }
 
-static void _append(user_data_t *user_data, char x) {
-  if (user_data->consumed >= user_data->size) {
-    user_data->failure = 1;
+static void _append(user_data_t *draw_data, char x) {
+  if (draw_data->consumed >= draw_data->size) {
+    draw_data->failure = 1;
     return;
   }
-  user_data->str[user_data->consumed++] = x;
+  draw_data->str[draw_data->consumed++] = x;
 }
 
-static void _strcat(user_data_t *user_data, const char *s) {
+static void _strcat(user_data_t *draw_data, const char *s) {
   while (*s) {
-    _append(user_data, *s++);
+    _append(draw_data, *s++);
   }
 }
 
 #define ITOA_BUF_SIZE 12 // 10 digits in int32, 1 for negative sign, 1 for \0
 
 static void
-move_to (hb_position_t to_x, hb_position_t to_y, user_data_t *user_data)
+move_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
+	 float to_x, float to_y,
+	 void *)
 {
   /* 4 = command character space + comma + array starts with 0 index + nul character space */
-  if (user_data->consumed + 2 * ITOA_BUF_SIZE + 4 > user_data->size) return;
-  _append(user_data, 'M');
-  user_data->consumed += _hb_itoa (to_x, user_data->str + user_data->consumed);
-  _append(user_data, ',');
-  user_data->consumed += _hb_itoa (to_y, user_data->str + user_data->consumed);
+  if (draw_data->consumed + 2 * ITOA_BUF_SIZE + 4 > draw_data->size) return;
+  _append(draw_data, 'M');
+  draw_data->consumed += _hb_itoa (to_x, draw_data->str + draw_data->consumed);
+  _append(draw_data, ',');
+  draw_data->consumed += _hb_itoa (to_y, draw_data->str + draw_data->consumed);
 }
 
 static void
-line_to (hb_position_t to_x, hb_position_t to_y, user_data_t *user_data)
+line_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
+	 float to_x, float to_y,
+	 void *)
 {
-  if (user_data->consumed + 2 * ITOA_BUF_SIZE + 4 > user_data->size) return;
-  _append(user_data, 'L');
-  user_data->consumed += _hb_itoa (to_x, user_data->str + user_data->consumed);
-  _append(user_data, ',');
-  user_data->consumed += _hb_itoa (to_y, user_data->str + user_data->consumed);
+  if (draw_data->consumed + 2 * ITOA_BUF_SIZE + 4 > draw_data->size) return;
+  _append(draw_data, 'L');
+  draw_data->consumed += _hb_itoa (to_x, draw_data->str + draw_data->consumed);
+  _append(draw_data, ',');
+  draw_data->consumed += _hb_itoa (to_y, draw_data->str + draw_data->consumed);
 }
 
 static void
-quadratic_to (hb_position_t control_x, hb_position_t control_y,
-	  hb_position_t to_x, hb_position_t to_y,
-	  user_data_t *user_data)
+quadratic_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
+	      float control_x, float control_y,
+	      float to_x, float to_y,
+	      void *)
 {
 
-  if (user_data->consumed + 4 * ITOA_BUF_SIZE + 6 > user_data->size) return;
-  _append(user_data, 'Q');
-  user_data->consumed += _hb_itoa (control_x, user_data->str + user_data->consumed);
-  _append(user_data, ',');
-  user_data->consumed += _hb_itoa (control_y, user_data->str + user_data->consumed);
-  _append(user_data, ' ');
-  user_data->consumed += _hb_itoa (to_x, user_data->str + user_data->consumed);
-  _append(user_data, ',');
-  user_data->consumed += _hb_itoa (to_y, user_data->str + user_data->consumed);
+  if (draw_data->consumed + 4 * ITOA_BUF_SIZE + 6 > draw_data->size) return;
+  _append(draw_data, 'Q');
+  draw_data->consumed += _hb_itoa (control_x, draw_data->str + draw_data->consumed);
+  _append(draw_data, ',');
+  draw_data->consumed += _hb_itoa (control_y, draw_data->str + draw_data->consumed);
+  _append(draw_data, ' ');
+  draw_data->consumed += _hb_itoa (to_x, draw_data->str + draw_data->consumed);
+  _append(draw_data, ',');
+  draw_data->consumed += _hb_itoa (to_y, draw_data->str + draw_data->consumed);
 }
 
 static void
-cubic_to (hb_position_t control1_x, hb_position_t control1_y,
-	  hb_position_t control2_x, hb_position_t control2_y,
-	  hb_position_t to_x, hb_position_t to_y,
-	  user_data_t *user_data)
+cubic_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
+	  float control1_x, float control1_y,
+	  float control2_x, float control2_y,
+	  float to_x, float to_y,
+	  void *)
 {
-  if (user_data->consumed + 6 * ITOA_BUF_SIZE + 8 > user_data->size) return;
-  _append(user_data, 'C');
-  user_data->consumed += _hb_itoa (control1_x, user_data->str + user_data->consumed);
-  _append(user_data, ',');
-  user_data->consumed += _hb_itoa (control1_y, user_data->str + user_data->consumed);
-  _append(user_data, ' ');
-  user_data->consumed += _hb_itoa (control2_x, user_data->str + user_data->consumed);
-  _append(user_data, ',');
-  user_data->consumed += _hb_itoa (control2_y, user_data->str + user_data->consumed);
-  _append(user_data, ' ');
-  user_data->consumed += _hb_itoa (to_x, user_data->str + user_data->consumed);
-  _append(user_data, ',');
-  user_data->consumed += _hb_itoa (to_y, user_data->str + user_data->consumed);
+  if (draw_data->consumed + 6 * ITOA_BUF_SIZE + 8 > draw_data->size) return;
+  _append(draw_data, 'C');
+  draw_data->consumed += _hb_itoa (control1_x, draw_data->str + draw_data->consumed);
+  _append(draw_data, ',');
+  draw_data->consumed += _hb_itoa (control1_y, draw_data->str + draw_data->consumed);
+  _append(draw_data, ' ');
+  draw_data->consumed += _hb_itoa (control2_x, draw_data->str + draw_data->consumed);
+  _append(draw_data, ',');
+  draw_data->consumed += _hb_itoa (control2_y, draw_data->str + draw_data->consumed);
+  _append(draw_data, ' ');
+  draw_data->consumed += _hb_itoa (to_x, draw_data->str + draw_data->consumed);
+  _append(draw_data, ',');
+  draw_data->consumed += _hb_itoa (to_y, draw_data->str + draw_data->consumed);
 }
 
 static void
-close_path (user_data_t *user_data)
+close_path (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *, void *)
 {
-  _append(user_data, 'Z');
+  _append(draw_data, 'Z');
 }
 
 static hb_draw_funcs_t *funcs = 0;
@@ -154,14 +160,14 @@ hbjs_glyph_svg (hb_font_t *font, hb_codepoint_t glyph, char *buf, unsigned buf_s
   if (funcs == 0) /* not the best pattern for multi-threaded apps which is not a concern here */
   {
     funcs = hb_draw_funcs_create (); /* will be leaked */
-    hb_draw_funcs_set_move_to_func (funcs, (hb_draw_move_to_func_t) move_to);
-    hb_draw_funcs_set_line_to_func (funcs, (hb_draw_line_to_func_t) line_to);
-    hb_draw_funcs_set_quadratic_to_func (funcs, (hb_draw_quadratic_to_func_t) quadratic_to);
-    hb_draw_funcs_set_cubic_to_func (funcs, (hb_draw_cubic_to_func_t) cubic_to);
-    hb_draw_funcs_set_close_path_func (funcs, (hb_draw_close_path_func_t) close_path);
+    hb_draw_funcs_set_move_to_func (funcs, (hb_draw_move_to_func_t) move_to, nullptr, nullptr);
+    hb_draw_funcs_set_line_to_func (funcs, (hb_draw_line_to_func_t) line_to, nullptr, nullptr);
+    hb_draw_funcs_set_quadratic_to_func (funcs, (hb_draw_quadratic_to_func_t) quadratic_to, nullptr, nullptr);
+    hb_draw_funcs_set_cubic_to_func (funcs, (hb_draw_cubic_to_func_t) cubic_to, nullptr, nullptr);
+    hb_draw_funcs_set_close_path_func (funcs, (hb_draw_close_path_func_t) close_path, nullptr, nullptr);
   }
 
-  user_data_t user_data = {
+  user_data_t draw_data = {
     .str = buf,
     .size = buf_size,
     .consumed = 0,
@@ -172,10 +178,10 @@ hbjs_glyph_svg (hb_font_t *font, hb_codepoint_t glyph, char *buf, unsigned buf_s
     .stopping = 0,
     .current_phase = 0
   };
-  hb_font_draw_glyph (font, glyph, funcs, &user_data);
-  if (user_data.failure) { return -1; }
-  buf[user_data.consumed] = '\0';
-  return user_data.consumed;
+  hb_font_get_glyph_shape (font, glyph, funcs, &draw_data);
+  if (draw_data.failure) { return -1; }
+  buf[draw_data.consumed] = '\0';
+  return draw_data.consumed;
 }
 
 static hb_bool_t do_trace (hb_buffer_t *buffer,
