@@ -223,7 +223,6 @@ export function loadHarfbuzz(webAssemblyUrl: string): Promise<void> {
     return WebAssembly.instantiate(wasm);
   }).then(result => {
     //@ts-ignore
-    result.instance.exports.memory.grow(1000); // each page is 64kb in size => 64mb allowed for webassembly, maybe we need more... 
     hb = new HarfBuzzExports(result.instance.exports);
   });
 }

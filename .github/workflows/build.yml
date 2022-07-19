@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  EM_VERSION: 3.1.16
+  EM_CACHE_FOLDER: 'emsdk-cache'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Setup cache
+        id: cache-system-libraries
+        uses: actions/cache@v3
+        with:
+          path: ${{env.EM_CACHE_FOLDER}}
+          key: ${{env.EM_VERSION}}-${{runner.os}}
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v11
+        with:
+          version: ${{env.EM_VERSION}}
+          actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
+      - name: Build hb.wasm
+        run: ./build.sh
+      - name: Build hb-subset.wasm
+        run: cd subset && ./build.sh
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+      - name: Test hb.wasm
+        run: node examples/hbjs.example.node.js
+      - name: Test hb-subset.wasm
+        run: node subset/test.js
