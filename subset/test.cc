@@ -26,10 +26,16 @@ int main() {
     hb_set_union (input_glyphs, glyphs);
     hb_set_destroy (glyphs);
     //hb_subset_input_set_drop_hints (input, true);
-    hb_face_t *subset = hb_subset (face, input);
+    hb_face_t *subset = hb_subset_or_fail (face, input);
 
     /* Clean up */
     hb_subset_input_destroy (input);
+
+    if (!subset)
+    {
+      hb_face_destroy (face);
+      return 1;
+    }
 
     /* Get result blob */
     hb_blob_t *result = hb_face_reference_blob (subset);
