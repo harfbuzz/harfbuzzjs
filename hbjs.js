@@ -110,6 +110,9 @@ function hbjs(instance) {
   var pathBufferSize = 65536; // should be enough for most glyphs
   var pathBuffer = exports.malloc(pathBufferSize); // permanently allocated
 
+  var nameBufferSize = 256; // should be enough for most glyphs
+  var nameBuffer = exports.malloc(nameBufferSize); // permanently allocated
+
   /**
   * Create an object representing a Harfbuzz font.
   * @param {object} blob An object returned from `createFace`.
@@ -124,6 +127,8 @@ function hbjs(instance) {
     function glyphToPath(glyphId) {
       var svgLength = exports.hbjs_glyph_svg(ptr, glyphId, pathBuffer, pathBufferSize);
       return svgLength > 0 ? utf8Decoder.decode(heapu8.subarray(pathBuffer, pathBuffer + svgLength)) : "";
+    }
+
     /**
      * Return glyph name.
      * @param {number} glyphId ID of the requested glyph in the font.
