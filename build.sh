@@ -12,7 +12,7 @@ em++ \
 	-I. \
 	-DHB_TINY \
 	-DHB_USE_INTERNAL_QSORT \
-	-DHAVE_CONFIG_OVERRIDE_H \
+	-DHB_CONFIG_OVERRIDE_H=\"config-override.h\" \
 	-DHB_EXPERIMENTAL_API \
 	--no-entry \
 	-s EXPORTED_FUNCTIONS=@hbjs.symbols \

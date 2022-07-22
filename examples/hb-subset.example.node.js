@@ -5,8 +5,8 @@ const readFileAsync = require('util').promisify(fs.readFile);
 const writeFileAsync = require('util').promisify(fs.writeFile);
 
 (async () => {
-    const { instance: { exports } } = await WebAssembly.instantiate(await readFileAsync(__dirname + '/hb-subset.wasm'));
-    const fontBlob = await readFileAsync(__dirname + '/roboto-black.ttf');
+    const { instance: { exports } } = await WebAssembly.instantiate(await readFileAsync(__dirname + '/../hb-subset.wasm'));
+    const fontBlob = await readFileAsync(__dirname + '/Roboto-Black.ttf');
 
     const heapu8 = new Uint8Array(exports.memory.buffer);
     const fontBuffer = exports.malloc(fontBlob.byteLength);
@@ -36,8 +36,8 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
     const data = exports.hb_blob_get_data(result, 0);
     const subsetFontBlob = heapu8.subarray(data, data + exports.hb_blob_get_length(result));
 
-    await writeFileAsync(__dirname + '/roboto-black-subset-js.ttf', subsetFontBlob);
-    console.log(`Wrote subset to: ${__dirname}/roboto-black-subset-js.ttf`);
+    await writeFileAsync(__dirname + '/Roboto-Black.subset.ttf', subsetFontBlob);
+    console.log(`Wrote subset to: ${__dirname}/Roboto-Black.subset.ttf`);
 
     /* Clean up */
     exports.hb_blob_destroy(result);

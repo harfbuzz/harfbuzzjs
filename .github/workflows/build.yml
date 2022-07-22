@@ -35,11 +35,11 @@ jobs:
       - name: Build hb.wasm
         run: ./build.sh
       - name: Build hb-subset.wasm
-        run: cd subset && ./build.sh
+        run: ./build-subset.sh
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
       - name: Test hb.wasm
         run: node examples/hbjs.example.node.js
       - name: Test hb-subset.wasm
-        run: node subset/test.js
+        run: node examples/hb-subset.example.node.js

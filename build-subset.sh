@@ -12,10 +12,10 @@ em++ \
 	-I. \
 	-DHB_TINY \
 	-DHB_USE_INTERNAL_QSORT \
-	-DHAVE_CONFIG_OVERRIDE_H \
+	-DHB_CONFIG_OVERRIDE_H=\"config-override-subset.h\" \
 	-DHB_EXPERIMENTAL_API \
 	--no-entry \
-	-s EXPORTED_FUNCTIONS=@subset.symbols \
+	-s EXPORTED_FUNCTIONS=@hb-subset.symbols \
 	-s INITIAL_MEMORY=65MB \
 	-o hb-subset.wasm \
 	../harfbuzz/src/harfbuzz.cc \
