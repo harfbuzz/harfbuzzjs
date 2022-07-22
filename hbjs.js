@@ -134,19 +134,14 @@ function hbjs(instance) {
      * @param {number} glyphId ID of the requested glyph in the font.
      **/
     function glyphName(glyphId) {
-      var ok = exports.hb_font_get_glyph_name(
+      exports.hb_font_glyph_to_string(
         ptr,
         glyphId,
         nameBuffer,
         nameBufferSize
       );
-      if (!ok) {
-        return '';
-      }
-      var decoded = utf8Decoder.decode(
-        heapu8.subarray(nameBuffer, nameBuffer + nameBufferSize)
-      );
-      return decoded.replace(/\0.*/, '');
+      var array = heapu8.subarray(nameBuffer, nameBuffer + nameBufferSize);
+      return utf8Decoder.decode(array.slice(0, array.indexOf(0)));
     }
 
     return {
