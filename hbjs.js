@@ -9,6 +9,7 @@ function hbjs(instance) {
   var utf8Decoder = new TextDecoder("utf8");
 
   var HB_MEMORY_MODE_WRITABLE = 2;
+  var HB_SET_VALUE_INVALID = -1;
 
   function hb_tag(s) {
     return (
@@ -55,6 +56,42 @@ function hbjs(instance) {
   }
 
   /**
+   * Return the typed array of HarfBuzz set contents.
+   * @template {typeof Uint8Array | typeof Uint32Array | typeof Int32Array | typeof Float32Array} T
+   * @param {number} setPtr Pointer of set
+   * @param {T} arrayClass Typed array class
+   * @returns {InstanceType<T>} Typed array instance
+   */
+  function typedArrayFromSet(setPtr, arrayClass) {
+    let heap = heapu8;
+    if (arrayClass === Uint32Array) {
+      heap = heapu32;
+    } else if (arrayClass === Int32Array) {
+      heap = heapi32;
+    } else if (arrayClass === Float32Array) {
+      heap = heapf32;
+    }
+    const bytesPerElment = arrayClass.BYTES_PER_ELEMENT;
+    const setCount = exports.hb_set_get_population(setPtr);
+    const arrayPtr = exports.malloc(
+      setCount * bytesPerElment,
+    );
+    const arrayOffset = arrayPtr / bytesPerElment;
+    const array = heap.subarray(
+      arrayOffset,
+      arrayOffset + setCount,
+    );
+    heap.set(array, arrayOffset);
+    exports.hb_set_next_many(
+      this.ptr,
+      HB_SET_VALUE_INVALID,
+      arrayPtr,
+      setCount,
+    );
+    return array;
+  }
+
+  /**
   * Create an object representing a Harfbuzz face.
   * @param {object} blob An object returned from `createBlob`.
   * @param {number} index The index of the font in the blob. (0 for most files,
@@ -96,6 +133,16 @@ function hbjs(instance) {
         });
         exports.free(c);
         exports.free(axis);
+        return result;
+      },
+      /**
+       * Return unicodes the face supports
+       */
+      collectUnicodes: function() {
+        var unicodeSetPtr = exports.hb_set_create();
+        exports.hb_face_collect_unicodes(ptr, unicodeSetPtr);
+        var result = typedArrayFromSet(unicodeSetPtr, Uint32Array);
+        exports.hb_set_destroy(ptr);
         return result;
       },
       /**
