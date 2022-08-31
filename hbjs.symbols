@@ -16,6 +16,7 @@ _hb_buffer_set_flags
 _hb_buffer_set_language
 _hb_buffer_set_script
 _hb_face_create
+_hb_face_collect_unicodes
 _hb_face_destroy
 _hb_face_get_upem
 _hb_face_reference_table
@@ -28,6 +29,10 @@ _hb_glyph_info_get_glyph_flags
 _hb_language_from_string
 _hb_ot_var_get_axis_infos
 _hb_script_from_string
+_hb_set_create
+_hb_set_destroy
+_hb_set_get_population
+_hb_set_next_many
 _hb_shape
 _hbjs_glyph_svg
 _hbjs_shape_with_trace
