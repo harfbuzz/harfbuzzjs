@@ -15,7 +15,7 @@ demo source is in [gh-pages](https://github.com/harfbuzz/harfbuzzjs/tree/gh-page
 
 ## Usage and testing
 
-### TDLR
+### TL;DR
 
 ```javascript
 hb = require("hbjs.js")
@@ -30,7 +30,7 @@ WebAssembly.instantiateStreaming(fetch("hb.wasm")).then(function (result) {
     buffer.addText('abc');              // Fill it with some stuff
     buffer.guessSegmentProperties();    // Set script, language and direction
     hb.shape(font, buffer);             // Shape the text, determining glyph IDs and positions
-    var output = shape.json();
+    var output = buffer.json();
 
     // Enumerate the glyphs
     var xCursor = 0;
@@ -53,6 +53,7 @@ WebAssembly.instantiateStreaming(fetch("hb.wasm")).then(function (result) {
     font.destroy();
     face.destroy();
     blob.destroy();
+  })
 })
 ```
 
