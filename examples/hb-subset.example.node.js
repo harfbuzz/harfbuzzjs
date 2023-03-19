@@ -1,13 +1,14 @@
 // Based on https://github.com/harfbuzz/harfbuzzjs/issues/9#issuecomment-507874962
 // Which was based on https://github.com/harfbuzz/harfbuzzjs/issues/9#issuecomment-507622485
-const fs = require('fs');
-const readFileAsync = require('util').promisify(fs.readFile);
-const writeFileAsync = require('util').promisify(fs.writeFile);
+const { readFile, writeFile } = require('fs').promises;
+
+const SUBSET_TEXT = 'abc';
 
 (async () => {
-    const { instance: { exports } } = await WebAssembly.instantiate(await readFileAsync(__dirname + '/../hb-subset.wasm'));
-    const fontBlob = await readFileAsync(__dirname + '/Roboto-Black.ttf');
+    const { instance: { exports } } = await WebAssembly.instantiate(await readFile(__dirname + '/../hb-subset.wasm'));
+    const fontBlob = await readFile(__dirname + '/Roboto-Black.ttf');
 
+    const t = performance.now();
     const heapu8 = new Uint8Array(exports.memory.buffer);
     const fontBuffer = exports.malloc(fontBlob.byteLength);
     heapu8.set(new Uint8Array(fontBlob), fontBuffer);
@@ -20,9 +21,9 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
     /* Add your glyph indices here and subset */
     const input = exports.hb_subset_input_create_or_fail();
     const unicode_set = exports.hb_subset_input_unicode_set(input);
-    exports.hb_set_add(unicode_set, 'a'.charCodeAt(0));
-    exports.hb_set_add(unicode_set, 'b'.charCodeAt(0));
-    exports.hb_set_add(unicode_set, 'c'.charCodeAt(0));
+    for (const text of SUBSET_TEXT) {
+        exports.hb_set_add(unicode_set, text.charCodeAt(0));
+    }
 
     // exports.hb_subset_input_set_drop_hints(input, true);
     const subset = exports.hb_subset_or_fail(face, input);
@@ -31,16 +32,28 @@ const writeFileAsync = require('util').promisify(fs.writeFile);
     exports.hb_subset_input_destroy(input);
 
     /* Get result blob */
-    const result = exports.hb_face_reference_blob(subset);
+    const resultBlob = exports.hb_face_reference_blob(subset);
 
-    const data = exports.hb_blob_get_data(result, 0);
-    const subsetFontBlob = heapu8.subarray(data, data + exports.hb_blob_get_length(result));
-
-    await writeFileAsync(__dirname + '/Roboto-Black.subset.ttf', subsetFontBlob);
-    console.log(`Wrote subset to: ${__dirname}/Roboto-Black.subset.ttf`);
+    const offset = exports.hb_blob_get_data(resultBlob, 0);
+    const subsetByteLength = exports.hb_blob_get_length(resultBlob);
+    if (subsetByteLength === 0) {
+        exports.hb_blob_destroy(resultBlob);
+        exports.hb_face_destroy(subset);
+        exports.hb_face_destroy(face);
+        exports.free(fontBuffer);
+        throw new Error(
+            'Failed to create subset font, maybe the input file is corrupted?'
+        );
+    }
+    
+    // Output font data(Uint8Array)
+    const subsetFontBlob = heapu8.subarray(offset, offset + exports.hb_blob_get_length(resultBlob));
+    console.info('✨ Subset done in', performance.now() - t, 'ms');
+    await writeFile(__dirname + '/Roboto-Black.subset.ttf', subsetFontBlob);    
+    console.info(`Wrote subset to: ${__dirname}/Roboto-Black.subset.ttf`);
 
     /* Clean up */
-    exports.hb_blob_destroy(result);
+    exports.hb_blob_destroy(resultBlob);
     exports.hb_face_destroy(subset);
     exports.hb_face_destroy(face);
     exports.free(fontBuffer);
