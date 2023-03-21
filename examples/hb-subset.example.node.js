@@ -1,12 +1,14 @@
 // Based on https://github.com/harfbuzz/harfbuzzjs/issues/9#issuecomment-507874962
 // Which was based on https://github.com/harfbuzz/harfbuzzjs/issues/9#issuecomment-507622485
 const { readFile, writeFile } = require('fs').promises;
+const { join, extname, basename } = require('path');
 
 const SUBSET_TEXT = 'abc';
 
 (async () => {
-    const { instance: { exports } } = await WebAssembly.instantiate(await readFile(__dirname + '/../hb-subset.wasm'));
-    const fontBlob = await readFile(__dirname + '/Roboto-Black.ttf');
+    const { instance: { exports } } = await WebAssembly.instantiate(await readFile(join(__dirname, '../hb-subset.wasm')));
+    const fileName = 'Roboto-Black.ttf';
+    const fontBlob = await readFile(join(__dirname, '/', fileName));
 
     const t = performance.now();
     const heapu8 = new Uint8Array(exports.memory.buffer);
@@ -22,7 +24,7 @@ const SUBSET_TEXT = 'abc';
     const input = exports.hb_subset_input_create_or_fail();
     const unicode_set = exports.hb_subset_input_unicode_set(input);
     for (const text of SUBSET_TEXT) {
-        exports.hb_set_add(unicode_set, text.charCodeAt(0));
+        exports.hb_set_add(unicode_set, text.codePointAt(0));
     }
 
     // exports.hb_subset_input_set_drop_hints(input, true);
@@ -49,8 +51,11 @@ const SUBSET_TEXT = 'abc';
     // Output font data(Uint8Array)
     const subsetFontBlob = heapu8.subarray(offset, offset + exports.hb_blob_get_length(resultBlob));
     console.info('✨ Subset done in', performance.now() - t, 'ms');
-    await writeFile(__dirname + '/Roboto-Black.subset.ttf', subsetFontBlob);    
-    console.info(`Wrote subset to: ${__dirname}/Roboto-Black.subset.ttf`);
+
+    const extName = extname(fileName).toLowerCase();
+    const fontName = basename(fileName, extName);
+    await writeFile(join(__dirname, '/', `${fontName}.subset${extName}`), subsetFontBlob);    
+    console.info(`Wrote subset to: ${__dirname}/${fontName}.subset${extName}`);
 
     /* Clean up */
     exports.hb_blob_destroy(resultBlob);
