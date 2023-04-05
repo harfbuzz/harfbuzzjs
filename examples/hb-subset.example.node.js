@@ -2,6 +2,7 @@
 // Which was based on https://github.com/harfbuzz/harfbuzzjs/issues/9#issuecomment-507622485
 const { readFile, writeFile } = require('fs').promises;
 const { join, extname, basename } = require('path');
+const { performance } = require('node:perf_hooks');
 
 const SUBSET_TEXT = 'abc';
 
