@@ -1,8 +1,0 @@
-[package]
-name = "ebraminio/harfbuzz"
-version = "0.0.2"
-description = "HarfBuzz text shaping engine"
-
-[[module]]
-name = "harfbuzz"
-source = "hb.wasm"
