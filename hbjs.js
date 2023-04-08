@@ -142,7 +142,7 @@ function hbjs(instance) {
         var unicodeSetPtr = exports.hb_set_create();
         exports.hb_face_collect_unicodes(ptr, unicodeSetPtr);
         var result = typedArrayFromSet(unicodeSetPtr, Uint32Array);
-        exports.hb_set_destroy(ptr);
+        exports.hb_set_destroy(unicodeSetPtr);
         return result;
       },
       /**
