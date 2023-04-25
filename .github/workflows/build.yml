@@ -39,6 +39,10 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
+      - name: NPM install
+        run: npm install
+      - name: Run tests
+        run: npm test
       - name: Test hb.wasm
         run: node examples/hbjs.example.node.js
       - name: Test hb-subset.wasm
