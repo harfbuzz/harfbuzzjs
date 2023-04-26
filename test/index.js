@@ -123,3 +123,34 @@ describe('Buffer', function () {
     expect(glyphs[0].g).not.to.equal(3 /* space */);
   });
 });
+
+describe('shape', function () {
+  it('shape Latin string', function () {
+    this.blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    this.face = hb.createFace(this.blob);
+    this.font = hb.createFont(this.face);
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('abc');
+    this.buffer.guessSegmentProperties();
+    hb.shape(this.font, this.buffer)
+    const glyphs = this.buffer.json();
+    expect(glyphs[0]).to.deep.equal({cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0, flags: 0} /* a */);
+    expect(glyphs[1]).to.deep.equal({cl: 1, g: 69, ax: 615, ay: 0, dx: 0, dy: 0, flags: 0} /* b */);
+    expect(glyphs[2]).to.deep.equal({cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0, flags: 0} /* c */);
+  });
+
+  it('shape Arabic string', function () {
+    this.blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    this.face = hb.createFace(this.blob);
+    this.font = hb.createFont(this.face);
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('أبجد');
+    this.buffer.guessSegmentProperties();
+    hb.shape(this.font, this.buffer)
+    const glyphs = this.buffer.json();
+    expect(glyphs[0]).to.deep.equal({cl: 3, g: 213, ax: 532, ay: 0, dx: 0, dy: 0, flags: 1} /* د */);
+    expect(glyphs[1]).to.deep.equal({cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, flags: 1} /* ج */);
+    expect(glyphs[2]).to.deep.equal({cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0, flags: 0} /* ب */);
+    expect(glyphs[3]).to.deep.equal({cl: 0, g:  50, ax: 235, ay: 0, dx: 0, dy: 0, flags: 0} /* أ */);
+  });
+});
