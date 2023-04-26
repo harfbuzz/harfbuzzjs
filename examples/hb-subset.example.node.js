@@ -8,8 +8,8 @@ const SUBSET_TEXT = 'abc';
 
 (async () => {
     const { instance: { exports } } = await WebAssembly.instantiate(await readFile(join(__dirname, '../hb-subset.wasm')));
-    const fileName = 'Roboto-Black.ttf';
-    const fontBlob = await readFile(join(__dirname, '/', fileName));
+    const fileName = 'NotoSans-Regular.ttf';
+    const fontBlob = await readFile(join(__dirname, '../test/fonts/noto', fileName));
 
     const t = performance.now();
     const heapu8 = new Uint8Array(exports.memory.buffer);

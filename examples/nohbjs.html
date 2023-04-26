@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <script>
 var utf8Encoder = new TextEncoder("utf8");
 
@@ -10,7 +11,7 @@ fetch("../hb.wasm").then(function (x) {
 }).then(function (result) {
   var exports = result.instance.exports;
 
-  fetch('Roboto.abc.ttf').then(function (x) {
+  fetch('../test/fonts/noto/NotoSans-Regular.ttf').then(function (x) {
     return x.arrayBuffer();
   }).then(function (fontBlob) {
     var heapu8 = new Uint8Array(exports.memory.buffer);
