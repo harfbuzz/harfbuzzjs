@@ -153,4 +153,33 @@ describe('shape', function () {
     expect(glyphs[2]).to.deep.equal({cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0, flags: 0} /* ب */);
     expect(glyphs[3]).to.deep.equal({cl: 0, g:  50, ax: 235, ay: 0, dx: 0, dy: 0, flags: 0} /* أ */);
   });
+
+  it('shape with tracing', function () {
+    this.blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    this.face = hb.createFace(this.blob);
+    this.font = hb.createFont(this.face);
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('abc');
+    this.buffer.guessSegmentProperties();
+    const result = hb.shapeWithTrace(this.font, this.buffer, 0, 0)
+    expect(result).to.have.lengthOf(42);
+    expect(result[0]).to.deep.equal({
+      "m": "start table GSUB",
+      "glyphs": true,
+      "t": [
+        {cl: 0, g: 68},
+        {cl: 1, g: 69},
+        {cl: 2, g: 70},
+      ],
+    });
+    expect(result[41]).to.deep.equal({
+      "m": "end table GPOS",
+      "glyphs": true,
+      "t": [
+        {cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0},
+        {cl: 1, g: 69, ax: 615, ay: 0, dx: 0, dy: 0},
+        {cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0},
+      ],
+    });
+  });
 });
