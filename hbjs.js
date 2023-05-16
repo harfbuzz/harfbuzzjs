@@ -35,6 +35,7 @@ function hbjs(instance) {
     if (s == "PRESERVE_DEFAULT_IGNORABLES") { return 0x4; }
     if (s == "REMOVE_DEFAULT_IGNORABLES") { return 0x8; }
     if (s == "DO_NOT_INSERT_DOTTED_CIRCLE") { return 0x10; }
+    if (s == "PRODUCE_UNSAFE_TO_CONCAT") { return 0x40; }
     return 0x0;
   }
 
@@ -304,6 +305,7 @@ function hbjs(instance) {
       * "PRESERVE_DEFAULT_IGNORABLES"
       * "REMOVE_DEFAULT_IGNORABLES"
       * "DO_NOT_INSERT_DOTTED_CIRCLE"
+      * "PRODUCE_UNSAFE_TO_CONCAT"
       */
       setFlags: function (flags) {
         var flagValue = 0
