@@ -238,14 +238,21 @@ function hbjs(instance) {
     };
   }
 
-  var utf8Encoder = new TextEncoder("utf8");
-  function createCString(text) {
-    var bytes = utf8Encoder.encode(text);
-    var ptr = exports.malloc(bytes.byteLength);
-    heapu8.set(bytes, ptr);
+  /**
+  * Use when you know the input range should be ASCII.
+  * Faster than encoding to UTF-8
+  **/
+  function createAsciiString(text) {
+    var ptr = exports.malloc(text.length + 1);
+    for (let i = 0; i < text.length; ++i) {
+      const char = text.charCodeAt(i);
+      if (char > 127) throw new Error('Expected ASCII text');
+      heapu8[ptr + i] = char;
+    }
+    heapu8[ptr + text.length] = 0;
     return {
       ptr: ptr,
-      length: bytes.byteLength,
+      length: text.length,
       free: function () { exports.free(ptr); }
     };
   }
@@ -320,7 +327,7 @@ function hbjs(instance) {
       * @param {string} language: The buffer language
       */
       setLanguage: function (language) {
-        var str = createCString(language);
+        var str = createAsciiString(language);
         exports.hb_buffer_set_language(ptr, exports.hb_language_from_string(str.ptr,-1));
         str.free();
       },
@@ -329,7 +336,7 @@ function hbjs(instance) {
       * @param {string} script: The buffer script
       */
       setScript: function (script) {
-        var str = createCString(script);
+        var str = createAsciiString(script);
         exports.hb_buffer_set_script(ptr, exports.hb_script_from_string(str.ptr,-1));
         str.free();
       },
@@ -421,7 +428,7 @@ function hbjs(instance) {
   function shapeWithTrace(font, buffer, features, stop_at, stop_phase) {
     var bufLen = 1024 * 1024;
     var traceBuffer = exports.malloc(bufLen);
-    var featurestr = createCString(features);
+    var featurestr = createAsciiString(features);
     var traceLen = exports.hbjs_shape_with_trace(font.ptr, buffer.ptr, featurestr.ptr, stop_at, stop_phase, traceBuffer, bufLen);
     featurestr.free();
     var trace = utf8Decoder.decode(heapu8.subarray(traceBuffer, traceBuffer + traceLen - 1));
