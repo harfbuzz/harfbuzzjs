@@ -164,7 +164,7 @@ describe('shape', function () {
     const result = hb.shapeWithTrace(this.font, this.buffer, 0, 0)
     expect(result).to.have.lengthOf(42);
     expect(result[0]).to.deep.equal({
-      "m": "start table GSUB",
+      "m": "start table GSUB script tag 'latn'",
       "glyphs": true,
       "t": [
         {cl: 0, g: 68},
@@ -173,7 +173,7 @@ describe('shape', function () {
       ],
     });
     expect(result[41]).to.deep.equal({
-      "m": "end table GPOS",
+      "m": "end table GPOS script tag 'latn'",
       "glyphs": true,
       "t": [
         {cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0},
