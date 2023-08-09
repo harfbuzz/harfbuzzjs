@@ -3,7 +3,7 @@ import type { BlobInstace } from '~/schema/blob'
 import type { FaceInstance } from '~/schema/face'
 import type { FontInstance } from '~/schema/font'
 import type { BufferInstance } from '~/schema/buffer'
-import { hb_tag, hb_untag, buffer_flag } from '~/utils/index'
+import { buffer_flag, hb_tag, hb_untag } from '~/utils/index'
 
 const HB_MEMORY_MODE_WRITABLE = 2
 const HB_SET_VALUE_INVALID = -1
@@ -91,11 +91,11 @@ export function hb(instance: WebAssembly.Instance) {
     }
   }
 
-  var pathBufferSize = 65536; // should be enough for most glyphs
-  var pathBuffer = exports.malloc(pathBufferSize); // permanently allocated
+  const pathBufferSize = 65536; // should be enough for most glyphs
+  const pathBuffer = exports.malloc(pathBufferSize); // permanently allocated
 
-  var nameBufferSize = 256; // should be enough for most glyphs
-  var nameBuffer = exports.malloc(nameBufferSize); // permanently allocated
+  const nameBufferSize = 256; // should be enough for most glyphs
+  const nameBuffer = exports.malloc(nameBufferSize); // permanently allocated
 
   function createFont(face: FaceInstance) {
     const ptr = exports.hb_font_create(face.ptr)
@@ -155,9 +155,9 @@ export function hb(instance: WebAssembly.Instance) {
        * @param {object} variations Dictionary of variations to set
        **/
       setVariations (variations: Record<string, number>) {
-        var entries = Object.entries(variations)
-        var vars = exports.malloc(8 * entries.length)
-        entries.forEach(function (entry, i) {
+        const entries = Object.entries(variations)
+        const vars = exports.malloc(8 * entries.length)
+        entries.forEach((entry, i) => {
           heapu32[vars / 4 + i * 2 + 0] = hb_tag(entry[0]);
           heapf32[vars / 4 + i * 2 + 1] = entry[1];
         });
@@ -227,7 +227,7 @@ export function hb(instance: WebAssembly.Instance) {
       * @param {string} script: The buffer script
       */
        setScript (script: string) {
-        var str = createAsciiString(script)
+        const str = createAsciiString(script)
         exports.hb_buffer_set_script(ptr, exports.hb_script_from_string(str.ptr, -1))
         str.free()
       },
@@ -271,7 +271,7 @@ export function hb(instance: WebAssembly.Instance) {
         dy: number
         flags: GlyphFlag
       }> = []
-      for (var i = 0; i < length; ++i) {
+      for (let i = 0; i < length; ++i) {
         result.push({
           g: infos[i * 5 + 0],
           cl: infos[i * 5 + 2],
@@ -382,3 +382,5 @@ export function hb(instance: WebAssembly.Instance) {
     shapeWithTrace
   }
 }
+
+export * from './schema/export'

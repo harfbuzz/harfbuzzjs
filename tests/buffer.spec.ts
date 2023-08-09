@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import * as path from 'path'
 import * as fs from 'fs'
-import { initHB, hb as hbjs } from '../src/index'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import type { hb as hbjs } from '~/node'
+import { initHB } from '~/node'
 
 type HB = ReturnType<typeof hbjs>
 type Nullable<T> = T | undefined | null

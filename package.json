@@ -3,6 +3,7 @@
   "version": "0.3.3",
   "description": "Minimal version of HarfBuzz for JavaScript use",
   "packageManager": "pnpm@8.6.3",
+  "type": "module",
   "engines": {
     "node": ">= 16"
   },
