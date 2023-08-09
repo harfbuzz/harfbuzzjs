@@ -2,20 +2,15 @@ import { hb as hbjs } from 'harfbuzzjs/client'
 import init from './assets/hb.wasm?init'
 import fontUrl from './assets/NotoSans-Regular.ttf?url'
 
-main().catch(e => {
-  console.error(e)
-})
-
-async function main () {
+export async function render () {
   const wasm = await init({})
   const res = await fetch(fontUrl)
   const data = await res.arrayBuffer()
-  document.body.innerText = JSON.stringify(
+  return JSON.stringify(
     preview(hbjs(wasm), new Uint8Array(data), ''),
     undefined,
     2
   )
-  document.body.style.whiteSpace = 'pre'
 }
 
 function preview (hb: Awaited<ReturnType<typeof hbjs>>, data: ArrayBuffer, text: string) {
