@@ -9,9 +9,14 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "strictNullChecks": true,
+    "moduleResolution": "NodeNext",
     "skipLibCheck": true,
-    "strictPropertyInitialization": true
+    "strictPropertyInitialization": true,
+    "paths": {
+      "~/*": ["./src/*"]
+    }
   },
+  "include": ["./src/**/*.ts", "vitest.config.ts"],
   "exclude": [
     "node_modules"
   ]
