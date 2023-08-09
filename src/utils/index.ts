@@ -15,3 +15,13 @@ export function hb_untag(tag: number) {
     String.fromCharCode((tag >>  0) & 0xFF)
   ].join('')
 }
+
+export function buffer_flag(s: string) {
+  if (s == "BOT") { return 0x1 }
+    if (s == "EOT") { return 0x2 }
+    if (s == "PRESERVE_DEFAULT_IGNORABLES") { return 0x4 }
+    if (s == "REMOVE_DEFAULT_IGNORABLES") { return 0x8 }
+    if (s == "DO_NOT_INSERT_DOTTED_CIRCLE") { return 0x10 }
+    if (s == "PRODUCE_UNSAFE_TO_CONCAT") { return 0x40 }
+    return 0x0
+}
