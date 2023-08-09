@@ -2,7 +2,7 @@ export interface FontInstance {
   ptr: number
   glyphToPath(id: number): string
   glyphName(id: number): string
-  glyphToJson: Array<{
+  glyphToJson(id: number): Array<{
     type: string
     values: number[]
   }>
