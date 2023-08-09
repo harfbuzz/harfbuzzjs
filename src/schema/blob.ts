@@ -1,4 +1,4 @@
-import { Pointer } from "./export"
+import type { Pointer } from "./export"
 
 export interface BlobInstace {
   ptr: Pointer

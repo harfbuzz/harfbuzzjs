@@ -1,4 +1,4 @@
-import { GlyphFlag } from "./export"
+import type { GlyphFlag } from "./export"
 
 export interface BufferInstance {
   ptr: number
