@@ -4,3 +4,4 @@
 #undef HB_NO_SUBSET_LAYOUT
 #undef HB_NO_VAR
 #undef HB_NO_STYLE
+#undef HB_NO_VERTICAL
