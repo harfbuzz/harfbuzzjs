@@ -4,12 +4,10 @@ const { readFile, writeFile } = require('fs').promises;
 const { join, extname, basename } = require('path');
 const { performance } = require('node:perf_hooks');
 
-const SUBSET_TEXT = 'abc';
-
 (async () => {
     const { instance: { exports } } = await WebAssembly.instantiate(await readFile(join(__dirname, '../hb-subset.wasm')));
-    const fileName = 'NotoSans-Regular.ttf';
-    const fontBlob = await readFile(join(__dirname, '../test/fonts/noto', fileName));
+    const fileName = 'MaterialSymbolsOutlined-VF.ttf';
+    const fontBlob = await readFile(join(__dirname, fileName));
 
     const t = performance.now();
     const heapu8 = new Uint8Array(exports.memory.buffer);
@@ -23,12 +21,19 @@ const SUBSET_TEXT = 'abc';
 
     /* Add your glyph indices here and subset */
     const input = exports.hb_subset_input_create_or_fail();
-    const unicode_set = exports.hb_subset_input_unicode_set(input);
-    for (const text of SUBSET_TEXT) {
-        exports.hb_set_add(unicode_set, text.codePointAt(0));
+    const plan = exports.hb_subset_plan_create_or_fail(face, input);
+    console.log('plan: ', plan)
+    const glyph_map = exports.hb_subset_plan_old_to_new_glyph_mapping(plan);
+    console.log('glyph_map: ', glyph_map)
+
+    const glyph_set = exports.hb_subset_input_glyph_set(plan);
+
+    // TODO: get gids via hb-shape
+    const SUBSET_GIDS = [4261,4995,5012,5013,5014]; // star icon
+    for (const gid of SUBSET_GIDS) {
+        exports.hb_set_add(glyph_set, gid.toString());
     }
 
-    // exports.hb_subset_input_set_drop_hints(input, true);
     const subset = exports.hb_subset_or_fail(face, input);
 
     /* Clean up */
