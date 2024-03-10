@@ -22,6 +22,7 @@ _hb_subset_input_pin_axis_location
 _hb_subset_input_pin_axis_to_default
 _hb_subset_input_reference
 _hb_subset_input_set
+_hb_subset_input_set_axis_range
 _hb_subset_input_set_flags
 _hb_subset_input_set_user_data
 _hb_subset_input_unicode_set
