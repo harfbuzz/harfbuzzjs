@@ -15,7 +15,10 @@ em++ \
 	-DHB_CONFIG_OVERRIDE_H=\"config-override.h\" \
 	-DHB_EXPERIMENTAL_API \
 	--no-entry \
+	-s MODULARIZE \
 	-s EXPORTED_FUNCTIONS=@hbjs.symbols \
+	-s EXPORTED_RUNTIME_METHODS='["wasmMemory", "wasmExports"]' \
 	-s INITIAL_MEMORY=65MB \
-	-o hb.wasm \
+	-lexports.js \
+	-o hb.js \
 	hbjs.cc
