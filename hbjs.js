@@ -1,11 +1,11 @@
-function hbjs(instance) {
+function hbjs(Module) {
   'use strict';
 
-  var exports = instance.exports;
-  var heapu8 = new Uint8Array(exports.memory.buffer);
-  var heapu32 = new Uint32Array(exports.memory.buffer);
-  var heapi32 = new Int32Array(exports.memory.buffer);
-  var heapf32 = new Float32Array(exports.memory.buffer);
+  var exports = Module.wasmExports;
+  var heapu8 = Module.HEAPU8;
+  var heapu32 = Module.HEAPU32;
+  var heapi32 = Module.HEAP32;
+  var heapf32 = Module.HEAPF32;
   var utf8Decoder = new TextDecoder("utf8");
 
   var HB_MEMORY_MODE_WRITABLE = 2;
@@ -259,7 +259,7 @@ function hbjs(instance) {
 
   function createJsString(text) {
     const ptr = exports.malloc(text.length * 2);
-    const words = new Uint16Array(exports.memory.buffer, ptr, text.length);
+    const words = new Uint16Array(Module.wasmMemory.buffer, ptr, text.length);
     for (let i = 0; i < words.length; ++i) words[i] = text.charCodeAt(i);
     return {
       ptr: ptr,
