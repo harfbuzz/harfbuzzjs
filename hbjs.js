@@ -7,6 +7,7 @@ function hbjs(Module) {
   var heapi32 = Module.HEAP32;
   var heapf32 = Module.HEAPF32;
   var utf8Decoder = new TextDecoder("utf8");
+  let addFunction = Module.addFunction;
 
   var HB_MEMORY_MODE_WRITABLE = 2;
   var HB_SET_VALUE_INVALID = -1;
@@ -155,8 +156,7 @@ function hbjs(Module) {
     };
   }
 
-  var pathBufferSize = 65536; // should be enough for most glyphs
-  var pathBuffer = exports.malloc(pathBufferSize); // permanently allocated
+  var pathBuffer = "";
 
   var nameBufferSize = 256; // should be enough for most glyphs
   var nameBuffer = exports.malloc(nameBufferSize); // permanently allocated
@@ -167,14 +167,46 @@ function hbjs(Module) {
   **/
   function createFont(face) {
     var ptr = exports.hb_font_create(face.ptr);
+    var drawFuncsPtr = null;
 
     /**
     * Return a glyph as an SVG path string.
     * @param {number} glyphId ID of the requested glyph in the font.
     **/
     function glyphToPath(glyphId) {
-      var svgLength = exports.hbjs_glyph_svg(ptr, glyphId, pathBuffer, pathBufferSize);
-      return svgLength > 0 ? utf8Decoder.decode(heapu8.subarray(pathBuffer, pathBuffer + svgLength)) : "";
+      if (!drawFuncsPtr) {
+        var moveTo = function (dfuncs, draw_data, draw_state, to_x, to_y, user_data) {
+          pathBuffer += `M${to_x},${to_y}`;
+        }
+        var lineTo = function (dfuncs, draw_data, draw_state, to_x, to_y, user_data) {
+          pathBuffer += `L${to_x},${to_y}`;
+        }
+        var cubicTo = function (dfuncs, draw_data, draw_state, c1_x, c1_y, c2_x, c2_y, to_x, to_y, user_data) {
+          pathBuffer += `C${c1_x},${c1_y} ${c2_x},${c2_y} ${to_x},${to_y}`;
+        }
+        var quadTo = function (dfuncs, draw_data, draw_state, c_x, c_y, to_x, to_y, user_data) {
+          pathBuffer += `Q${c_x},${c_y} ${to_x},${to_y}`;
+        }
+        var closePath = function (dfuncs, draw_data, draw_state, user_data) {
+          pathBuffer += 'Z';
+        }
+
+        var moveToPtr = addFunction(moveTo, 'viiiffi');
+        var lineToPtr = addFunction(lineTo, 'viiiffi');
+        var cubicToPtr = addFunction(cubicTo, 'viiiffffffi');
+        var quadToPtr = addFunction(quadTo, 'viiiffffi');
+        var closePathPtr = addFunction(closePath, 'viiii');
+        drawFuncsPtr = exports.hb_draw_funcs_create();
+        exports.hb_draw_funcs_set_move_to_func(drawFuncsPtr, moveToPtr, 0, 0);
+        exports.hb_draw_funcs_set_line_to_func(drawFuncsPtr, lineToPtr, 0, 0);
+        exports.hb_draw_funcs_set_cubic_to_func(drawFuncsPtr, cubicToPtr, 0, 0);
+        exports.hb_draw_funcs_set_quadratic_to_func(drawFuncsPtr, quadToPtr, 0, 0);
+        exports.hb_draw_funcs_set_close_path_func(drawFuncsPtr, closePathPtr, 0, 0);
+      }
+
+      pathBuffer = "";
+      exports.hb_font_draw_glyph(ptr, glyphId, drawFuncsPtr, 0);
+      return pathBuffer;
     }
 
     /**

@@ -25,6 +25,13 @@ _hb_font_destroy
 _hb_font_glyph_to_string
 _hb_font_set_scale
 _hb_font_set_variations
+_hb_font_draw_glyph
+_hb_draw_funcs_create
+_hb_draw_funcs_set_move_to_func
+_hb_draw_funcs_set_line_to_func
+_hb_draw_funcs_set_quadratic_to_func
+_hb_draw_funcs_set_cubic_to_func
+_hb_draw_funcs_set_close_path_func
 _hb_glyph_info_get_glyph_flags
 _hb_language_from_string
 _hb_ot_var_get_axis_infos
@@ -34,7 +41,6 @@ _hb_set_destroy
 _hb_set_get_population
 _hb_set_next_many
 _hb_shape
-_hbjs_glyph_svg
 _hbjs_shape_with_trace
 _malloc
 _free

@@ -17,8 +17,9 @@ em++ \
 	--no-entry \
 	-s MODULARIZE \
 	-s EXPORTED_FUNCTIONS=@hbjs.symbols \
-	-s EXPORTED_RUNTIME_METHODS='["wasmMemory", "wasmExports"]' \
+	-s EXPORTED_RUNTIME_METHODS='["addFunction", "wasmMemory", "wasmExports"]' \
 	-s INITIAL_MEMORY=65MB \
+	-s ALLOW_TABLE_GROWTH \
 	-lexports.js \
 	-o hb.js \
 	hbjs.cc
