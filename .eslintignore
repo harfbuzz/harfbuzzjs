@@ -1,0 +1,5 @@
+.eslintrc.js
+examples
+node_modules
+harfbuzz
+*.wasm
