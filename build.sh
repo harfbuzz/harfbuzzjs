@@ -16,7 +16,7 @@ em++ \
 	-DHB_EXPERIMENTAL_API \
 	--no-entry \
 	-s MODULARIZE \
-	-s EXPORTED_FUNCTIONS=@hbjs.symbols \
+	-s EXPORTED_FUNCTIONS=@hb.symbols \
 	-s EXPORTED_RUNTIME_METHODS='["addFunction", "wasmMemory", "wasmExports"]' \
 	-s INITIAL_MEMORY=65MB \
 	-s ALLOW_TABLE_GROWTH \
