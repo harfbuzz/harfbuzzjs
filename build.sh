@@ -22,4 +22,4 @@ em++ \
 	-s ALLOW_TABLE_GROWTH \
 	-lexports.js \
 	-o hb.js \
-	hbjs.cc
+	harfbuzz/src/harfbuzz.cc
