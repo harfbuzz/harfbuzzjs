@@ -1,2 +1,3 @@
 *.wasm
+hb.js
 .DS_Store
