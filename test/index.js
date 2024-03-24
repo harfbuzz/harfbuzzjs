@@ -190,7 +190,7 @@ describe('shape', function () {
     this.buffer = hb.createBuffer();
     this.buffer.addText('abc');
     this.buffer.guessSegmentProperties();
-    const result = hb.shapeWithTrace(this.font, this.buffer, 0, 0)
+    const result = hb.shapeWithTrace(this.font, this.buffer, "", 0, 0)
     expect(result).to.have.lengthOf(42);
     expect(result[0]).to.deep.equal({
       "m": "start table GSUB script tag 'latn'",
