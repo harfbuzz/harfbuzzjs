@@ -9,6 +9,8 @@ function hbjs(Module) {
   var utf8Decoder = new TextDecoder("utf8");
   let addFunction = Module.addFunction;
 
+  var freeFuncPtr = addFunction(function (ptr) { exports.free(ptr); }, 'vi');
+
   var HB_MEMORY_MODE_WRITABLE = 2;
   var HB_SET_VALUE_INVALID = -1;
   var HB_BUFFER_CONTENT_TYPE_GLYPHS = 2;
@@ -54,7 +56,7 @@ function hbjs(Module) {
   function createBlob(blob) {
     var blobPtr = exports.malloc(blob.byteLength);
     heapu8.set(new Uint8Array(blob), blobPtr);
-    var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, blobPtr, exports.free_ptr());
+    var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, blobPtr, freeFuncPtr);
     return {
       ptr: ptr,
       /**

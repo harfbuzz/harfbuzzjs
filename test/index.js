@@ -22,6 +22,8 @@ describe('Face', function () {
     const codepoints = [...this.face.collectUnicodes()];
     expect(codepoints).to.include('a'.codePointAt(0));
     expect(codepoints).not.to.include('ا'.codePointAt(0));
+    this.face.destroy();
+    this.blob.destroy();
   });
 
   it('exposes upem', function () {

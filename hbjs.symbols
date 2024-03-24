@@ -47,4 +47,3 @@ _hb_set_next_many
 _hb_shape
 _malloc
 _free
-_free_ptr
