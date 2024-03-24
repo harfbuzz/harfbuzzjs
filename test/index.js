@@ -211,4 +211,37 @@ describe('shape', function () {
       ],
     });
   });
+
+  it('shape with tracing and features', function () {
+    this.blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    this.face = hb.createFace(this.blob);
+    this.font = hb.createFont(this.face);
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('fi AV');
+    this.buffer.guessSegmentProperties();
+    const result = hb.shapeWithTrace(this.font, this.buffer, "-liga,-kern", 0, 0)
+    expect(result).to.have.lengthOf(29);
+    expect(result[0]).to.deep.equal({
+      "m": "start table GSUB script tag 'latn'",
+      "glyphs": true,
+      "t": [
+        {cl: 0, g: 73},
+        {cl: 1, g: 76},
+        {cl: 2, g: 3},
+        {cl: 3, g: 36},
+        {cl: 4, g: 57},
+      ],
+    });
+    expect(result[28]).to.deep.equal({
+      "m": "end table GPOS script tag 'latn'",
+      "glyphs": true,
+      "t": [
+        {cl: 0, g: 73, ax: 344, ay: 0, dx: 0, dy: 0},
+        {cl: 1, g: 76, ax: 258, ay: 0, dx: 0, dy: 0},
+        {cl: 2, g: 3, ax: 260, ay: 0, dx: 0, dy: 0},
+        {cl: 3, g: 36, ax: 639, ay: 0, dx: 0, dy: 0},
+        {cl: 4, g: 57, ax: 600, ay: 0, dx: 0, dy: 0},
+      ],
+    });
+  });
 });
