@@ -11,6 +11,10 @@ function hbjs(Module) {
 
   var HB_MEMORY_MODE_WRITABLE = 2;
   var HB_SET_VALUE_INVALID = -1;
+  var HB_BUFFER_CONTENT_TYPE_GLYPHS = 2;
+  var DONT_STOP = 0;
+  var GSUB_PHASE = 1;
+  var GPOS_PHASE = 2;
 
   function hb_tag(s) {
     return (
@@ -20,6 +24,9 @@ function hbjs(Module) {
       (s.charCodeAt(3) & 0xFF) <<  0
     );
   }
+
+  var HB_BUFFER_SERIALIZE_FORMAT_JSON	= hb_tag('JSON');
+  var HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES	= 4;
 
   function _hb_untag(tag) {
     return [
@@ -433,10 +440,25 @@ function hbjs(Module) {
   * @param {object} font: A font returned from `createFont`
   * @param {object} buffer: A buffer returned from `createBuffer` and suitably
   *   prepared.
-  * @param {object} features: (Currently unused).
+  * @param {object} features: A string of comma-separated OpenType features to apply.
   */
   function shape(font, buffer, features) {
-    exports.hb_shape(font.ptr, buffer.ptr, 0, 0);
+    var featuresPtr = 0;
+    var featuresLen = 0;
+    if (features) {
+      features = features.split(",");
+      featuresPtr = exports.malloc(16 * features.length);
+      features.forEach(function (feature, i) {
+        var str = createAsciiString(feature);
+        if (exports.hb_feature_from_string(str.ptr, -1, featuresPtr + featuresLen * 16))
+          featuresLen++;
+        str.free();
+      });
+    }
+
+    exports.hb_shape(font.ptr, buffer.ptr, featuresPtr, featuresLen);
+    if (featuresPtr)
+      exports.free(featuresPtr);
   }
 
   /**
@@ -450,22 +472,63 @@ function hbjs(Module) {
   * @param {object} font: A font returned from `createFont`
   * @param {object} buffer: A buffer returned from `createBuffer` and suitably
   *   prepared.
-  * @param {object} features: A dictionary of OpenType features to apply.
+  * @param {object} features: A string of comma-separated OpenType features to apply.
   * @param {number} stop_at: A lookup ID at which to terminate shaping.
   * @param {number} stop_phase: Either 0 (don't terminate shaping), 1 (`stop_at`
       refers to a lookup ID in the GSUB table), 2 (`stop_at` refers to a lookup
       ID in the GPOS table).
   */
-
   function shapeWithTrace(font, buffer, features, stop_at, stop_phase) {
-    var bufLen = 1024 * 1024;
-    var traceBuffer = exports.malloc(bufLen);
-    var featurestr = createAsciiString(features);
-    var traceLen = exports.hbjs_shape_with_trace(font.ptr, buffer.ptr, featurestr.ptr, stop_at, stop_phase, traceBuffer, bufLen);
-    featurestr.free();
-    var trace = utf8Decoder.decode(heapu8.subarray(traceBuffer, traceBuffer + traceLen - 1));
-    exports.free(traceBuffer);
-    return JSON.parse(trace);
+    var trace = [];
+    var currentPhase = DONT_STOP;
+    var stopping = false;
+    var failure = false;
+
+    var traceBufLen = 1024 * 1024;
+    var traceBufPtr = exports.malloc(traceBufLen);
+
+    var traceFunc = function (bufferPtr, fontPtr, messagePtr, user_data) {
+      var message = utf8Decoder.decode(heapu8.subarray(messagePtr, heapu8.indexOf(0, messagePtr)));
+      if (message.startsWith("start table GSUB"))
+        currentPhase = GSUB_PHASE;
+      else if (message.startsWith("start table GPOS"))
+        currentPhase = GPOS_PHASE;
+
+      if (currentPhase != stop_phase)
+        stopping = false;
+
+      if (failure)
+        return 1;
+
+      if (stop_phase != DONT_STOP && currentPhase == stop_phase && message.startsWith("end lookup " + stop_at))
+        stopping = true;
+
+      if (stopping)
+        return 0;
+
+      exports.hb_buffer_serialize_glyphs(
+        bufferPtr,
+        0, exports.hb_buffer_get_length(bufferPtr),
+        traceBufPtr, traceBufLen, 0,
+        fontPtr,
+        HB_BUFFER_SERIALIZE_FORMAT_JSON,
+        HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES);
+
+      trace.push({
+        m: message,
+        t: JSON.parse(utf8Decoder.decode(heapu8.subarray(traceBufPtr, heapu8.indexOf(0, traceBufPtr)))),
+        glyphs: exports.hb_buffer_get_content_type(bufferPtr) == HB_BUFFER_CONTENT_TYPE_GLYPHS,
+      });
+
+      return 1;
+    }
+
+    var traceFuncPtr = addFunction(traceFunc, 'iiiii');
+    exports.hb_buffer_set_message_func(buffer.ptr, traceFuncPtr, 0, 0);
+    shape(font, buffer, features, 0);
+    exports.free(traceBufPtr);
+
+    return trace;
   }
 
   return {
