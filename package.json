@@ -1,6 +1,6 @@
 {
   "name": "harfbuzzjs",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Minimal version of HarfBuzz for JavaScript use",
   "main": "index.js",
   "scripts": {
