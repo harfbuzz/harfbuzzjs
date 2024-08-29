@@ -533,15 +533,34 @@ function hbjs(Module) {
     return trace;
   }
 
+  function get_version() {
+    var major = exports.malloc(4);
+    var minor = exports.malloc(4);
+    var patch = exports.malloc(4);
+    heapu32[major / 4] = 0;
+    heapu32[minor / 4] = 0;
+    heapu32[patch / 4] = 0;
+    exports.hb_version(major, minor, patch);
+    let hbversion =
+      heapu32[major / 4] + "." + heapu32[minor / 4] + "." + heapu32[patch / 4];
+    exports.free(major);
+    exports.free(minor);
+    exports.free(patch);
+    return hbversion;
+  }
+
   return {
     createBlob: createBlob,
     createFace: createFace,
     createFont: createFont,
     createBuffer: createBuffer,
     shape: shape,
-    shapeWithTrace: shapeWithTrace
+    shapeWithTrace: shapeWithTrace,
+    version: get_version(),
   };
-};
+}
 
 // Should be replaced with something more reliable
-try { module.exports = hbjs; } catch(e) {}
+try {
+  module.exports = hbjs;
+} catch (e) {}
