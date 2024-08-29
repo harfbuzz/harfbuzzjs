@@ -247,3 +247,10 @@ describe('shape', function () {
     });
   });
 });
+
+describe('misc', function () {
+  it('get version string', function () {
+    const version = hb.version
+    expect(version).to.match(/^\d+\.\d+\.\d+$/);
+  });
+});

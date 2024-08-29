@@ -46,5 +46,6 @@ _hb_set_get_population
 _hb_set_next_many
 _hb_shape
 _hb_version
+_hb_version_string
 _malloc
 _free
