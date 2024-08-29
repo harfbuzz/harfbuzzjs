@@ -533,15 +533,24 @@ function hbjs(Module) {
     return trace;
   }
 
+  function get_version() {
+    var versionPtr = exports.hb_version_string();
+    var version = utf8Decoder.decode(heapu8.subarray(versionPtr, heapu8.indexOf(0, versionPtr)));
+    return version;
+  }
+
   return {
     createBlob: createBlob,
     createFace: createFace,
     createFont: createFont,
     createBuffer: createBuffer,
     shape: shape,
-    shapeWithTrace: shapeWithTrace
+    shapeWithTrace: shapeWithTrace,
+    version: get_version(),
   };
-};
+}
 
 // Should be replaced with something more reliable
-try { module.exports = hbjs; } catch(e) {}
+try {
+  module.exports = hbjs;
+} catch (e) {}
