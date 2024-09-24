@@ -533,7 +533,23 @@ function hbjs(Module) {
     return trace;
   }
 
-  function get_version() {
+  function version() {
+    var major = exports.malloc(4);
+    var minor = exports.malloc(4);
+    var micro = exports.malloc(4);
+    exports.hb_version(major, minor, micro);
+    var version = {
+      major: heapu32[major / 4],
+      minor: heapu32[minor / 4],
+      micro: heapu32[micro / 4],
+    };
+    exports.free(major);
+    exports.free(minor);
+    exports.free(micro);
+    return version;
+  }
+
+  function version_string() {
     var versionPtr = exports.hb_version_string();
     var version = utf8Decoder.decode(heapu8.subarray(versionPtr, heapu8.indexOf(0, versionPtr)));
     return version;
@@ -546,7 +562,8 @@ function hbjs(Module) {
     createBuffer: createBuffer,
     shape: shape,
     shapeWithTrace: shapeWithTrace,
-    version: get_version(),
+    version: version,
+    version_string: version_string,
   };
 }
 
