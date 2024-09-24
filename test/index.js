@@ -249,8 +249,15 @@ describe('shape', function () {
 });
 
 describe('misc', function () {
+  it('get version', function () {
+    const version = hb.version();
+    expect(version).to.have.property('major').that.is.a('number');
+    expect(version).to.have.property('minor').that.is.a('number');
+    expect(version).to.have.property('micro').that.is.a('number');
+    expect(version.major).to.be.at.least(10);
+  });
   it('get version string', function () {
-    const version = hb.version
-    expect(version).to.match(/^\d+\.\d+\.\d+$/);
+    const version_string = hb.version_string();
+    expect(version_string).to.match(/^\d+\.\d+\.\d+$/);
   });
 });
