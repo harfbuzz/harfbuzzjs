@@ -534,18 +534,14 @@ function hbjs(Module) {
   }
 
   function version() {
-    var major = exports.malloc(4);
-    var minor = exports.malloc(4);
-    var micro = exports.malloc(4);
-    exports.hb_version(major, minor, micro);
+    var versionPtr = exports.malloc(12);
+    exports.hb_version(versionPtr, versionPtr + 4, versionPtr + 8);
     var version = {
-      major: heapu32[major / 4],
-      minor: heapu32[minor / 4],
-      micro: heapu32[micro / 4],
+      major: heapu32[versionPtr / 4],
+      minor: heapu32[(versionPtr + 4) / 4],
+      micro: heapu32[(versionPtr + 8) / 4],
     };
-    exports.free(major);
-    exports.free(minor);
-    exports.free(micro);
+    exports.free(versionPtr);
     return version;
   }
 
