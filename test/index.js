@@ -246,6 +246,50 @@ describe('shape', function () {
       ],
     });
   });
+
+  it('shape with 3-letter languae tag', function () {
+    this.blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansDevanagari-Regular.otf')));
+    this.face = hb.createFace(this.blob);
+    this.font = hb.createFont(this.face);
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('५ल');
+    this.buffer.guessSegmentProperties();
+    hb.shape(this.font, this.buffer)
+    var glyphs = this.buffer.json();
+    expect(glyphs).to.have.lengthOf(2);
+    expect(glyphs[0].g).to.equal(118);
+
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('५ल');
+    this.buffer.setLanguage('dty');
+    this.buffer.guessSegmentProperties();
+    hb.shape(this.font, this.buffer)
+    var glyphs = this.buffer.json();
+    expect(glyphs).to.have.lengthOf(2);
+    expect(glyphs[0].g).to.equal(123);
+  });
+
+  it('shape with OpenType language tag', function () {
+    this.blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansDevanagari-Regular.otf')));
+    this.face = hb.createFace(this.blob);
+    this.font = hb.createFont(this.face);
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('५ल');
+    this.buffer.guessSegmentProperties();
+    hb.shape(this.font, this.buffer)
+    var glyphs = this.buffer.json();
+    expect(glyphs).to.have.lengthOf(2);
+    expect(glyphs[0].g).to.equal(118);
+
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('५ल');
+    this.buffer.setLanguage('x-hbot-4e455020'); // 'NEP '
+    this.buffer.guessSegmentProperties();
+    hb.shape(this.font, this.buffer)
+    var glyphs = this.buffer.json();
+    expect(glyphs).to.have.lengthOf(2);
+    expect(glyphs[0].g).to.equal(123);
+  });
 });
 
 describe('misc', function () {
