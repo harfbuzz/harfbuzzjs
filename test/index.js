@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const {expect} = require('chai');
+const { expect } = require('chai');
 let hb;
 
 before(async function () {
@@ -36,8 +36,8 @@ describe('Face', function () {
     this.blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
     this.face = hb.createFace(this.blob);
     expect(this.face.getAxisInfos()).to.deep.equal({
-      wght: {min: 100, default: 400, max: 900},
-      wdth: {min: 62.5, default: 100, max: 100}
+      wght: { min: 100, default: 400, max: 900 },
+      wdth: { min: 62.5, default: 100, max: 100 }
     });
   });
 
@@ -73,7 +73,7 @@ describe('Font', function () {
     this.blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
     this.face = hb.createFace(this.blob);
     this.font = hb.createFont(this.face);
-    this.font.setVariations({'wght': 789});
+    this.font.setVariations({ 'wght': 789 });
     this.buffer = hb.createBuffer();
     this.buffer.addText('آلو');
     this.buffer.guessSegmentProperties();
@@ -165,9 +165,9 @@ describe('shape', function () {
     this.buffer.guessSegmentProperties();
     hb.shape(this.font, this.buffer)
     const glyphs = this.buffer.json();
-    expect(glyphs[0]).to.deep.equal({cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0, flags: 0} /* a */);
-    expect(glyphs[1]).to.deep.equal({cl: 1, g: 69, ax: 615, ay: 0, dx: 0, dy: 0, flags: 0} /* b */);
-    expect(glyphs[2]).to.deep.equal({cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0, flags: 0} /* c */);
+    expect(glyphs[0]).to.deep.equal({ cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0, flags: 0 } /* a */);
+    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 69, ax: 615, ay: 0, dx: 0, dy: 0, flags: 0 } /* b */);
+    expect(glyphs[2]).to.deep.equal({ cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0, flags: 0 } /* c */);
   });
 
   it('shape Arabic string', function () {
@@ -179,10 +179,10 @@ describe('shape', function () {
     this.buffer.guessSegmentProperties();
     hb.shape(this.font, this.buffer)
     const glyphs = this.buffer.json();
-    expect(glyphs[0]).to.deep.equal({cl: 3, g: 213, ax: 532, ay: 0, dx: 0, dy: 0, flags: 1} /* د */);
-    expect(glyphs[1]).to.deep.equal({cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, flags: 1} /* ج */);
-    expect(glyphs[2]).to.deep.equal({cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0, flags: 0} /* ب */);
-    expect(glyphs[3]).to.deep.equal({cl: 0, g:  50, ax: 235, ay: 0, dx: 0, dy: 0, flags: 0} /* أ */);
+    expect(glyphs[0]).to.deep.equal({ cl: 3, g: 213, ax: 532, ay: 0, dx: 0, dy: 0, flags: 1 } /* د */);
+    expect(glyphs[1]).to.deep.equal({ cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, flags: 1 } /* ج */);
+    expect(glyphs[2]).to.deep.equal({ cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0, flags: 0 } /* ب */);
+    expect(glyphs[3]).to.deep.equal({ cl: 0, g: 50, ax: 235, ay: 0, dx: 0, dy: 0, flags: 0 } /* أ */);
   });
 
   it('shape with tracing', function () {
@@ -198,18 +198,18 @@ describe('shape', function () {
       "m": "start table GSUB script tag 'latn'",
       "glyphs": true,
       "t": [
-        {cl: 0, g: 68},
-        {cl: 1, g: 69},
-        {cl: 2, g: 70},
+        { cl: 0, g: 68 },
+        { cl: 1, g: 69 },
+        { cl: 2, g: 70 },
       ],
     });
     expect(result[41]).to.deep.equal({
       "m": "end table GPOS script tag 'latn'",
       "glyphs": true,
       "t": [
-        {cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0},
-        {cl: 1, g: 69, ax: 615, ay: 0, dx: 0, dy: 0},
-        {cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0},
+        { cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0 },
+        { cl: 1, g: 69, ax: 615, ay: 0, dx: 0, dy: 0 },
+        { cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0 },
       ],
     });
   });
@@ -227,24 +227,68 @@ describe('shape', function () {
       "m": "start table GSUB script tag 'latn'",
       "glyphs": true,
       "t": [
-        {cl: 0, g: 73},
-        {cl: 1, g: 76},
-        {cl: 2, g: 3},
-        {cl: 3, g: 36},
-        {cl: 4, g: 57},
+        { cl: 0, g: 73 },
+        { cl: 1, g: 76 },
+        { cl: 2, g: 3 },
+        { cl: 3, g: 36 },
+        { cl: 4, g: 57 },
       ],
     });
     expect(result[28]).to.deep.equal({
       "m": "end table GPOS script tag 'latn'",
       "glyphs": true,
       "t": [
-        {cl: 0, g: 73, ax: 344, ay: 0, dx: 0, dy: 0},
-        {cl: 1, g: 76, ax: 258, ay: 0, dx: 0, dy: 0},
-        {cl: 2, g: 3, ax: 260, ay: 0, dx: 0, dy: 0},
-        {cl: 3, g: 36, ax: 639, ay: 0, dx: 0, dy: 0},
-        {cl: 4, g: 57, ax: 600, ay: 0, dx: 0, dy: 0},
+        { cl: 0, g: 73, ax: 344, ay: 0, dx: 0, dy: 0 },
+        { cl: 1, g: 76, ax: 258, ay: 0, dx: 0, dy: 0 },
+        { cl: 2, g: 3, ax: 260, ay: 0, dx: 0, dy: 0 },
+        { cl: 3, g: 36, ax: 639, ay: 0, dx: 0, dy: 0 },
+        { cl: 4, g: 57, ax: 600, ay: 0, dx: 0, dy: 0 },
       ],
     });
+  });
+
+  it('shape with 3-letter languae tag', function () {
+    this.blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansDevanagari-Regular.otf')));
+    this.face = hb.createFace(this.blob);
+    this.font = hb.createFont(this.face);
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('५ल');
+    this.buffer.guessSegmentProperties();
+    hb.shape(this.font, this.buffer)
+    var glyphs = this.buffer.json();
+    expect(glyphs).to.have.lengthOf(2);
+    expect(glyphs[0].g).to.equal(118);
+
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('५ल');
+    this.buffer.setLanguage('dty');
+    this.buffer.guessSegmentProperties();
+    hb.shape(this.font, this.buffer)
+    var glyphs = this.buffer.json();
+    expect(glyphs).to.have.lengthOf(2);
+    expect(glyphs[0].g).to.equal(123);
+  });
+
+  it('shape with OpenType language tag', function () {
+    this.blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansDevanagari-Regular.otf')));
+    this.face = hb.createFace(this.blob);
+    this.font = hb.createFont(this.face);
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('५ल');
+    this.buffer.guessSegmentProperties();
+    hb.shape(this.font, this.buffer)
+    var glyphs = this.buffer.json();
+    expect(glyphs).to.have.lengthOf(2);
+    expect(glyphs[0].g).to.equal(118);
+
+    this.buffer = hb.createBuffer();
+    this.buffer.addText('५ल');
+    this.buffer.setLanguage('x-hbot-4e455020'); // 'NEP '
+    this.buffer.guessSegmentProperties();
+    hb.shape(this.font, this.buffer)
+    var glyphs = this.buffer.json();
+    expect(glyphs).to.have.lengthOf(2);
+    expect(glyphs[0].g).to.equal(123);
   });
 });
 
