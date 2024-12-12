@@ -8,6 +8,25 @@ See the demo [here](https://harfbuzz.github.io/harfbuzzjs/).
 1. Install emscripten
 2. `./build.sh`
 
+### Using Docker
+Install Docker and use the following commands to build the Docker container, and run.
+
+The Dockerfile contains a complete set of tools to build and test harfbuzzjs.
+
+Linux:
+1. `docker build ./ -t harfbuzzjs:0.4.3`
+2. `docker run --rm -it -v $PWD:/app -w /app harfbuzzjs:0.4.3`
+3. Then, inside the temporary Linux terminal, use `./build.sh` and `npm test`
+
+Windows CMD prompt:
+1. `docker build ./ -t harfbuzzjs:0.4.3`
+2. `docker run --rm -it -v %cd%:/app -w /app harfbuzzjs:0.4.3`
+3. Then, inside the temporary Linux terminal, use `./build.sh` and `npm test`
+
+Two .cmd files are provided for ease `build-docker.cmd` and `run-docker.cmd`.
+
+NOTE: if using PowerShell, replace `%cd%` with `${PWD}`.
+
 ## Download
 Download the pack from [releases tab](https://github.com/harfbuzz/harfbuzzjs/releases)
 of the project, or just download the [demo page](https://harfbuzz.github.io/harfbuzzjs/) (the
@@ -17,6 +36,7 @@ demo source is in [gh-pages](https://github.com/harfbuzz/harfbuzzjs/tree/gh-page
 
 ### TL;DR
 
+NodeJS:
 ```javascript
 hb = require("hbjs.js")
 WebAssembly.instantiateStreaming(fetch("hb.wasm")).then(function (result) {
