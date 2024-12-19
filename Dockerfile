@@ -43,11 +43,18 @@ RUN set -x \
   && nvm alias default $NODE_VERSION \
   && nvm use default \
   && node -v \
-  && npm -v \
-  && npm i -g mocha@10.8.2 \
-  && npm i -g chai@4.5.0 \
-  && npm i -g typescript@5.7.2 \
-  && npm i -g pad.js
+  && npm -v
+
+#-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!
+# chai (and mocha) need to be installed locally!
+# chai CANNOT be found if only installed globally :-(
+#
+# *INSTEAD* Use ./npm-install.sh
+# This creates ./node_modules in the current app directory
+# and downloads all the required npm modules for `npm test`
+# Only needs to be called once within the docker container.
+#-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!
+
 
 # Essential to get EM++ to work!
 # (From terminal this is set in the `source ./emsdk_env.sh` script)

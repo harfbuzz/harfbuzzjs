@@ -9,23 +9,28 @@ See the demo [here](https://harfbuzz.github.io/harfbuzzjs/).
 2. `./build.sh`
 
 ### Using Docker
-Install Docker and use the following commands to build the Docker container, and run.
+Install Docker Desktop and use the following commands from a command prompt to build the Docker container, and run.
 
 The Dockerfile contains a complete set of tools to build and test harfbuzzjs.
 
 Linux:
 1. `docker build ./ -t harfbuzzjs:0.4.3`
 2. `docker run --rm -it -v $PWD:/app -w /app harfbuzzjs:0.4.3`
-3. Then, inside the temporary Linux terminal, use `./build.sh` and `npm test`
 
 Windows CMD prompt:
 1. `docker build ./ -t harfbuzzjs:0.4.3`
 2. `docker run --rm -it -v %cd%:/app -w /app harfbuzzjs:0.4.3`
-3. Then, inside the temporary Linux terminal, use `./build.sh` and `npm test`
 
 Two .cmd files are provided for ease `build-docker.cmd` and `run-docker.cmd`.
 
 NOTE: if using PowerShell, replace `%cd%` with `${PWD}`.
+
+Inside the Linux docker:
+1. Build the wasm: `./build.sh`
+2. Testing:
+ - (once) `./npm-install.sh` This creates `./node_modules` in the harfbuzzjs directory with all the required NodeJS modules
+ - `npm test` - runs the tests
+
 
 ## Download
 Download the pack from [releases tab](https://github.com/harfbuzz/harfbuzzjs/releases)
