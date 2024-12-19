@@ -1,14 +1,22 @@
-function hbjs(instance) {
+function hbjs(Module) {
   'use strict';
 
-  var exports = instance.exports;
-  var heapu8 = new Uint8Array(exports.memory.buffer);
-  var heapu32 = new Uint32Array(exports.memory.buffer);
-  var heapi32 = new Int32Array(exports.memory.buffer);
-  var heapf32 = new Float32Array(exports.memory.buffer);
+  var exports = Module.wasmExports;
+  var heapu8 = Module.HEAPU8;
+  var heapu32 = Module.HEAPU32;
+  var heapi32 = Module.HEAP32;
+  var heapf32 = Module.HEAPF32;
   var utf8Decoder = new TextDecoder("utf8");
+  let addFunction = Module.addFunction;
+
+  var freeFuncPtr = addFunction(function (ptr) { exports.free(ptr); }, 'vi');
 
   var HB_MEMORY_MODE_WRITABLE = 2;
+  var HB_SET_VALUE_INVALID = -1;
+  var HB_BUFFER_CONTENT_TYPE_GLYPHS = 2;
+  var DONT_STOP = 0;
+  var GSUB_PHASE = 1;
+  var GPOS_PHASE = 2;
 
   function hb_tag(s) {
     return (
@@ -18,6 +26,9 @@ function hbjs(instance) {
       (s.charCodeAt(3) & 0xFF) <<  0
     );
   }
+
+  var HB_BUFFER_SERIALIZE_FORMAT_JSON	= hb_tag('JSON');
+  var HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES	= 4;
 
   function _hb_untag(tag) {
     return [
@@ -34,6 +45,7 @@ function hbjs(instance) {
     if (s == "PRESERVE_DEFAULT_IGNORABLES") { return 0x4; }
     if (s == "REMOVE_DEFAULT_IGNORABLES") { return 0x8; }
     if (s == "DO_NOT_INSERT_DOTTED_CIRCLE") { return 0x10; }
+    if (s == "PRODUCE_UNSAFE_TO_CONCAT") { return 0x40; }
     return 0x0;
   }
 
@@ -44,7 +56,7 @@ function hbjs(instance) {
   function createBlob(blob) {
     var blobPtr = exports.malloc(blob.byteLength);
     heapu8.set(new Uint8Array(blob), blobPtr);
-    var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, blobPtr, exports.free_ptr());
+    var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, blobPtr, freeFuncPtr);
     return {
       ptr: ptr,
       /**
@@ -52,6 +64,42 @@ function hbjs(instance) {
       */
       destroy: function () { exports.hb_blob_destroy(ptr); }
     };
+  }
+
+  /**
+   * Return the typed array of HarfBuzz set contents.
+   * @template {typeof Uint8Array | typeof Uint32Array | typeof Int32Array | typeof Float32Array} T
+   * @param {number} setPtr Pointer of set
+   * @param {T} arrayClass Typed array class
+   * @returns {InstanceType<T>} Typed array instance
+   */
+  function typedArrayFromSet(setPtr, arrayClass) {
+    let heap = heapu8;
+    if (arrayClass === Uint32Array) {
+      heap = heapu32;
+    } else if (arrayClass === Int32Array) {
+      heap = heapi32;
+    } else if (arrayClass === Float32Array) {
+      heap = heapf32;
+    }
+    const bytesPerElment = arrayClass.BYTES_PER_ELEMENT;
+    const setCount = exports.hb_set_get_population(setPtr);
+    const arrayPtr = exports.malloc(
+      setCount * bytesPerElment,
+    );
+    const arrayOffset = arrayPtr / bytesPerElment;
+    const array = heap.subarray(
+      arrayOffset,
+      arrayOffset + setCount,
+    );
+    heap.set(array, arrayOffset);
+    exports.hb_set_next_many(
+      setPtr,
+      HB_SET_VALUE_INVALID,
+      arrayPtr,
+      setCount,
+    );
+    return array;
   }
 
   /**
@@ -99,6 +147,16 @@ function hbjs(instance) {
         return result;
       },
       /**
+       * Return unicodes the face supports
+       */
+      collectUnicodes: function() {
+        var unicodeSetPtr = exports.hb_set_create();
+        exports.hb_face_collect_unicodes(ptr, unicodeSetPtr);
+        var result = typedArrayFromSet(unicodeSetPtr, Uint32Array);
+        exports.hb_set_destroy(unicodeSetPtr);
+        return result;
+      },
+      /**
        * Free the object.
        */
       destroy: function () {
@@ -107,8 +165,10 @@ function hbjs(instance) {
     };
   }
 
-  var pathBufferSize = 65536; // should be enough for most glyphs
-  var pathBuffer = exports.malloc(pathBufferSize); // permanently allocated
+  var pathBuffer = "";
+
+  var nameBufferSize = 256; // should be enough for most glyphs
+  var nameBuffer = exports.malloc(nameBufferSize); // permanently allocated
 
   /**
   * Create an object representing a Harfbuzz font.
@@ -116,18 +176,66 @@ function hbjs(instance) {
   **/
   function createFont(face) {
     var ptr = exports.hb_font_create(face.ptr);
+    var drawFuncsPtr = null;
 
     /**
     * Return a glyph as an SVG path string.
     * @param {number} glyphId ID of the requested glyph in the font.
     **/
     function glyphToPath(glyphId) {
-      var svgLength = exports.hbjs_glyph_svg(ptr, glyphId, pathBuffer, pathBufferSize);
-      return svgLength > 0 ? utf8Decoder.decode(heapu8.subarray(pathBuffer, pathBuffer + svgLength)) : "";
+      if (!drawFuncsPtr) {
+        var moveTo = function (dfuncs, draw_data, draw_state, to_x, to_y, user_data) {
+          pathBuffer += `M${to_x},${to_y}`;
+        }
+        var lineTo = function (dfuncs, draw_data, draw_state, to_x, to_y, user_data) {
+          pathBuffer += `L${to_x},${to_y}`;
+        }
+        var cubicTo = function (dfuncs, draw_data, draw_state, c1_x, c1_y, c2_x, c2_y, to_x, to_y, user_data) {
+          pathBuffer += `C${c1_x},${c1_y} ${c2_x},${c2_y} ${to_x},${to_y}`;
+        }
+        var quadTo = function (dfuncs, draw_data, draw_state, c_x, c_y, to_x, to_y, user_data) {
+          pathBuffer += `Q${c_x},${c_y} ${to_x},${to_y}`;
+        }
+        var closePath = function (dfuncs, draw_data, draw_state, user_data) {
+          pathBuffer += 'Z';
+        }
+
+        var moveToPtr = addFunction(moveTo, 'viiiffi');
+        var lineToPtr = addFunction(lineTo, 'viiiffi');
+        var cubicToPtr = addFunction(cubicTo, 'viiiffffffi');
+        var quadToPtr = addFunction(quadTo, 'viiiffffi');
+        var closePathPtr = addFunction(closePath, 'viiii');
+        drawFuncsPtr = exports.hb_draw_funcs_create();
+        exports.hb_draw_funcs_set_move_to_func(drawFuncsPtr, moveToPtr, 0, 0);
+        exports.hb_draw_funcs_set_line_to_func(drawFuncsPtr, lineToPtr, 0, 0);
+        exports.hb_draw_funcs_set_cubic_to_func(drawFuncsPtr, cubicToPtr, 0, 0);
+        exports.hb_draw_funcs_set_quadratic_to_func(drawFuncsPtr, quadToPtr, 0, 0);
+        exports.hb_draw_funcs_set_close_path_func(drawFuncsPtr, closePathPtr, 0, 0);
+      }
+
+      pathBuffer = "";
+      exports.hb_font_draw_glyph(ptr, glyphId, drawFuncsPtr, 0);
+      return pathBuffer;
+    }
+
+    /**
+     * Return glyph name.
+     * @param {number} glyphId ID of the requested glyph in the font.
+     **/
+    function glyphName(glyphId) {
+      exports.hb_font_glyph_to_string(
+        ptr,
+        glyphId,
+        nameBuffer,
+        nameBufferSize
+      );
+      var array = heapu8.subarray(nameBuffer, nameBuffer + nameBufferSize);
+      return utf8Decoder.decode(array.slice(0, array.indexOf(0)));
     }
 
     return {
       ptr: ptr,
+      glyphName: glyphName,
       glyphToPath: glyphToPath,
       /**
       * Return a glyph as a JSON path string
@@ -171,21 +279,28 @@ function hbjs(instance) {
     };
   }
 
-  var utf8Encoder = new TextEncoder("utf8");
-  function createCString(text) {
-    var bytes = utf8Encoder.encode(text);
-    var ptr = exports.malloc(bytes.byteLength);
-    heapu8.set(bytes, ptr);
+  /**
+  * Use when you know the input range should be ASCII.
+  * Faster than encoding to UTF-8
+  **/
+  function createAsciiString(text) {
+    var ptr = exports.malloc(text.length + 1);
+    for (let i = 0; i < text.length; ++i) {
+      const char = text.charCodeAt(i);
+      if (char > 127) throw new Error('Expected ASCII text');
+      heapu8[ptr + i] = char;
+    }
+    heapu8[ptr + text.length] = 0;
     return {
       ptr: ptr,
-      length: bytes.byteLength,
+      length: text.length,
       free: function () { exports.free(ptr); }
     };
   }
 
   function createJsString(text) {
     const ptr = exports.malloc(text.length * 2);
-    const words = new Uint16Array(exports.memory.buffer, ptr, text.length);
+    const words = new Uint16Array(Module.wasmMemory.buffer, ptr, text.length);
     for (let i = 0; i < words.length; ++i) words[i] = text.charCodeAt(i);
     return {
       ptr: ptr,
@@ -238,6 +353,7 @@ function hbjs(instance) {
       * "PRESERVE_DEFAULT_IGNORABLES"
       * "REMOVE_DEFAULT_IGNORABLES"
       * "DO_NOT_INSERT_DOTTED_CIRCLE"
+      * "PRODUCE_UNSAFE_TO_CONCAT"
       */
       setFlags: function (flags) {
         var flagValue = 0
@@ -252,7 +368,7 @@ function hbjs(instance) {
       * @param {string} language: The buffer language
       */
       setLanguage: function (language) {
-        var str = createCString(language);
+        var str = createAsciiString(language);
         exports.hb_buffer_set_language(ptr, exports.hb_language_from_string(str.ptr,-1));
         str.free();
       },
@@ -261,7 +377,7 @@ function hbjs(instance) {
       * @param {string} script: The buffer script
       */
       setScript: function (script) {
-        var str = createCString(script);
+        var str = createAsciiString(script);
         exports.hb_buffer_set_script(ptr, exports.hb_script_from_string(str.ptr,-1));
         str.free();
       },
@@ -326,10 +442,25 @@ function hbjs(instance) {
   * @param {object} font: A font returned from `createFont`
   * @param {object} buffer: A buffer returned from `createBuffer` and suitably
   *   prepared.
-  * @param {object} features: (Currently unused).
+  * @param {object} features: A string of comma-separated OpenType features to apply.
   */
   function shape(font, buffer, features) {
-    exports.hb_shape(font.ptr, buffer.ptr, 0, 0);
+    var featuresPtr = 0;
+    var featuresLen = 0;
+    if (features) {
+      features = features.split(",");
+      featuresPtr = exports.malloc(16 * features.length);
+      features.forEach(function (feature, i) {
+        var str = createAsciiString(feature);
+        if (exports.hb_feature_from_string(str.ptr, -1, featuresPtr + featuresLen * 16))
+          featuresLen++;
+        str.free();
+      });
+    }
+
+    exports.hb_shape(font.ptr, buffer.ptr, featuresPtr, featuresLen);
+    if (featuresPtr)
+      exports.free(featuresPtr);
   }
 
   /**
@@ -343,22 +474,81 @@ function hbjs(instance) {
   * @param {object} font: A font returned from `createFont`
   * @param {object} buffer: A buffer returned from `createBuffer` and suitably
   *   prepared.
-  * @param {object} features: A dictionary of OpenType features to apply.
+  * @param {object} features: A string of comma-separated OpenType features to apply.
   * @param {number} stop_at: A lookup ID at which to terminate shaping.
   * @param {number} stop_phase: Either 0 (don't terminate shaping), 1 (`stop_at`
       refers to a lookup ID in the GSUB table), 2 (`stop_at` refers to a lookup
       ID in the GPOS table).
   */
-
   function shapeWithTrace(font, buffer, features, stop_at, stop_phase) {
-    var bufLen = 1024 * 1024;
-    var traceBuffer = exports.malloc(bufLen);
-    var featurestr = createCString(features);
-    var traceLen = exports.hbjs_shape_with_trace(font.ptr, buffer.ptr, featurestr.ptr, stop_at, stop_phase, traceBuffer, bufLen);
-    featurestr.free();
-    var trace = utf8Decoder.decode(heapu8.subarray(traceBuffer, traceBuffer + traceLen - 1));
-    exports.free(traceBuffer);
-    return JSON.parse(trace);
+    var trace = [];
+    var currentPhase = DONT_STOP;
+    var stopping = false;
+    var failure = false;
+
+    var traceBufLen = 1024 * 1024;
+    var traceBufPtr = exports.malloc(traceBufLen);
+
+    var traceFunc = function (bufferPtr, fontPtr, messagePtr, user_data) {
+      var message = utf8Decoder.decode(heapu8.subarray(messagePtr, heapu8.indexOf(0, messagePtr)));
+      if (message.startsWith("start table GSUB"))
+        currentPhase = GSUB_PHASE;
+      else if (message.startsWith("start table GPOS"))
+        currentPhase = GPOS_PHASE;
+
+      if (currentPhase != stop_phase)
+        stopping = false;
+
+      if (failure)
+        return 1;
+
+      if (stop_phase != DONT_STOP && currentPhase == stop_phase && message.startsWith("end lookup " + stop_at))
+        stopping = true;
+
+      if (stopping)
+        return 0;
+
+      exports.hb_buffer_serialize_glyphs(
+        bufferPtr,
+        0, exports.hb_buffer_get_length(bufferPtr),
+        traceBufPtr, traceBufLen, 0,
+        fontPtr,
+        HB_BUFFER_SERIALIZE_FORMAT_JSON,
+        HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES);
+
+      trace.push({
+        m: message,
+        t: JSON.parse(utf8Decoder.decode(heapu8.subarray(traceBufPtr, heapu8.indexOf(0, traceBufPtr)))),
+        glyphs: exports.hb_buffer_get_content_type(bufferPtr) == HB_BUFFER_CONTENT_TYPE_GLYPHS,
+      });
+
+      return 1;
+    }
+
+    var traceFuncPtr = addFunction(traceFunc, 'iiiii');
+    exports.hb_buffer_set_message_func(buffer.ptr, traceFuncPtr, 0, 0);
+    shape(font, buffer, features, 0);
+    exports.free(traceBufPtr);
+
+    return trace;
+  }
+
+  function version() {
+    var versionPtr = exports.malloc(12);
+    exports.hb_version(versionPtr, versionPtr + 4, versionPtr + 8);
+    var version = {
+      major: heapu32[versionPtr / 4],
+      minor: heapu32[(versionPtr + 4) / 4],
+      micro: heapu32[(versionPtr + 8) / 4],
+    };
+    exports.free(versionPtr);
+    return version;
+  }
+
+  function version_string() {
+    var versionPtr = exports.hb_version_string();
+    var version = utf8Decoder.decode(heapu8.subarray(versionPtr, heapu8.indexOf(0, versionPtr)));
+    return version;
   }
 
   return {
@@ -367,9 +557,13 @@ function hbjs(instance) {
     createFont: createFont,
     createBuffer: createBuffer,
     shape: shape,
-    shapeWithTrace: shapeWithTrace
+    shapeWithTrace: shapeWithTrace,
+    version: version,
+    version_string: version_string,
   };
-};
+}
 
 // Should be replaced with something more reliable
-try { module.exports = hbjs; } catch(e) {}
+try {
+  module.exports = hbjs;
+} catch (e) {}
