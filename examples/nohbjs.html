@@ -1,15 +1,12 @@
 <!DOCTYPE html>
+<script src="../hb.js"></script>
 <script>
 var utf8Encoder = new TextEncoder("utf8");
 
-// We could use instantiateStreaming but it's not supported in Safari yet
-// https://bugs.webkit.org/show_bug.cgi?id=173105
-fetch("../hb.wasm").then(function (x) {
-  return x.arrayBuffer();
-}).then(function (wasm) {
-  return WebAssembly.instantiate(wasm);
-}).then(function (result) {
-  var exports = result.instance.exports;
+let harfBuzzModule;
+createHarfBuzz().then(hbmodule=>{
+  harfBuzzModule = hbmodule;
+  var exports = hbmodule.wasmExports;
 
   fetch('../test/fonts/noto/NotoSans-Regular.ttf').then(function (x) {
     return x.arrayBuffer();

@@ -1,12 +1,15 @@
+<script src="../hb.js"></script>
 <script src="../hbjs.js"></script>
 <script src="hbjs.example.js"></script>
 <script>
-// instantiateStreaming isn't supported in Safari yet, see nohbjs.html
-WebAssembly.instantiateStreaming(fetch("../hb.wasm")).then(function (result) {
+
+let harfBuzzModule; // not really needed with the hbjs wrapper
+createHarfBuzz().then(hbmodule=>{
+  harfBuzzModule = hbmodule;
   fetch('../test/fonts/noto/NotoSans-Regular.ttf').then(function (x) {
     return x.arrayBuffer();
   }).then(function (blob) {
-    document.body.innerText = JSON.stringify(example(hbjs(result.instance), new Uint8Array(blob)), undefined, 2);
+    document.body.innerText = JSON.stringify(example(hbjs(hbmodule), new Uint8Array(blob)), undefined, 2);
     document.body.style.whiteSpace = 'pre';
   });
 });
