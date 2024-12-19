@@ -3,6 +3,7 @@
 <p><input type="text" value="abc" id="text"></p>
 <p><a id="svgResult" href="#" title="Click to download"></a></p>
 <p>Result:<div id="shapeResult"></div></p>
+<script src="hb.js"></script>   <!-- Module, required -->
 <script src="hbjs.js"></script> <!-- Wrapper, can be used without -->
 <script>
 'use strict';
@@ -82,14 +83,10 @@ function updateResult() {
   shapeResult.innerText = JSON.stringify(result);
 }
 
-// We could use instantiateStreaming but it's not supported in Safari yet
-// https://bugs.webkit.org/show_bug.cgi?id=173105
-fetch("hb.wasm").then(function (x) {
-  return x.arrayBuffer();
-}).then(function (wasm) {
-  return WebAssembly.instantiate(wasm);
-}).then(function (result) {
-  window.hb = hbjs(result.instance);
+let harfBuzzModule; // not really needed with the hbjs wrapper
+createHarfBuzz().then(hbmodule=>{
+  harfBuzzModule = hbmodule;
+  window.hb = hbjs(hbmodule);
   fetch('Roboto.abc.ttf').then(function (res) {
     return res.arrayBuffer();
   }).then(function (blob) { // can be used without our wrapper
