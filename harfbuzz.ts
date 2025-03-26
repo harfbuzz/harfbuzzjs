@@ -9,7 +9,7 @@ class HarfBuzzExports {
   readonly heapi32: Int32Array;
   readonly utf8Encoder: TextEncoder;
 
-  //exported HarfBuzz methods
+  // exported HarfBuzz methods
   readonly malloc: (length: number) => Pointer
   readonly free: (ptr: Pointer) => void
   readonly free_ptr: () => Pointer
@@ -268,7 +268,7 @@ export function loadHarfbuzz(webAssemblyUrl: string): Promise<void> {
   }).then(wasm => {
     return WebAssembly.instantiate(wasm);
   }).then(result => {
-    //@ts-ignore
+    // @ts-ignore
     hb = new HarfBuzzExports(result.instance.exports);
   });
 }
