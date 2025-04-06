@@ -18,7 +18,7 @@ em++ \
 	-s MODULARIZE \
 	-s EXPORT_NAME=createHarfBuzz \
 	-s EXPORTED_FUNCTIONS=@hb.symbols \
-	-s EXPORTED_RUNTIME_METHODS='["addFunction", "wasmMemory", "wasmExports"]' \
+	-s EXPORTED_RUNTIME_METHODS='["addFunction", "removeFunction", "wasmMemory", "wasmExports"]' \
 	-s INITIAL_MEMORY=65MB \
 	-s ALLOW_TABLE_GROWTH \
 	-lexports.js \

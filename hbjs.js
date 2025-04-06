@@ -8,6 +8,7 @@ function hbjs(Module) {
   var heapf32 = Module.HEAPF32;
   var utf8Decoder = new TextDecoder("utf8");
   let addFunction = Module.addFunction;
+  let removeFunction = Module.removeFunction;
 
   var freeFuncPtr = addFunction(function (ptr) { exports.free(ptr); }, 'vi');
 
@@ -177,6 +178,11 @@ function hbjs(Module) {
   function createFont(face) {
     var ptr = exports.hb_font_create(face.ptr);
     var drawFuncsPtr = null;
+    var moveToPtr = null;
+    var lineToPtr = null;
+    var cubicToPtr = null;
+    var quadToPtr = null;
+    var closePathPtr = null;
 
     /**
     * Return a glyph as an SVG path string.
@@ -200,11 +206,11 @@ function hbjs(Module) {
           pathBuffer += 'Z';
         }
 
-        var moveToPtr = addFunction(moveTo, 'viiiffi');
-        var lineToPtr = addFunction(lineTo, 'viiiffi');
-        var cubicToPtr = addFunction(cubicTo, 'viiiffffffi');
-        var quadToPtr = addFunction(quadTo, 'viiiffffi');
-        var closePathPtr = addFunction(closePath, 'viiii');
+        moveToPtr = addFunction(moveTo, 'viiiffi');
+        lineToPtr = addFunction(lineTo, 'viiiffi');
+        cubicToPtr = addFunction(cubicTo, 'viiiffffffi');
+        quadToPtr = addFunction(quadTo, 'viiiffffi');
+        closePathPtr = addFunction(closePath, 'viiii');
         drawFuncsPtr = exports.hb_draw_funcs_create();
         exports.hb_draw_funcs_set_move_to_func(drawFuncsPtr, moveToPtr, 0, 0);
         exports.hb_draw_funcs_set_line_to_func(drawFuncsPtr, lineToPtr, 0, 0);
@@ -275,7 +281,18 @@ function hbjs(Module) {
       /**
       * Free the object.
       */
-      destroy: function () { exports.hb_font_destroy(ptr); }
+      destroy: function () {
+        exports.hb_font_destroy(ptr);
+        if (drawFuncsPtr) {
+          exports.hb_draw_funcs_destroy(drawFuncsPtr);
+          drawFuncsPtr = null;
+          removeFunction(moveToPtr);
+          removeFunction(lineToPtr);
+          removeFunction(cubicToPtr);
+          removeFunction(quadToPtr);
+          removeFunction(closePathPtr);
+        }
+      }
     };
   }
 
@@ -529,6 +546,7 @@ function hbjs(Module) {
     exports.hb_buffer_set_message_func(buffer.ptr, traceFuncPtr, 0, 0);
     shape(font, buffer, features, 0);
     exports.free(traceBufPtr);
+    removeFunction(traceFuncPtr);
 
     return trace;
   }
