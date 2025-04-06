@@ -2,10 +2,6 @@ function hbjs(Module) {
   'use strict';
 
   var exports = Module.wasmExports;
-  var heapu8 = Module.HEAPU8;
-  var heapu32 = Module.HEAPU32;
-  var heapi32 = Module.HEAP32;
-  var heapf32 = Module.HEAPF32;
   var utf8Decoder = new TextDecoder("utf8");
   let addFunction = Module.addFunction;
   let removeFunction = Module.removeFunction;
@@ -56,7 +52,7 @@ function hbjs(Module) {
   **/
   function createBlob(blob) {
     var blobPtr = exports.malloc(blob.byteLength);
-    heapu8.set(new Uint8Array(blob), blobPtr);
+    Module.HEAPU8.set(new Uint8Array(blob), blobPtr);
     var ptr = exports.hb_blob_create(blobPtr, blob.byteLength, HB_MEMORY_MODE_WRITABLE, blobPtr, freeFuncPtr);
     return {
       ptr: ptr,
@@ -76,8 +72,8 @@ function hbjs(Module) {
     const setCount = exports.hb_set_get_population(setPtr);
     const arrayPtr = exports.malloc(setCount << 2);
     const arrayOffset = arrayPtr >> 2;
-    const array = heapu32.subarray(arrayOffset, arrayOffset + setCount);
-    heapu32.set(array, arrayOffset);
+    const array = Module.HEAPU32.subarray(arrayOffset, arrayOffset + setCount);
+    Module.HEAPU32.set(array, arrayOffset);
     exports.hb_set_next_many(setPtr, HB_SET_VALUE_INVALID, arrayPtr, setCount);
     return array;
   }
@@ -103,7 +99,7 @@ function hbjs(Module) {
         var length = exports.hb_blob_get_length(blob);
         if (!length) { return; }
         var blobptr = exports.hb_blob_get_data(blob, null);
-        var table_string = heapu8.subarray(blobptr, blobptr+length);
+        var table_string = Module.HEAPU8.subarray(blobptr, blobptr+length);
         return table_string;
       },
       /**
@@ -112,14 +108,14 @@ function hbjs(Module) {
       getAxisInfos: function() {
         var axis = exports.malloc(64 * 32);
         var c = exports.malloc(4);
-        heapu32[c / 4] = 64;
+        Module.HEAPU32[c / 4] = 64;
         exports.hb_ot_var_get_axis_infos(ptr, 0, c, axis);
         var result = {};
-        Array.from({ length: heapu32[c / 4] }).forEach(function (_, i) {
-          result[_hb_untag(heapu32[axis / 4 + i * 8 + 1])] = {
-            min: heapf32[axis / 4 + i * 8 + 4],
-            default: heapf32[axis / 4 + i * 8 + 5],
-            max: heapf32[axis / 4 + i * 8 + 6]
+        Array.from({ length: Module.HEAPU32[c / 4] }).forEach(function (_, i) {
+          result[_hb_untag(Module.HEAPU32[axis / 4 + i * 8 + 1])] = {
+            min: Module.HEAPF32[axis / 4 + i * 8 + 4],
+            default: Module.HEAPF32[axis / 4 + i * 8 + 5],
+            max: Module.HEAPF32[axis / 4 + i * 8 + 6]
           };
         });
         exports.free(c);
@@ -214,7 +210,7 @@ function hbjs(Module) {
         nameBuffer,
         nameBufferSize
       );
-      var array = heapu8.subarray(nameBuffer, nameBuffer + nameBufferSize);
+      var array = Module.HEAPU8.subarray(nameBuffer, nameBuffer + nameBufferSize);
       return utf8Decoder.decode(array.slice(0, array.indexOf(0)));
     }
 
@@ -251,8 +247,8 @@ function hbjs(Module) {
         var entries = Object.entries(variations);
         var vars = exports.malloc(8 * entries.length);
         entries.forEach(function (entry, i) {
-          heapu32[vars / 4 + i * 2 + 0] = hb_tag(entry[0]);
-          heapf32[vars / 4 + i * 2 + 1] = entry[1];
+          Module.HEAPU32[vars / 4 + i * 2 + 0] = hb_tag(entry[0]);
+          Module.HEAPF32[vars / 4 + i * 2 + 1] = entry[1];
         });
         exports.hb_font_set_variations(ptr, vars, entries.length);
         exports.free(vars);
@@ -284,9 +280,9 @@ function hbjs(Module) {
     for (let i = 0; i < text.length; ++i) {
       const char = text.charCodeAt(i);
       if (char > 127) throw new Error('Expected ASCII text');
-      heapu8[ptr + i] = char;
+      Module.HEAPU8[ptr + i] = char;
     }
-    heapu8[ptr + text.length] = 0;
+    Module.HEAPU8[ptr + text.length] = 0;
     return {
       ptr: ptr,
       length: text.length,
@@ -408,8 +404,8 @@ function hbjs(Module) {
         var infosPtr = exports.hb_buffer_get_glyph_infos(ptr, 0);
         var infosPtr32 = infosPtr / 4;
         var positionsPtr32 = exports.hb_buffer_get_glyph_positions(ptr, 0) / 4;
-        var infos = heapu32.subarray(infosPtr32, infosPtr32 + 5 * length);
-        var positions = heapi32.subarray(positionsPtr32, positionsPtr32 + 5 * length);
+        var infos = Module.HEAPU32.subarray(infosPtr32, infosPtr32 + 5 * length);
+        var positions = Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + 5 * length);
         for (var i = 0; i < length; ++i) {
           result.push({
             g: infos[i * 5 + 0],
@@ -486,7 +482,7 @@ function hbjs(Module) {
     var traceBufPtr = exports.malloc(traceBufLen);
 
     var traceFunc = function (bufferPtr, fontPtr, messagePtr, user_data) {
-      var message = utf8Decoder.decode(heapu8.subarray(messagePtr, heapu8.indexOf(0, messagePtr)));
+      var message = utf8Decoder.decode(Module.HEAPU8.subarray(messagePtr, Module.HEAPU8.indexOf(0, messagePtr)));
       if (message.startsWith("start table GSUB"))
         currentPhase = GSUB_PHASE;
       else if (message.startsWith("start table GPOS"))
@@ -514,7 +510,7 @@ function hbjs(Module) {
 
       trace.push({
         m: message,
-        t: JSON.parse(utf8Decoder.decode(heapu8.subarray(traceBufPtr, heapu8.indexOf(0, traceBufPtr)))),
+        t: JSON.parse(utf8Decoder.decode(Module.HEAPU8.subarray(traceBufPtr, Module.HEAPU8.indexOf(0, traceBufPtr)))),
         glyphs: exports.hb_buffer_get_content_type(bufferPtr) == HB_BUFFER_CONTENT_TYPE_GLYPHS,
       });
 
@@ -534,9 +530,9 @@ function hbjs(Module) {
     var versionPtr = exports.malloc(12);
     exports.hb_version(versionPtr, versionPtr + 4, versionPtr + 8);
     var version = {
-      major: heapu32[versionPtr / 4],
-      minor: heapu32[(versionPtr + 4) / 4],
-      micro: heapu32[(versionPtr + 8) / 4],
+      major: Module.HEAPU32[versionPtr / 4],
+      minor: Module.HEAPU32[(versionPtr + 4) / 4],
+      micro: Module.HEAPU32[(versionPtr + 8) / 4],
     };
     exports.free(versionPtr);
     return version;
@@ -544,7 +540,7 @@ function hbjs(Module) {
 
   function version_string() {
     var versionPtr = exports.hb_version_string();
-    var version = utf8Decoder.decode(heapu8.subarray(versionPtr, heapu8.indexOf(0, versionPtr)));
+    var version = utf8Decoder.decode(Module.HEAPU8.subarray(versionPtr, Module.HEAPU8.indexOf(0, versionPtr)));
     return version;
   }
 
