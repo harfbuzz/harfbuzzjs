@@ -30,6 +30,7 @@ _hb_font_set_scale
 _hb_font_set_variations
 _hb_font_draw_glyph
 _hb_draw_funcs_create
+_hb_draw_funcs_destroy
 _hb_draw_funcs_set_move_to_func
 _hb_draw_funcs_set_line_to_func
 _hb_draw_funcs_set_quadratic_to_func
