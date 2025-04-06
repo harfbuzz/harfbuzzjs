@@ -69,37 +69,16 @@ function hbjs(Module) {
 
   /**
    * Return the typed array of HarfBuzz set contents.
-   * @template {typeof Uint8Array | typeof Uint32Array | typeof Int32Array | typeof Float32Array} T
    * @param {number} setPtr Pointer of set
-   * @param {T} arrayClass Typed array class
-   * @returns {InstanceType<T>} Typed array instance
+   * @returns {Uint32Array} Typed array instance
    */
-  function typedArrayFromSet(setPtr, arrayClass) {
-    let heap = heapu8;
-    if (arrayClass === Uint32Array) {
-      heap = heapu32;
-    } else if (arrayClass === Int32Array) {
-      heap = heapi32;
-    } else if (arrayClass === Float32Array) {
-      heap = heapf32;
-    }
-    const bytesPerElment = arrayClass.BYTES_PER_ELEMENT;
+  function typedArrayFromSet(setPtr) {
     const setCount = exports.hb_set_get_population(setPtr);
-    const arrayPtr = exports.malloc(
-      setCount * bytesPerElment,
-    );
-    const arrayOffset = arrayPtr / bytesPerElment;
-    const array = heap.subarray(
-      arrayOffset,
-      arrayOffset + setCount,
-    );
-    heap.set(array, arrayOffset);
-    exports.hb_set_next_many(
-      setPtr,
-      HB_SET_VALUE_INVALID,
-      arrayPtr,
-      setCount,
-    );
+    const arrayPtr = exports.malloc(setCount << 2);
+    const arrayOffset = arrayPtr >> 2;
+    const array = heapu32.subarray(arrayOffset, arrayOffset + setCount);
+    heapu32.set(array, arrayOffset);
+    exports.hb_set_next_many(setPtr, HB_SET_VALUE_INVALID, arrayPtr, setCount);
     return array;
   }
 
@@ -153,7 +132,7 @@ function hbjs(Module) {
       collectUnicodes: function() {
         var unicodeSetPtr = exports.hb_set_create();
         exports.hb_face_collect_unicodes(ptr, unicodeSetPtr);
-        var result = typedArrayFromSet(unicodeSetPtr, Uint32Array);
+        var result = typedArrayFromSet(unicodeSetPtr);
         exports.hb_set_destroy(unicodeSetPtr);
         return result;
       },
