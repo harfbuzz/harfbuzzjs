@@ -3,8 +3,12 @@ name: Build
 on:
   push:
     branches: [ "main" ]
+    tags: [ "*" ]
   pull_request:
     branches: [ "main" ]
+
+permissions:
+  contents: write
 
 env:
   EM_VERSION: 3.1.56
@@ -47,3 +51,32 @@ jobs:
         run: node examples/hbjs.example.node.js
       - name: Test hb-subset.wasm
         run: node examples/hb-subset.example.node.js
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm
+          path: hb*.wasm
+          if-no-files-found: error
+
+  release:
+    name: Create and populate release
+    needs: build
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/tags/')
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm
+      - name: Check for release
+        id: create_release
+        run: |
+          if ! gh release view ${{ github.ref_name }}; then
+            gh release create ${{ github.ref_name }} --title ${{ github.ref_name }} --draft
+          fi
+      - name: Populate release
+        run: |
+          gh release upload ${{ github.ref_name }} hb*.wasm --clobber
