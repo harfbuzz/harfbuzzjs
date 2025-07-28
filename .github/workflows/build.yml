@@ -55,7 +55,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wasm
-          path: hb*.wasm
+          path: |
+            hb.js
+            hb.wasm
+            hb-subset.wasm
           if-no-files-found: error
 
   release:
@@ -79,4 +82,4 @@ jobs:
           fi
       - name: Populate release
         run: |
-          gh release upload ${{ github.ref_name }} hb*.wasm --clobber
+          gh release upload ${{ github.ref_name }} hb.js hb.wasm hb-subset.wasm --clobber
