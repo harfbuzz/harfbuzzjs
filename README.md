@@ -9,9 +9,7 @@ See the demo [here](https://harfbuzz.github.io/harfbuzzjs/).
 2. `./build.sh`
 
 ## Download
-Download the pack from [releases tab](https://github.com/harfbuzz/harfbuzzjs/releases)
-of the project, or just download the [demo page](https://harfbuzz.github.io/harfbuzzjs/) (the
-demo source is in [gh-pages](https://github.com/harfbuzz/harfbuzzjs/tree/gh-pages) branch).
+Download from the [releases tab](https://github.com/harfbuzz/harfbuzzjs/releases).
 
 ## Usage and testing
 
