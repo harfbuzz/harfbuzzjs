@@ -1,3 +1,6 @@
+[![Build](https://github.com/harfbuzz/harfbuzzjs/actions/workflows/build.yml/badge.svg)](https://github.com/harfbuzz/harfbuzzjs/actions/workflows/build.yml)
+[![NPM Version](https://img.shields.io/npm/v/harfbuzzjs)](https://www.npmjs.com/package/harfbuzzjs)
+
 # harfbuzzjs
 Providing [HarfBuzz](https://github.com/harfbuzz/harfbuzz) shaping
 library for client/server side JavaScript projects.
