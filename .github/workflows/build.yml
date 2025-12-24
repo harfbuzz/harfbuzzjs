@@ -43,7 +43,10 @@ jobs:
         run: ./build-subset.sh
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
       - name: NPM install
         run: npm install
       - name: Run tests
@@ -84,5 +87,11 @@ jobs:
       - name: Populate release
         run: |
           gh release upload ${{ github.ref_name }} hb.js hb.wasm hb-subset.wasm --clobber
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
       - name: Publish on NPM
         run: npm publish
