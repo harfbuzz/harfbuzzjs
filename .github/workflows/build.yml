@@ -43,7 +43,7 @@ jobs:
         run: ./build-subset.sh
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
@@ -78,6 +78,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: wasm
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Publish on NPM
+        run: npm publish
+
       - name: Check for release
         id: create_release
         run: |
@@ -87,11 +96,3 @@ jobs:
       - name: Populate release
         run: |
           gh release upload ${{ github.ref_name }} hb.js hb.wasm hb-subset.wasm --clobber
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
-      - name: Publish on NPM
-        run: npm publish
