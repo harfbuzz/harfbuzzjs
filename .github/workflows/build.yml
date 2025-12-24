@@ -8,6 +8,7 @@ on:
     branches: [ "main" ]
 
 permissions:
+  id-token: write
   contents: write
 
 env:
@@ -83,3 +84,5 @@ jobs:
       - name: Populate release
         run: |
           gh release upload ${{ github.ref_name }} hb.js hb.wasm hb-subset.wasm --clobber
+      - name: Publish on NPM
+        run: npm publish
