@@ -85,9 +85,7 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
       - name: Publish on NPM
-        run: |
-          npm ci
-          npm publish
+        run: npm publish
 
       - name: Check for release
         id: create_release
