@@ -217,6 +217,32 @@ function hbjs(Module) {
 
     return {
       ptr: ptr,
+      /**
+       * Return font horizontal extents.
+       * @returns {object} Object with ascender, descender, and lineGap properties.
+       **/
+      hExtents: function () {
+        var extentsPtr = Module.stackAlloc(12);
+        exports.hb_font_get_h_extents(ptr, extentsPtr);
+        return {
+          ascender: Module.HEAP32[extentsPtr / 4],
+          descender: Module.HEAP32[extentsPtr / 4 + 1],
+          lineGap: Module.HEAP32[extentsPtr / 4 + 2],
+        };
+      },
+      /**
+       * Return font vertical extents.
+       * @returns {object} Object with ascender, descender, and lineGap properties.
+       **/
+      vExtents: function () {
+        var extentsPtr = Module.stackAlloc(12);
+        exports.hb_font_get_v_extents(ptr, extentsPtr);
+        return {
+          ascender: Module.HEAP32[extentsPtr / 4],
+          descender: Module.HEAP32[extentsPtr / 4 + 1],
+          lineGap: Module.HEAP32[extentsPtr / 4 + 2],
+        };
+      },
       glyphName: glyphName,
       glyphToPath: glyphToPath,
       /**

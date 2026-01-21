@@ -48,6 +48,28 @@ describe('Face', function () {
 });
 
 describe('Font', function () {
+  it('hExtents returns extents for the font', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    expect(font.hExtents()).to.deep.equal({
+      ascender: 1069,
+      descender: -293,
+      lineGap: 0
+    });
+  });
+
+  it('vExtents returns extents for the font', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    expect(font.vExtents()).to.deep.equal({
+      ascender: 0,
+      descender: 0,
+      lineGap: 0
+    });
+  });
+
   it('glyphName returns names for glyph ids', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);
@@ -68,7 +90,7 @@ describe('Font', function () {
     expect(glyphs[0].ax).to.equal(561 * 2);
   });
 
-  it('getGlyphExtents returns extents for glyph ids', function () {
+  it('glyphExtents returns extents for glyph ids', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);
     font = hb.createFont(face);
