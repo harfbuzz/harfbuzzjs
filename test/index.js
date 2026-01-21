@@ -68,6 +68,18 @@ describe('Font', function () {
     expect(glyphs[0].ax).to.equal(561 * 2);
   });
 
+  it('getGlyphExtents returns extents for glyph ids', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    expect(font.glyphExtents(20)).to.deep.equal({
+      xBearing: 89,
+      yBearing: 714,
+      width: 266,
+      height: -714
+    });
+  });
+
   it('setVariations affects advances', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
     face = hb.createFace(blob);
