@@ -28,6 +28,8 @@ _hb_font_destroy
 _hb_font_glyph_to_string
 _hb_font_set_scale
 _hb_font_set_variations
+_hb_font_get_h_extents
+_hb_font_get_v_extents
 _hb_font_get_glyph_extents
 _hb_font_get_glyph_from_name
 _hb_font_get_glyph_h_advance
