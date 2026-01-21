@@ -220,6 +220,20 @@ function hbjs(Module) {
       glyphName: glyphName,
       glyphToPath: glyphToPath,
       /**
+       * Return glyph horizontal advance.
+       * @param {number} glyphId ID of the requested glyph in the font.
+       **/
+      glyphHAdvance: function (glyphId) {
+        return exports.hb_font_get_glyph_h_advance(ptr, glyphId);
+      },
+      /**
+       * Return glyph vertical advance.
+       * @param {number} glyphId ID of the requested glyph in the font.
+       **/
+      glyphVAdvance: function (glyphId) {
+        return exports.hb_font_get_glyph_v_advance(ptr, glyphId);
+      },
+      /**
        * Return glyph extents.
        * @param {number} glyphId ID of the requested glyph in the font.
        **/

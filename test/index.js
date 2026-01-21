@@ -80,6 +80,20 @@ describe('Font', function () {
     });
   });
 
+  it('glyphHAdvance returns advances for glyph ids', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    expect(font.glyphHAdvance(20)).to.equal(572);
+  });
+
+  it('glyphVAdvance returns advances for glyph ids', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    expect(font.glyphVAdvance(20)).to.equal(-1000);
+  });
+
   it('glyphFromName returns ids for glyph names', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);
