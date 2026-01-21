@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { expect } = require('chai');
 let hb;
-let blob, face, font, buffer;
+let blob, face, font, buffer, fontFuncs;
 
 before(async function () {
   hb = await require('..');
@@ -13,7 +13,8 @@ afterEach(function () {
   if (face) face.destroy();
   if (font) font.destroy();
   if (buffer) buffer.destroy();
-  blob = face = font = buffer = undefined;
+  if (fontFuncs) fontFuncs.destroy();
+  blob = face = font = buffer = fontFuncs = undefined;
 });
 
 describe('Face', function () {
@@ -178,6 +179,206 @@ describe('Font', function () {
 650 403,610 403,541C403,460 341,406 224,406L154,406L154,331L223,331C349,331 423,294 423,205C423,117 370,64 242,64C178,\
 64 105,81 45,111L45,29C104,0 166,-10 241,-10C430,-10 515,78 515,203C515,297 459,358 345,372L345,376C435,394 493,451 493,547Z';
     expect(font.glyphToPath(22)).to.equal(expected22);
+  });
+});
+
+describe('FontFuncs', function () {
+  it('setGlyphExtentsFunc', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setGlyphExtentsFunc(function (font_, glyph) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return {
+        xBearing: glyph,
+        yBearing: 0,
+        width: 100 * glyph,
+        height: 100
+      };
+    });
+    font.setFuncs(fontFuncs);
+    expect(font.glyphExtents(0)).to.deep.equal({
+      xBearing: 0,
+      yBearing: 0,
+      width: 0,
+      height: 100
+    });
+    expect(font.glyphExtents(20)).to.deep.equal({
+      xBearing: 20,
+      yBearing: 0,
+      width: 2000,
+      height: 100
+    });
+  });
+
+  it('setGlyphFromNameFunc', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setGlyphFromNameFunc(function (font_, name) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return name == 'one' ? 20 : null;
+    });
+    font.setFuncs(fontFuncs);
+    expect(font.glyphFromName('one')).to.equal(20);
+    expect(font.glyphFromName('two')).to.equal(null);
+  });
+
+  it('setGlyphHAdvanceFunc', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setGlyphHAdvanceFunc(function (font_, glyph) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return glyph == 20 ? 100 : 200;
+    });
+    font.setFuncs(fontFuncs);
+    expect(font.glyphHAdvance(20)).to.equal(100);
+    expect(font.glyphHAdvance(21)).to.equal(200);
+  });
+
+  it('setGlyphVAdvanceFunc', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setGlyphVAdvanceFunc(function (font_, glyph) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return glyph == 20 ? 100 : 200;
+    });
+    font.setFuncs(fontFuncs);
+    expect(font.glyphVAdvance(20)).to.equal(100);
+    expect(font.glyphVAdvance(21)).to.equal(200);
+  });
+
+  it('setGlyphHOriginFunc', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setGlyphHOriginFunc(function (font_, glyph) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return glyph == 20 ? [100, 200] : [300, 400];
+    });
+    font.setFuncs(fontFuncs);
+    expect(font.glyphHOrigin(20)).to.deep.equal([100, 200]);
+    expect(font.glyphHOrigin(21)).to.deep.equal([300, 400]);
+  });
+
+  it('setGlyphVOriginFunc', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setGlyphVOriginFunc(function (font_, glyph) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return glyph == 20 ? [100, 200] : [300, 400];
+    });
+    font.setFuncs(fontFuncs);
+    expect(font.glyphVOrigin(20)).to.deep.equal([100, 200]);
+    expect(font.glyphVOrigin(21)).to.deep.equal([300, 400]);
+  });
+
+  it('setGlyphNameFunc', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setGlyphNameFunc(function (font_, glyph) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return glyph == 20 ? 'one' : null;
+    });
+    font.setFuncs(fontFuncs);
+    expect(font.glyphName(20)).to.equal('one');
+    expect(font.glyphName(21)).to.equal('gid21');
+  });
+
+  it('setNominalGlyphFunc', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setNominalGlyphFunc(function (font_, unicode) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return unicode == 49 ? 21 : 22;
+    });
+    font.setFuncs(fontFuncs);
+    buffer = hb.createBuffer();
+    buffer.addText('12');
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer)
+    const glyphs = buffer.json();
+    expect(glyphs[0].g).to.equal(21);
+    expect(glyphs[1].g).to.equal(22);
+  });
+
+  it('setVariationGlyphFunc', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setNominalGlyphFunc(function (font_, unicode) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return unicode == 49 ? 21 : 22;
+    });
+    fontFuncs.setVariationGlyphFunc(function (font_, unicode, variationSelector) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return unicode == 49 ? 23 : null;
+    });
+    font.setFuncs(fontFuncs);
+    buffer = hb.createBuffer();
+    buffer.addText('11\uFE002\uFE00');
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer)
+    const glyphs = buffer.json();
+    expect(glyphs[0].g).to.equal(21);
+    expect(glyphs[1].g).to.equal(23);
+    expect(glyphs[2].g).to.equal(22);
+  });
+
+  it('setFontHExtentsFunc', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setFontHExtentsFunc(function (font_) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return {
+        ascender: 100,
+        descender: 200,
+        lineGap: 300,
+      };
+    });
+    font.setFuncs(fontFuncs);
+    expect(font.hExtents()).to.deep.equal({
+      ascender: 100,
+      descender: 200,
+      lineGap: 300,
+    });
+  });
+
+  it('setFontVExtentsFunc', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setFontVExtentsFunc(function (font_) {
+      expect(font_.ptr).to.equal(font.ptr);
+      return {
+        ascender: 100,
+        descender: 200,
+        lineGap: 300,
+      };
+    });
+    font.setFuncs(fontFuncs);
+    expect(font.vExtents()).to.deep.equal({
+      ascender: 100,
+      descender: 200,
+      lineGap: 300,
+    });
   });
 });
 

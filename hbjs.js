@@ -150,9 +150,10 @@ function hbjs(Module) {
   /**
   * Create an object representing a Harfbuzz font.
   * @param {object} blob An object returned from `createFace`.
+  * @param {number} ptr Optional pointer to an existing font.
   **/
-  function createFont(face) {
-    var ptr = exports.hb_font_create(face.ptr);
+  function createFont(face, ptr) {
+    var ptr = ptr ? exports.hb_font_reference(ptr) : exports.hb_font_create(face.ptr);
     var drawFuncsPtr = null;
     var moveToPtr = null;
     var lineToPtr = null;
@@ -350,6 +351,13 @@ function hbjs(Module) {
         exports.free(vars);
       },
       /**
+      * Set the font's font functions.
+      * @param {object} fontFuncs The font functions.
+      **/
+      setFuncs: function (fontFuncs) {
+        exports.hb_font_set_funcs(ptr, fontFuncs.ptr);
+      },
+      /**
       * Free the object.
       */
       destroy: function () {
@@ -363,6 +371,304 @@ function hbjs(Module) {
           removeFunction(quadToPtr);
           removeFunction(closePathPtr);
         }
+      }
+    };
+  }
+
+  /**
+  * Create a object representing a HarfBuzz font functions.
+  **/
+  function createFontFuncs() {
+    var ptr = exports.hb_font_funcs_create();
+    return {
+      ptr: ptr,
+      /**
+      * Set the font's glyph extents function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      * @param {number} glyph The glyph ID.
+      *
+      * The function should return an object with the following properties, or null on failure:
+      * @param {number} xBearing The x bearing of the glyph.
+      * @param {number} yBearing The y bearing of the glyph.
+      * @param {number} width The width of the glyph.
+      * @param {number} height The height of the glyph.
+      **/
+      setGlyphExtentsFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, glyph, extentsPtr, user_data) {
+          let font = createFont(null, fontPtr);
+          let extents = func(font, glyph);
+          font.destroy();
+          if (extents) {
+            Module.HEAP32[extentsPtr / 4] = extents.xBearing;
+            Module.HEAP32[extentsPtr / 4 + 1] = extents.yBearing;
+            Module.HEAP32[extentsPtr / 4 + 2] = extents.width;
+            Module.HEAP32[extentsPtr / 4 + 3] = extents.height;
+            return 1;
+          }
+          return 0;
+        }, 'ippipp');
+        exports.hb_font_funcs_set_glyph_extents_func(ptr, funcPtr, 0, 0);
+      },
+      /**
+      * Set the font's glyph from name function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      * @param {string} name The glyph name.
+      *
+      * The function should return an object with the following properties, or null on failure:
+      * @param {number} glyph The glyph ID.
+      **/
+      setGlyphFromNameFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, namePtr, len, glyphPtr, user_data) {
+          let font = createFont(null, fontPtr);
+          let name = utf8Decoder.decode(Module.HEAPU8.subarray(namePtr, namePtr + len));
+          let glyph = func(font, name);
+          font.destroy();
+          if (glyph) {
+            Module.HEAPU32[glyphPtr / 4] = glyph;
+            return 1;
+          }
+          return 0;
+        }, 'ipppipp');
+        exports.hb_font_funcs_set_glyph_from_name_func(ptr, funcPtr, 0, 0);
+      },
+      /**
+      * Set the font's glyph horizontal advance function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      * @param {number} glyph The glyph ID.
+      *
+      * The function should return the horizontal advance of the glyph.
+      **/
+      setGlyphHAdvanceFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, glyph, user_data) {
+          let font = createFont(null, fontPtr);
+          let advance = func(font, glyph);
+          font.destroy();
+          return advance;
+        }, 'ippip');
+        exports.hb_font_funcs_set_glyph_h_advance_func(ptr, funcPtr, 0, 0);
+      },
+      /**
+      * Set the font's glyph vertical advance function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      * @param {number} glyph The glyph ID.
+      *
+      * The function should return the vertical advance of the glyph.
+      **/
+      setGlyphVAdvanceFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, glyph, user_data) {
+          let font = createFont(null, fontPtr);
+          let advance = func(font, glyph);
+          font.destroy();
+          return advance;
+        }, 'ippip');
+        exports.hb_font_funcs_set_glyph_v_advance_func(ptr, funcPtr, 0, 0);
+      },
+      /**
+      * Set the font's glyph horizontal origin function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      * @param {number} glyph The glyph ID.
+      *
+      * The function should return the x and y horizontal origin of the glyph, or null on failure.
+      **/
+      setGlyphHOriginFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, glyph, xPtr, yPtr, user_data) {
+          let font = createFont(null, fontPtr);
+          let origin = func(font, glyph);
+          font.destroy();
+          if (origin) {
+            Module.HEAP32[xPtr / 4] = origin[0];
+            Module.HEAP32[yPtr / 4] = origin[1];
+            return 1;
+          }
+          return 0;
+        }, 'ippippp');
+        exports.hb_font_funcs_set_glyph_h_origin_func(ptr, funcPtr, 0, 0);
+      },
+      /**
+      * Set the font's glyph vertical origin function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      * @param {number} glyph The glyph ID.
+      *
+      * The function should return the x and y vertical origin of the glyph, or null on failure.
+      **/
+      setGlyphVOriginFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, glyph, xPtr, yPtr, user_data) {
+          let font = createFont(null, fontPtr);
+          let origin = func(font, glyph);
+          font.destroy();
+          if (origin) {
+            Module.HEAP32[xPtr / 4] = origin[0];
+            Module.HEAP32[yPtr / 4] = origin[1];
+            return 1;
+          }
+          return 0;
+        }, 'ippippp');
+        exports.hb_font_funcs_set_glyph_v_origin_func(ptr, funcPtr, 0, 0);
+      },
+      /**
+      * Set the font's glyph horizontal kerning function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      * @param {number} firstGlyph The first glyph ID.
+      * @param {number} secondGlyph The second glyph ID.
+      *
+      * The function should return the horizontal kerning of the glyphs.
+      **/
+      setGlyphHKerningFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, firstGlyph, secondGlyph, user_data) {
+          let font = createFont(null, fontPtr);
+          let kerning = func(font, firstGlyph, secondGlyph);
+          font.destroy();
+          return kerning;
+        }, 'ippiip');
+        exports.hb_font_funcs_set_glyph_h_kerning_func(ptr, funcPtr, 0, 0);
+      },
+      /**
+      * Set the font's glyph name function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      * @param {number} glyph The glyph ID.
+      *
+      * The function should return the name of the glyph, or null on failure.
+      **/
+      setGlyphNameFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, glyph, namePtr, size, user_data) {
+          let font = createFont(null, fontPtr);
+          let name = func(font, glyph);
+          font.destroy();
+          if (name) {
+            utf8Encoder.encodeInto(name, Module.HEAPU8.subarray(namePtr, namePtr + size));
+            return 1;
+          }
+          return 0;
+        }, 'ippipip');
+        exports.hb_font_funcs_set_glyph_name_func(ptr, funcPtr, 0, 0);
+      },
+      /**
+      * Set the font's nominal glyph function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      * @param {number} unicode The unicode.
+      *
+      * The function should return the nominal glyph of the unicode, or null on failure.
+      **/
+      setNominalGlyphFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, unicode, glyphPtr, user_data) {
+          let font = createFont(null, fontPtr);
+          let glyph = func(font, unicode);
+          font.destroy();
+          if (glyph) {
+            Module.HEAPU32[glyphPtr / 4] = glyph;
+            return 1;
+          }
+          return 0;
+        }, 'ippipp');
+        exports.hb_font_funcs_set_nominal_glyph_func(ptr, funcPtr, 0, 0);
+      },
+      /**
+      * Set the font's variation glyph function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      * @param {number} unicode The unicode.
+      * @param {number} variationSelector The variation selector.
+      *
+      * The function should return the variation glyph of the unicode, or null on failure.
+      **/
+      setVariationGlyphFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, unicode, variationSelector, glyphPtr, user_data) {
+          let font = createFont(null, fontPtr);
+          let glyph = func(font, unicode, variationSelector);
+          font.destroy();
+          if (glyph) {
+            Module.HEAPU32[glyphPtr / 4] = glyph;
+            return 1;
+          }
+          return 0;
+        }, 'ippiipp');
+        exports.hb_font_funcs_set_variation_glyph_func(ptr, funcPtr, 0, 0);
+      },
+      /**
+      * Set the font's horizontal extents function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      *
+      * The function should return an object with the following properties, or null on failure:
+      * @param {number} ascender The ascender of the font.
+      * @param {number} descender The descender of the font.
+      * @param {number} lineGap The line gap of the font.
+      **/
+      setFontHExtentsFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, extentsPtr, user_data) {
+          let font = createFont(null, fontPtr);
+          let extents = func(font);
+          font.destroy();
+          if (extents) {
+            Module.HEAP32[extentsPtr / 4] = extents.ascender;
+            Module.HEAP32[extentsPtr / 4 + 1] = extents.descender;
+            Module.HEAP32[extentsPtr / 4 + 2] = extents.lineGap;
+            return 1;
+          }
+          return 0;
+        }, 'ipppp');
+        exports.hb_font_funcs_set_font_h_extents_func(ptr, funcPtr, 0, 0);
+      },
+      /**
+      * Set the font's vertical extents function.
+      * @param {function} func The function to set.
+      *
+      * The function takes the following arguments:
+      * @param {object} font The font.
+      *
+      * The function should return an object with the following properties, or null on failure:
+      * @param {number} ascender The ascender of the font.
+      * @param {number} descender The descender of the font.
+      * @param {number} lineGap The line gap of the font.
+      **/
+      setFontVExtentsFunc: function (func) {
+        let funcPtr = addFunction(function (fontPtr, font_data, extentsPtr, user_data) {
+          let font = createFont(null, fontPtr);
+          let extents = func(font);
+          font.destroy();
+          if (extents) {
+            Module.HEAP32[extentsPtr / 4] = extents.ascender;
+            Module.HEAP32[extentsPtr / 4 + 1] = extents.descender;
+            Module.HEAP32[extentsPtr / 4 + 2] = extents.lineGap;
+            return 1;
+          }
+          return 0;
+        }, 'ipppp');
+        exports.hb_font_funcs_set_font_v_extents_func(ptr, funcPtr, 0, 0);
+      },
+      destroy: function () {
+        exports.hb_font_funcs_destroy(ptr);
       }
     };
   }
@@ -644,6 +950,7 @@ function hbjs(Module) {
     createBlob: createBlob,
     createFace: createFace,
     createFont: createFont,
+    createFontFuncs: createFontFuncs,
     createBuffer: createBuffer,
     shape: shape,
     shapeWithTrace: shapeWithTrace,
