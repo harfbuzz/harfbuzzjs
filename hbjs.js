@@ -219,6 +219,22 @@ function hbjs(Module) {
       glyphName: glyphName,
       glyphToPath: glyphToPath,
       /**
+       * Return glyph extents.
+       * @param {number} glyphId ID of the requested glyph in the font.
+       **/
+      glyphExtents: function (glyphId) {
+        var extentsPtr = Module.stackAlloc(16);
+        if (exports.hb_font_get_glyph_extents(ptr, glyphId, extentsPtr)) {
+          return {
+            xBearing: Module.HEAP32[extentsPtr / 4],
+            yBearing: Module.HEAP32[extentsPtr / 4 + 1],
+            width: Module.HEAP32[extentsPtr / 4 + 2],
+            height: Module.HEAP32[extentsPtr / 4 + 3]
+          };
+        }
+        return null;
+      },
+      /**
       * Return a glyph as a JSON path string
       * based on format described on https://svgwg.org/specs/paths/#InterfaceSVGPathSegment
       * @param {number} glyphId ID of the requested glyph in the font.

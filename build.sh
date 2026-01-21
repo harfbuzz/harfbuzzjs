@@ -18,7 +18,7 @@ em++ \
 	-s MODULARIZE \
 	-s EXPORT_NAME=createHarfBuzz \
 	-s EXPORTED_FUNCTIONS=@hb.symbols \
-	-s EXPORTED_RUNTIME_METHODS='["addFunction", "removeFunction", "wasmMemory", "wasmExports", "HEAP8", "HEAPU8", "HEAP32", "HEAPU32", "HEAPF32"]' \
+	-s EXPORTED_RUNTIME_METHODS='["addFunction", "removeFunction", "stackAlloc", "wasmMemory", "wasmExports", "HEAP8", "HEAPU8", "HEAP32", "HEAPU32", "HEAPF32"]' \
 	-s INITIAL_MEMORY=256KB \
 	-s ALLOW_MEMORY_GROWTH \
 	-s ALLOW_TABLE_GROWTH \
