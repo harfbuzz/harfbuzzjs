@@ -19,20 +19,20 @@ function hbjs(Module) {
     return (
       (s.charCodeAt(0) & 0xFF) << 24 |
       (s.charCodeAt(1) & 0xFF) << 16 |
-      (s.charCodeAt(2) & 0xFF) <<  8 |
-      (s.charCodeAt(3) & 0xFF) <<  0
+      (s.charCodeAt(2) & 0xFF) << 8 |
+      (s.charCodeAt(3) & 0xFF) << 0
     );
   }
 
-  var HB_BUFFER_SERIALIZE_FORMAT_JSON	= hb_tag('JSON');
-  var HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES	= 4;
+  var HB_BUFFER_SERIALIZE_FORMAT_JSON = hb_tag('JSON');
+  var HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES = 4;
 
   function _hb_untag(tag) {
     return [
       String.fromCharCode((tag >> 24) & 0xFF),
       String.fromCharCode((tag >> 16) & 0xFF),
-      String.fromCharCode((tag >>  8) & 0xFF),
-      String.fromCharCode((tag >>  0) & 0xFF)
+      String.fromCharCode((tag >> 8) & 0xFF),
+      String.fromCharCode((tag >> 0) & 0xFF)
     ].join('');
   }
 
@@ -94,18 +94,18 @@ function hbjs(Module) {
        * Return the binary contents of an OpenType table.
        * @param {string} table Table name
        */
-      reference_table: function(table) {
+      reference_table: function (table) {
         var blob = exports.hb_face_reference_table(ptr, hb_tag(table));
         var length = exports.hb_blob_get_length(blob);
         if (!length) { return; }
         var blobptr = exports.hb_blob_get_data(blob, null);
-        var table_string = Module.HEAPU8.subarray(blobptr, blobptr+length);
+        var table_string = Module.HEAPU8.subarray(blobptr, blobptr + length);
         return table_string;
       },
       /**
        * Return variation axis infos
        */
-      getAxisInfos: function() {
+      getAxisInfos: function () {
         var axis = exports.malloc(64 * 32);
         var c = exports.malloc(4);
         Module.HEAPU32[c / 4] = 64;
@@ -125,7 +125,7 @@ function hbjs(Module) {
       /**
        * Return unicodes the face supports
        */
-      collectUnicodes: function() {
+      collectUnicodes: function () {
         var unicodeSetPtr = exports.hb_set_create();
         exports.hb_face_collect_unicodes(ptr, unicodeSetPtr);
         var result = typedArrayFromSet(unicodeSetPtr);
@@ -353,7 +353,7 @@ function hbjs(Module) {
           flagValue |= _buffer_flag(s);
         })
 
-        exports.hb_buffer_set_flags(ptr,flagValue);
+        exports.hb_buffer_set_flags(ptr, flagValue);
       },
       /**
       * Set buffer language explicitly.
@@ -361,7 +361,7 @@ function hbjs(Module) {
       */
       setLanguage: function (language) {
         var str = createAsciiString(language);
-        exports.hb_buffer_set_language(ptr, exports.hb_language_from_string(str.ptr,-1));
+        exports.hb_buffer_set_language(ptr, exports.hb_language_from_string(str.ptr, -1));
         str.free();
       },
       /**
@@ -370,7 +370,7 @@ function hbjs(Module) {
       */
       setScript: function (script) {
         var str = createAsciiString(script);
-        exports.hb_buffer_set_script(ptr, exports.hb_script_from_string(str.ptr,-1));
+        exports.hb_buffer_set_script(ptr, exports.hb_script_from_string(str.ptr, -1));
         str.free();
       },
 
@@ -559,4 +559,4 @@ function hbjs(Module) {
 // Should be replaced with something more reliable
 try {
   module.exports = hbjs;
-} catch (e) {}
+} catch (e) { }
