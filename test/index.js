@@ -94,6 +94,20 @@ describe('Font', function () {
     expect(font.glyphVAdvance(20)).to.equal(-1000);
   });
 
+  it('glyphHOrigin returns origins for glyph ids', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    expect(font.glyphHOrigin(20)).to.deep.equal([0, 0]);
+  });
+
+  it('glyphVOrigin returns origins for glyph ids', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    expect(font.glyphVOrigin(20)).to.equal(null);
+  });
+
   it('glyphFromName returns ids for glyph names', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);
