@@ -29,6 +29,7 @@ _hb_font_glyph_to_string
 _hb_font_set_scale
 _hb_font_set_variations
 _hb_font_get_glyph_extents
+_hb_font_get_glyph_from_name
 _hb_font_draw_glyph
 _hb_draw_funcs_create
 _hb_draw_funcs_destroy

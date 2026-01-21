@@ -3,6 +3,7 @@ function hbjs(Module) {
 
   var exports = Module.wasmExports;
   var utf8Decoder = new TextDecoder("utf8");
+  var utf8Encoder = new TextEncoder("utf8");
   let addFunction = Module.addFunction;
   let removeFunction = Module.removeFunction;
 
@@ -233,6 +234,21 @@ function hbjs(Module) {
           };
         }
         return null;
+      },
+      /**
+       * Return glyph ID from name.
+       * @param {string} name Name of the requested glyph in the font.
+       **/
+      glyphFromName: function (name) {
+        var glyphId = null;
+        var glyphIdPtr = Module.stackAlloc(4);
+        var namePtr = exports.malloc(name.length + 1);
+        utf8Encoder.encodeInto(name, Module.HEAPU8.subarray(namePtr, namePtr + name.length));
+        if (exports.hb_font_get_glyph_from_name(ptr, namePtr, name.length, glyphIdPtr)) {
+          glyphId = Module.HEAPU32[glyphIdPtr / 4];
+        }
+        exports.free(namePtr);
+        return glyphId;
       },
       /**
       * Return a glyph as a JSON path string

@@ -80,6 +80,14 @@ describe('Font', function () {
     });
   });
 
+  it('glyphFromName returns ids for glyph names', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    expect(font.glyphFromName('one')).to.equal(20);
+    expect(font.glyphFromName('NonExistentGlyph')).to.equal(null);
+  });
+
   it('setVariations affects advances', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
     face = hb.createFace(blob);
