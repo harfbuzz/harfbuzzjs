@@ -234,6 +234,30 @@ function hbjs(Module) {
         return exports.hb_font_get_glyph_v_advance(ptr, glyphId);
       },
       /**
+       * Return glyph horizontal origin.
+       * @param {number} glyphId ID of the requested glyph in the font.
+       **/
+      glyphHOrigin: function (glyphId) {
+        let xPtr = Module.stackAlloc(4);
+        let yPtr = Module.stackAlloc(4);
+        if (exports.hb_font_get_glyph_h_origin(ptr, glyphId, xPtr, yPtr)) {
+          return [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
+        }
+        return null;
+      },
+      /**
+       * Return glyph vertical origin.
+       * @param {number} glyphId ID of the requested glyph in the font.
+       **/
+      glyphVOrigin: function (glyphId) {
+        let xPtr = Module.stackAlloc(4);
+        let yPtr = Module.stackAlloc(4);
+        if (exports.hb_font_get_glyph_v_origin(ptr, glyphId, xPtr, yPtr)) {
+          return [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
+        }
+        return null;
+      },
+      /**
        * Return glyph extents.
        * @param {number} glyphId ID of the requested glyph in the font.
        **/
