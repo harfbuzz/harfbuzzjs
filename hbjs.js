@@ -219,6 +219,13 @@ function hbjs(Module) {
     return {
       ptr: ptr,
       /**
+       * Create a sub font.
+       * @returns {object} Object representing the sub font.
+       **/
+      subFont: function () {
+        return createFont(null, exports.hb_font_create_sub_font(ptr));
+      },
+      /**
        * Return font horizontal extents.
        * @returns {object} Object with ascender, descender, and lineGap properties.
        **/
