@@ -66,6 +66,36 @@ describe('Face', function () {
     face = hb.createFace(blob);
     expect(face.getScriptLanguageTags('GPOS', 1)).to.deep.equal(['MAR ', 'NEP ', 'SAN ', 'SAT ']);
   });
+
+  it('getLanguageFeatureTags returns tags for a font', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    expect(face.getLanguageFeatureTags('GSUB', 1, 1)).to.deep.equal(['aalt', 'c2sc', 'case', 'ccmp', 'dnom', 'frac',
+      'liga', 'lnum', 'locl', 'numr', 'onum', 'ordn', 'pnum', 'rtlm', 'sinf', 'smcp', 'ss03', 'ss06', 'ss07', 'subs',
+      'sups', 'tnum', 'zero']);
+    expect(face.getLanguageFeatureTags('GPOS', 5, 5)).to.deep.equal([]);
+  });
+
+  it('getTableScriptTags, getScriptLanguageTags, and getLanguageFeatureTags all together', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = hb.createFace(blob);
+    let result = {};
+    face.getTableScriptTags('GSUB').forEach((script, scriptIndex) => {
+      result[script] = { 'dflt': face.getLanguageFeatureTags('GSUB', scriptIndex, 0xFFFF) };
+      face.getScriptLanguageTags('GSUB', scriptIndex).forEach((language, languageIndex) => {
+        result[script][language] = face.getLanguageFeatureTags('GSUB', scriptIndex, languageIndex);
+      });
+    });
+    expect(result).to.deep.equal({
+      'DFLT': {
+        'dflt': ['aalt', 'ccmp', 'dlig', 'fina', 'init', 'isol', 'medi']
+      },
+      'arab': {
+        'dflt': ['aalt', 'ccmp', 'dlig', 'fina', 'init', 'isol', 'medi', 'rlig'],
+        'URD ': ['aalt', 'ccmp', 'dlig', 'fina', 'init', 'isol', 'locl', 'medi']
+      }
+    });
+  });
 });
 
 describe('Font', function () {
