@@ -16,6 +16,8 @@ function hbjs(Module) {
   var GSUB_PHASE = 1;
   var GPOS_PHASE = 2;
 
+  const STATIC_ARRAY_SIZE = 128
+
   function hb_tag(s) {
     return (
       (s.charCodeAt(0) & 0xFF) << 24 |
@@ -132,6 +134,30 @@ function hbjs(Module) {
         var result = typedArrayFromSet(unicodeSetPtr);
         exports.hb_set_destroy(unicodeSetPtr);
         return result;
+      },
+      /**
+       * Return all scripts enumerated in the specified face's
+       * GSUB table or GPOS table.
+       * @param {string} table: The table to query, either "GSUB" or "GPOS".
+       **/
+      getTableScriptTags: function (table) {
+        var tableTag = hb_tag(table);
+        var startOffset = 0;
+        var scriptCount = STATIC_ARRAY_SIZE;
+        var scriptCountPtr = Module.stackAlloc(4);
+        var scriptTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+        var tags = [];
+        while (scriptCount == STATIC_ARRAY_SIZE) {
+          Module.HEAPU32[scriptCountPtr / 4] = scriptCount;
+          exports.hb_ot_layout_table_get_script_tags(ptr, tableTag, startOffset,
+            scriptCountPtr, scriptTagsPtr);
+          scriptCount = Module.HEAPU32[scriptCountPtr / 4];
+          var scriptTags = Module.HEAPU32.subarray(scriptTagsPtr / 4,
+            scriptTagsPtr / 4 + scriptCount);
+          tags.push(...Array.from(scriptTags).map(_hb_untag));
+          startOffset += scriptCount;
+        }
+        return tags;
       },
       /**
        * Free the object.
