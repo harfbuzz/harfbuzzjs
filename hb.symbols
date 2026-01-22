@@ -26,6 +26,7 @@ _hb_face_reference_table
 _hb_font_create
 _hb_font_destroy
 _hb_font_reference
+_hb_font_create_sub_font
 _hb_font_glyph_to_string
 _hb_font_set_scale
 _hb_font_set_variations

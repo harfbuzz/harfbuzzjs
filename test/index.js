@@ -49,6 +49,34 @@ describe('Face', function () {
 });
 
 describe('Font', function () {
+  it('subFont creates a sub font', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    let subFont = font.subFont();
+    expect(subFont.ptr).to.not.equal(font.ptr);
+    subFont.destroy();
+  });
+
+  it('subFont font funcs fallback to parent', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    let subFont = font.subFont();
+    expect(subFont.ptr).to.not.equal(font.ptr);
+
+    fontFuncs = hb.createFontFuncs();
+    fontFuncs.setGlyphNameFunc(function (font_, glyph) {
+      expect(font_.ptr).to.equal(subFont.ptr);
+      return null;
+    });
+    subFont.setFuncs(fontFuncs);
+
+    expect(subFont.glyphName(20)).to.equal("gid20");
+    expect(subFont.glyphHAdvance(20)).to.equal(font.glyphHAdvance(20));
+    subFont.destroy();
+  });
+
   it('hExtents returns extents for the font', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);
