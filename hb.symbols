@@ -67,6 +67,7 @@ _hb_draw_funcs_set_close_path_func
 _hb_glyph_info_get_glyph_flags
 _hb_language_from_string
 _hb_ot_layout_table_get_script_tags
+_hb_ot_layout_script_get_language_tags
 _hb_ot_var_get_axis_infos
 _hb_script_from_string
 _hb_feature_from_string

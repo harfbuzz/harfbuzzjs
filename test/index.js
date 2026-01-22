@@ -53,6 +53,19 @@ describe('Face', function () {
     expect(face.getTableScriptTags('GSUB')).to.deep.equal(['DFLT', 'cyrl', 'dev2', 'deva', 'grek', 'latn']);
     expect(face.getTableScriptTags('GPOS')).to.deep.equal(['DFLT', 'cyrl', 'dev2', 'deva', 'grek', 'latn']);
   });
+
+  it('getScriptLanguageTags returns tags for a font', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    expect(face.getScriptLanguageTags('GSUB', 1)).to.deep.equal(['MKD ', 'SRB ']);
+    expect(face.getScriptLanguageTags('GPOS', 5)).to.deep.equal([]);
+  });
+
+  it('getScriptLanguageTags returns tags for GPOS table', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansDevanagari-Regular.otf')));
+    face = hb.createFace(blob);
+    expect(face.getScriptLanguageTags('GPOS', 1)).to.deep.equal(['MAR ', 'NEP ', 'SAN ', 'SAT ']);
+  });
 });
 
 describe('Font', function () {

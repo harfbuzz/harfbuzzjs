@@ -160,6 +160,31 @@ function hbjs(Module) {
         return tags;
       },
       /**
+       * Return language tags in the given face's GSUB or GPOS table, underneath
+       * the specified script index.
+       * @param {string} table: The table to query, either "GSUB" or "GPOS".
+       * @param {number} scriptIndex: The index of the script to query.
+       **/
+      getScriptLanguageTags: function (table, scriptIndex) {
+        var tableTag = hb_tag(table);
+        var startOffset = 0;
+        var languageCount = STATIC_ARRAY_SIZE;
+        var languageCountPtr = Module.stackAlloc(4);
+        var languageTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+        var tags = [];
+        while (languageCount == STATIC_ARRAY_SIZE) {
+          Module.HEAPU32[languageCountPtr / 4] = languageCount;
+          exports.hb_ot_layout_script_get_language_tags(ptr, tableTag, scriptIndex, startOffset,
+            languageCountPtr, languageTagsPtr);
+          languageCount = Module.HEAPU32[languageCountPtr / 4];
+          var languageTags = Module.HEAPU32.subarray(languageTagsPtr / 4,
+            languageTagsPtr / 4 + languageCount);
+          tags.push(...Array.from(languageTags).map(_hb_untag));
+          startOffset += languageCount;
+        }
+        return tags;
+      },
+      /**
        * Free the object.
        */
       destroy: function () {
