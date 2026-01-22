@@ -46,6 +46,13 @@ describe('Face', function () {
     face = hb.createFace(blob);
     expect(Object.keys(face.getAxisInfos())).to.have.lengthOf(0);
   });
+
+  it('getTableScriptTags returns tags for a font', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    expect(face.getTableScriptTags('GSUB')).to.deep.equal(['DFLT', 'cyrl', 'dev2', 'deva', 'grek', 'latn']);
+    expect(face.getTableScriptTags('GPOS')).to.deep.equal(['DFLT', 'cyrl', 'dev2', 'deva', 'grek', 'latn']);
+  });
 });
 
 describe('Font', function () {
