@@ -9,4 +9,5 @@
 #undef HB_NO_AVAR2
 #undef HB_NO_CUBIC_GLYF
 #undef HB_NO_VAR_COMPOSITES
+#undef HB_NO_NAME
 #define HB_BUFFER_MESSAGE_MORE 1

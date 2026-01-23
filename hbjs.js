@@ -49,6 +49,19 @@ function hbjs(Module) {
     return 0x0;
   }
 
+  function _language_to_string(language) {
+    var ptr = exports.hb_language_to_string(language);
+    var str = utf8Decoder.decode(Module.HEAPU8.subarray(ptr, Module.HEAPU8.indexOf(0, ptr)));
+    return str;
+  }
+
+  function _language_from_string(str) {
+    var languageStr = createAsciiString(str);
+    var languagePtr = exports.hb_language_from_string(languageStr.ptr, -1);
+    languageStr.free();
+    return languagePtr;
+  }
+
   /**
   * Create an object representing a Harfbuzz blob.
   * @param {string} blob A blob of binary data (usually the contents of a font file).
@@ -209,6 +222,41 @@ function hbjs(Module) {
           startOffset += featureCount;
         }
         return tags;
+      },
+      /**
+       * Return all names in the specified face's name table.
+       **/
+      listNames: function () {
+        var numEntriesPtr = Module.stackAlloc(4);
+        var entriesPtr = exports.hb_ot_name_list_names(ptr, numEntriesPtr);
+        var numEntries = Module.HEAPU32[numEntriesPtr / 4];
+        var entries = [];
+        for (var i = 0; i < numEntries; i++) {
+          // FIXME: this depends on the struct memory layout.
+          // A more robust way would involve ading helper C functions to access
+          // the struct and use them here.
+          entries.push({
+            nameId: Module.HEAPU32[(entriesPtr / 4) + (i * 3)],
+            language: _language_to_string(Module.HEAPU32[(entriesPtr / 4) + (i * 3) + 2])
+          });
+        }
+        return entries;
+      },
+      /**
+       * Get the name of the specified face.
+       * @param {number} nameId The ID of the name to get.
+       * @param {string} language The language of the name to get.
+       **/
+      getName: function (nameId, language) {
+        var languagePtr = _language_from_string(language);
+        var nameLen = exports.hb_ot_name_get_utf16(ptr, nameId, languagePtr, 0, 0) + 1;
+        var textSizePtr = Module.stackAlloc(4);
+        var textPtr = exports.malloc(nameLen * 2);
+        Module.HEAPU32[textSizePtr / 4] = nameLen;
+        exports.hb_ot_name_get_utf16(ptr, nameId, languagePtr, textSizePtr, textPtr);
+        var name = String.fromCharCode.apply(null, Module.HEAPU16.subarray(textPtr / 2, textPtr / 2 + nameLen - 1));
+        exports.free(textPtr);
+        return name;
       },
       /**
        * Free the object.
