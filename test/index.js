@@ -110,6 +110,22 @@ describe('Face', function () {
       }
     });
   });
+
+  it('listNames fetches all names', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    let names = face.listNames();
+    expect(names.length).to.equal(38);
+    expect(names[0]).to.deep.equal({ nameId: 0, language: 'en' });
+    expect(names[37]).to.deep.equal({ nameId: 278, language: 'en' });
+  })
+
+  it('getName fetches a name', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    expect(face.getName(1, 'en')).to.equal('Noto Sans');
+    expect(face.getName(256, 'en')).to.equal('florin symbol');
+  })
 });
 
 describe('Font', function () {
