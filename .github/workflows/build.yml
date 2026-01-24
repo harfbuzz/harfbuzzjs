@@ -37,10 +37,6 @@ jobs:
         with:
           version: ${{env.EM_VERSION}}
           actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
-      - name: Build hb.wasm
-        run: ./build.sh
-      - name: Build hb-subset.wasm
-        run: ./build-subset.sh
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
