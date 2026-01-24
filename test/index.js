@@ -54,6 +54,20 @@ describe('Face', function () {
     expect(face.getTableScriptTags('GPOS')).to.deep.equal(['DFLT', 'cyrl', 'dev2', 'deva', 'grek', 'latn']);
   });
 
+  it('getTableFeatureTags returns tags for a font', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    expect(face.getTableFeatureTags('GSUB')).to.deep.equal([
+      'aalt', 'abvs', 'akhn', 'blwf', 'blwf', 'blws', 'c2sc', 'case', 'ccmp', 'ccmp',
+      'ccmp', 'ccmp', 'cjct', 'cjct', 'dnom', 'frac', 'half', 'half', 'half', 'half',
+      'haln', 'liga', 'lnum', 'locl', 'locl', 'locl', 'locl', 'locl', 'locl', 'locl',
+      'locl', 'locl', 'locl', 'locl', 'locl', 'nukt', 'numr', 'onum', 'ordn', 'pnum',
+      'pres', 'pres', 'psts', 'rkrf', 'rphf', 'rtlm', 'salt', 'sinf', 'smcp', 'ss03',
+      'ss04', 'ss06', 'ss07', 'subs', 'sups', 'tnum', 'vatu', 'zero'
+    ]);
+    expect(face.getTableFeatureTags('GPOS')).to.deep.equal(['abvm', 'blwm', 'dist', 'kern', 'mark', 'mkmk']);
+  });
+
   it('getScriptLanguageTags returns tags for a font', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);
