@@ -126,6 +126,44 @@ describe('Face', function () {
     expect(face.getName(1, 'en')).to.equal('Noto Sans');
     expect(face.getName(256, 'en')).to.equal('florin symbol');
   })
+
+  it('getFeatureNameIds returns valid name Ids for ssNN features', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    expect(face.getFeatureNameIds("GSUB",
+      face.getTableFeatureTags("GSUB").indexOf("ss03"))).to.deep.equal({
+        uiLabelNameId: 256,
+        uiTooltipTextNameId: null,
+        sampleTextNameId: null,
+        paramUiLabelNameIds: []
+      });
+  })
+
+  it('getFeatureNameIds with getName', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    expect(face.getName(face.getFeatureNameIds("GSUB",
+      face.getTableFeatureTags("GSUB").indexOf("ss03")).uiLabelNameId, 'en')).to.equal('florin symbol');
+  })
+
+  it('getFeatureNameIds not found', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    expect(face.getFeatureNameIds("GSUB",
+      face.getTableFeatureTags("GSUB").indexOf("salt"))).to.equal(null);
+  })
+
+  it('getFeatureNameIds returns valid name Ids for cvNN features', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, '../harfbuzz/test/api/fonts/cv01.otf')));
+    face = hb.createFace(blob);
+    expect(face.getFeatureNameIds("GSUB",
+      face.getTableFeatureTags("GSUB").indexOf("cv01"))).to.deep.equal({
+        uiLabelNameId: 256,
+        uiTooltipTextNameId: 257,
+        sampleTextNameId: 258,
+        paramUiLabelNameIds: [259, 260]
+      });
+  })
 });
 
 describe('Font', function () {
