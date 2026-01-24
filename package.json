@@ -4,7 +4,8 @@
 	"description": "Minimal version of HarfBuzz for JavaScript use",
 	"main": "index.js",
 	"scripts": {
-		"test": "mocha test/index.js"
+		"prepare": "make",
+		"test": "make test"
 	},
 	"keywords": [
 		"harfbuzz",
