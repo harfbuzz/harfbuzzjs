@@ -30,6 +30,8 @@ function hbjs(Module) {
   var HB_BUFFER_SERIALIZE_FORMAT_JSON = hb_tag('JSON');
   var HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES = 4;
 
+  const HB_OT_NAME_ID_INVALID = 0xFFFF;
+
   function _hb_untag(tag) {
     return [
       String.fromCharCode((tag >> 24) & 0xFF),
@@ -281,6 +283,39 @@ function hbjs(Module) {
         var name = String.fromCharCode.apply(null, Module.HEAPU16.subarray(textPtr / 2, textPtr / 2 + nameLen - 1));
         exports.free(textPtr);
         return name;
+      },
+      /**
+       * Get the name IDs of the specified feature.
+       * @param {string} table The table to query, either "GSUB" or "GPOS".
+       * @param {number} featureIndex The index of the feature to query.
+       **/
+      getFeatureNameIds: function (table, featureIndex) {
+        var tableTag = hb_tag(table);
+        var labelIdPtr = Module.stackAlloc(4);
+        var tooltipIdPtr = Module.stackAlloc(4);
+        var sampleIdPtr = Module.stackAlloc(4);
+        var numNamedParametersPtr = Module.stackAlloc(4);
+        var firstParameterIdPtr = Module.stackAlloc(4);
+
+        var found = exports.hb_ot_layout_feature_get_name_ids(ptr, tableTag, featureIndex,
+          labelIdPtr, tooltipIdPtr, sampleIdPtr, numNamedParametersPtr, firstParameterIdPtr);
+
+        if (found) {
+          let uiLabelNameId = Module.HEAPU32[labelIdPtr / 4];
+          let uiTooltipTextNameId = Module.HEAPU32[tooltipIdPtr / 4];
+          let sampleTextNameId = Module.HEAPU32[sampleIdPtr / 4];
+          let numNamedParameters = Module.HEAPU32[numNamedParametersPtr / 4];
+          let firstParameterId = Module.HEAPU32[firstParameterIdPtr / 4];
+          let paramUiLabelNameIds = Array(numNamedParameters).fill().map((_, i) => firstParameterId + i);
+          return {
+            uiLabelNameId: uiLabelNameId == HB_OT_NAME_ID_INVALID ? null : uiLabelNameId,
+            uiTooltipTextNameId: uiTooltipTextNameId == HB_OT_NAME_ID_INVALID ? null : uiTooltipTextNameId,
+            sampleTextNameId: sampleTextNameId == HB_OT_NAME_ID_INVALID ? null : sampleTextNameId,
+            paramUiLabelNameIds: paramUiLabelNameIds
+          };
+        }
+
+        return null;
       },
       /**
        * Free the object.
