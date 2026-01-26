@@ -15,12 +15,15 @@ See the demo [here](https://harfbuzz.github.io/harfbuzzjs/).
 
 ## Building
 1. Install emscripten
-2. `./build.sh`
+2. `make`
+
+## Testing
+1. `make test`
 
 ## Download
 Download from the [releases tab](https://github.com/harfbuzz/harfbuzzjs/releases).
 
-## Usage and testing
+## Usage
 
 ### TL;DR
 
@@ -75,7 +78,7 @@ More examples:
 
 1. `(cd examples && node hbjs.example.node.js)`
 
-We provide a tiny wrapper (`hbjs.js`) around the main functionality of harfbuzz, but it's also easy to use other parts. (See `example/nohbjs.js` as an example. However, you may need a custom build to expose additional functionality.)
+We provide a wrapper (`hbjs.js`) around the main functionality of harfbuzz, but it's also easy to use other parts. (See `example/nohbjs.js` as an example. However, you may need a custom build to expose additional functionality.)
 
 ## [npm](https://www.npmjs.com/package/harfbuzzjs)
 Can be added with `npm i harfbuzzjs` or `yarn add harfbuzzjs`, see the examples for
