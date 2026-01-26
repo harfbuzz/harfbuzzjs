@@ -586,6 +586,20 @@ describe('shape', function () {
     expect(glyphs[2]).to.deep.equal({ cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0, flags: 0 } /* c */);
   });
 
+  it('shape Latin string code points', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addCodePoints([...'abc'].map(c => c.codePointAt(0)));
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer)
+    const glyphs = buffer.json();
+    expect(glyphs[0]).to.deep.equal({ cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0, flags: 0 } /* a */);
+    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 69, ax: 615, ay: 0, dx: 0, dy: 0, flags: 0 } /* b */);
+    expect(glyphs[2]).to.deep.equal({ cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0, flags: 0 } /* c */);
+  });
+
   it('shape Arabic string', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
     face = hb.createFace(blob);

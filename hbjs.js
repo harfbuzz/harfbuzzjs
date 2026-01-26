@@ -911,6 +911,17 @@ function hbjs(Module) {
         str.free();
       },
       /**
+      * Add code points to the buffer.
+      * @param {number[]} codePoints Array of code points to be added to the buffer.
+      */
+      addCodePoints: function (codePoints) {
+        let codePointsPtr = exports.malloc(codePoints.length * 4);
+        let codePointsArray = new Uint32Array(Module.wasmMemory.buffer, codePointsPtr, codePoints.length);
+        codePointsArray.set(codePoints);
+        exports.hb_buffer_add_codepoints(ptr, codePointsPtr, codePoints.length, 0, codePoints.length);
+        exports.free(codePointsPtr);
+      },
+      /**
       * Set buffer script, language and direction.
       *
       * This needs to be done before shaping.
