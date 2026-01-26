@@ -615,6 +615,32 @@ describe('shape', function () {
     expect(glyphs[3]).to.deep.equal({ cl: 0, g: 50, ax: 235, ay: 0, dx: 0, dy: 0, flags: 0 } /* أ */);
   });
 
+  it('shape Arabic string item', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addText('أبجد', 1, 2);
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer)
+    const glyphs = buffer.json();
+    expect(glyphs[0]).to.deep.equal({ cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, flags: 1 } /* ج */);
+    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0, flags: 0 } /* ب */);
+  });
+
+  it('shape Arabic code points item', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addCodePoints([...'أبجد'].map(c => c.codePointAt(0)), 1, 2);
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer)
+    const glyphs = buffer.json();
+    expect(glyphs[0]).to.deep.equal({ cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, flags: 1 } /* ج */);
+    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0, flags: 0 } /* ب */);
+  });
+
   it('shape with tracing', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);
