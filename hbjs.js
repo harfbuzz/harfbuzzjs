@@ -904,21 +904,27 @@ function hbjs(Module) {
       /**
       * Add text to the buffer.
       * @param {string} text Text to be added to the buffer.
+      * @param {number} itemOffset Optional. The offset of the first character to add to the buffer.
+      * @param {number} itemLength Optional. The number of characters to add to the buffer, or null for the end of text.
       **/
-      addText: function (text) {
+      addText: function (text, itemOffset = 0, itemLength = null) {
         const str = createJsString(text);
-        exports.hb_buffer_add_utf16(ptr, str.ptr, str.length, 0, str.length);
+        if (itemLength == null) itemLength = str.length;
+        exports.hb_buffer_add_utf16(ptr, str.ptr, str.length, itemOffset, itemLength);
         str.free();
       },
       /**
       * Add code points to the buffer.
       * @param {number[]} codePoints Array of code points to be added to the buffer.
+      * @param {number} itemOffset Optional. The offset of the first code point to add to the buffer.
+      * @param {number} itemLength Optional. The number of code points to add to the buffer, or null for the end of the array.
       */
-      addCodePoints: function (codePoints) {
+      addCodePoints: function (codePoints, itemOffset = 0, itemLength = null) {
         let codePointsPtr = exports.malloc(codePoints.length * 4);
         let codePointsArray = new Uint32Array(Module.wasmMemory.buffer, codePointsPtr, codePoints.length);
         codePointsArray.set(codePoints);
-        exports.hb_buffer_add_codepoints(ptr, codePointsPtr, codePoints.length, 0, codePoints.length);
+        if (itemLength == null) itemLength = codePoints.length;
+        exports.hb_buffer_add_codepoints(ptr, codePointsPtr, codePoints.length, itemOffset, itemLength);
         exports.free(codePointsPtr);
       },
       /**
