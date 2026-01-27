@@ -71,6 +71,16 @@ function hbjs(Module) {
     };
   }
 
+  function _string_to_utf8_ptr(text) {
+    const ptr = exports.malloc(text.length);
+    utf8Encoder.encodeInto(text, Module.HEAPU8.subarray(ptr, ptr + text.length));
+    return {
+      ptr: ptr,
+      length: text.length,
+      free: function () { exports.free(ptr); }
+    };
+  }
+
   function _string_to_utf16_ptr(text) {
     const ptr = exports.malloc(text.length * 2);
     const words = new Uint16Array(Module.wasmMemory.buffer, ptr, text.length);
@@ -568,13 +578,12 @@ function hbjs(Module) {
       glyphFromName: function (name) {
         var sp = Module.stackSave();
         var glyphIdPtr = Module.stackAlloc(4);
-        var namePtr = exports.malloc(name.length + 1);
-        utf8Encoder.encodeInto(name, Module.HEAPU8.subarray(namePtr, namePtr + name.length));
+        var namePtr = _string_to_utf8_ptr(name);
         var glyphId = null;
-        if (exports.hb_font_get_glyph_from_name(ptr, namePtr, name.length, glyphIdPtr)) {
+        if (exports.hb_font_get_glyph_from_name(ptr, namePtr.ptr, namePtr.length, glyphIdPtr)) {
           glyphId = Module.HEAPU32[glyphIdPtr / 4];
         }
-        exports.free(namePtr);
+        namePtr.free();
         Module.stackRestore(sp);
         return glyphId;
       },
