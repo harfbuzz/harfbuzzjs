@@ -47,6 +47,11 @@ function hbjs(Module) {
     return utf8Decoder.decode(Module.HEAPU8.subarray(ptr, end));
   }
 
+  function _utf16_ptr_to_string(ptr, length) {
+    let end = ptr / 2 + length;
+    return String.fromCharCode.apply(null, Module.HEAPU16.subarray(ptr / 2, end));
+  }
+
   /**
   * Use when you know the input range should be ASCII.
   * Faster than encoding to UTF-8
@@ -327,7 +332,7 @@ function hbjs(Module) {
         var textPtr = exports.malloc(nameLen * 2);
         Module.HEAPU32[textSizePtr / 4] = nameLen;
         exports.hb_ot_name_get_utf16(ptr, nameId, languagePtr, textSizePtr, textPtr);
-        var name = String.fromCharCode.apply(null, Module.HEAPU16.subarray(textPtr / 2, textPtr / 2 + nameLen - 1));
+        var name = _utf16_ptr_to_string(textPtr, nameLen - 1);
         exports.free(textPtr);
         Module.stackRestore(sp);
         return name;
