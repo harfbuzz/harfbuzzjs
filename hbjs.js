@@ -18,7 +18,7 @@ function hbjs(Module) {
 
   const STATIC_ARRAY_SIZE = 128
 
-  function hb_tag(s) {
+  function _hb_tag(s) {
     return (
       (s.charCodeAt(0) & 0xFF) << 24 |
       (s.charCodeAt(1) & 0xFF) << 16 |
@@ -27,7 +27,7 @@ function hbjs(Module) {
     );
   }
 
-  var HB_BUFFER_SERIALIZE_FORMAT_JSON = hb_tag('JSON');
+  var HB_BUFFER_SERIALIZE_FORMAT_JSON = _hb_tag('JSON');
   var HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES = 4;
 
   const HB_OT_NAME_ID_INVALID = 0xFFFF;
@@ -86,7 +86,7 @@ function hbjs(Module) {
    * @param {number} setPtr Pointer of set
    * @returns {Uint32Array} Typed array instance
    */
-  function typedArrayFromSet(setPtr) {
+  function _typed_array_from_set(setPtr) {
     const setCount = exports.hb_set_get_population(setPtr);
     const arrayPtr = exports.malloc(setCount << 2);
     const arrayOffset = arrayPtr >> 2;
@@ -113,7 +113,7 @@ function hbjs(Module) {
        * @param {string} table Table name
        */
       reference_table: function (table) {
-        var blob = exports.hb_face_reference_table(ptr, hb_tag(table));
+        var blob = exports.hb_face_reference_table(ptr, _hb_tag(table));
         var length = exports.hb_blob_get_length(blob);
         if (!length) { return; }
         var blobptr = exports.hb_blob_get_data(blob, null);
@@ -146,7 +146,7 @@ function hbjs(Module) {
       collectUnicodes: function () {
         var unicodeSetPtr = exports.hb_set_create();
         exports.hb_face_collect_unicodes(ptr, unicodeSetPtr);
-        var result = typedArrayFromSet(unicodeSetPtr);
+        var result = _typed_array_from_set(unicodeSetPtr);
         exports.hb_set_destroy(unicodeSetPtr);
         return result;
       },
@@ -157,7 +157,7 @@ function hbjs(Module) {
        **/
       getTableScriptTags: function (table) {
         var sp = Module.stackSave();
-        var tableTag = hb_tag(table);
+        var tableTag = _hb_tag(table);
         var startOffset = 0;
         var scriptCount = STATIC_ARRAY_SIZE;
         var scriptCountPtr = Module.stackAlloc(4);
@@ -183,7 +183,7 @@ function hbjs(Module) {
        **/
       getTableFeatureTags: function (table) {
         var sp = Module.stackSave();
-        var tableTag = hb_tag(table);
+        var tableTag = _hb_tag(table);
         var startOffset = 0;
         var featureCount = STATIC_ARRAY_SIZE;
         var featureCountPtr = Module.stackAlloc(4);
@@ -211,7 +211,7 @@ function hbjs(Module) {
        **/
       getScriptLanguageTags: function (table, scriptIndex) {
         var sp = Module.stackSave();
-        var tableTag = hb_tag(table);
+        var tableTag = _hb_tag(table);
         var startOffset = 0;
         var languageCount = STATIC_ARRAY_SIZE;
         var languageCountPtr = Module.stackAlloc(4);
@@ -239,7 +239,7 @@ function hbjs(Module) {
        **/
       getLanguageFeatureTags: function (table, scriptIndex, languageIndex) {
         var sp = Module.stackSave();
-        var tableTag = hb_tag(table);
+        var tableTag = _hb_tag(table);
         var startOffset = 0;
         var featureCount = STATIC_ARRAY_SIZE;
         var featureCountPtr = Module.stackAlloc(4);
@@ -304,7 +304,7 @@ function hbjs(Module) {
        **/
       getFeatureNameIds: function (table, featureIndex) {
         var sp = Module.stackSave();
-        var tableTag = hb_tag(table);
+        var tableTag = _hb_tag(table);
         var labelIdPtr = Module.stackAlloc(4);
         var tooltipIdPtr = Module.stackAlloc(4);
         var sampleIdPtr = Module.stackAlloc(4);
@@ -568,7 +568,7 @@ function hbjs(Module) {
         var entries = Object.entries(variations);
         var vars = exports.malloc(8 * entries.length);
         entries.forEach(function (entry, i) {
-          Module.HEAPU32[vars / 4 + i * 2 + 0] = hb_tag(entry[0]);
+          Module.HEAPU32[vars / 4 + i * 2 + 0] = _hb_tag(entry[0]);
           Module.HEAPF32[vars / 4 + i * 2 + 1] = entry[1];
         });
         exports.hb_font_set_variations(ptr, vars, entries.length);
@@ -1193,7 +1193,7 @@ function hbjs(Module) {
    * @returns {string}: The script.
    */
   function otTagToScript(tag) {
-    var hbTag = hb_tag(tag);
+    var hbTag = _hb_tag(tag);
     var script = exports.hb_ot_tag_to_script(hbTag);
     return _hb_untag(script);
   }
@@ -1204,7 +1204,7 @@ function hbjs(Module) {
    * @returns {string}: The language.
    */
   function otTagToLanguage(tag) {
-    var hbTag = hb_tag(tag);
+    var hbTag = _hb_tag(tag);
     var language = exports.hb_ot_tag_to_language(hbTag);
     return _language_to_string(language);
   }
