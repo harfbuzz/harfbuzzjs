@@ -764,6 +764,21 @@ describe('misc', function () {
     expect(version_string).to.match(/^\d+\.\d+\.\d+$/);
   });
 
+  it('convert OpenType tag to script', function () {
+    expect(hb.otTagToScript('arab')).to.equal('Arab');
+    expect(hb.otTagToScript('latn')).to.equal('Latn');
+    expect(hb.otTagToScript('dev2')).to.equal('Deva');
+    expect(hb.otTagToScript('nko ')).to.equal('Nkoo');
+    expect(hb.otTagToScript('DFLT')).to.equal('\0\0\0\0');
+  });
+
+  it('convert OpenType tag to language', function () {
+    expect(hb.otTagToLanguage('ARA ')).to.equal('ar');
+    expect(hb.otTagToLanguage('ENG ')).to.equal('en');
+    expect(hb.otTagToLanguage('BAD0')).to.equal('bad');
+    expect(hb.otTagToLanguage('SYRE')).to.equal('und-syre');
+  });
+
   it("test that calling functions repeatedly doesn't exhaust memory", function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);

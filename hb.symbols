@@ -74,6 +74,8 @@ _hb_ot_layout_language_get_feature_tags
 _hb_ot_layout_feature_get_name_ids
 _hb_ot_name_list_names
 _hb_ot_name_get_utf16
+_hb_ot_tag_to_language
+_hb_ot_tag_to_script
 _hb_ot_var_get_axis_infos
 _hb_script_from_string
 _hb_feature_from_string
