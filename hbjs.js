@@ -9,9 +9,9 @@ function hbjs(Module) {
 
   var freeFuncPtr = addFunction(function (ptr) { exports.free(ptr); }, 'vi');
 
-  const DONT_STOP = 0;
-  const GSUB_PHASE = 1;
-  const GPOS_PHASE = 2;
+  const TRACE_PHASE_DONT_STOP = 0;
+  const TRACE_PHASE_GSUB = 1;
+  const TRACE_PHASE_GPOS = 2;
 
   const STATIC_ARRAY_SIZE = 128
 
@@ -1135,7 +1135,7 @@ function hbjs(Module) {
   */
   function shapeWithTrace(font, buffer, features, stop_at, stop_phase) {
     var trace = [];
-    var currentPhase = DONT_STOP;
+    var currentPhase = TRACE_PHASE_DONT_STOP;
     var stopping = false;
     var failure = false;
 
@@ -1145,9 +1145,9 @@ function hbjs(Module) {
     var traceFunc = function (bufferPtr, fontPtr, messagePtr, user_data) {
       var message = _utf8_ptr_to_string(messagePtr);
       if (message.startsWith("start table GSUB"))
-        currentPhase = GSUB_PHASE;
+        currentPhase = TRACE_PHASE_GSUB;
       else if (message.startsWith("start table GPOS"))
-        currentPhase = GPOS_PHASE;
+        currentPhase = TRACE_PHASE_GPOS;
 
       if (currentPhase != stop_phase)
         stopping = false;
@@ -1155,7 +1155,7 @@ function hbjs(Module) {
       if (failure)
         return 1;
 
-      if (stop_phase != DONT_STOP && currentPhase == stop_phase && message.startsWith("end lookup " + stop_at))
+      if (stop_phase != TRACE_PHASE_DONT_STOP && currentPhase == stop_phase && message.startsWith("end lookup " + stop_at))
         stopping = true;
 
       if (stopping)
