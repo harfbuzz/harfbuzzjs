@@ -40,6 +40,13 @@ function hbjs(Module) {
     ].join('');
   }
 
+  function _utf8_ptr_to_string(ptr, length) {
+    let end;
+    if (length === undefined) end = Module.HEAPU8.indexOf(0, ptr);
+    else end = ptr + length;
+    return utf8Decoder.decode(Module.HEAPU8.subarray(ptr, end));
+  }
+
   function _buffer_flag(s) {
     if (s == "BOT") { return 0x1; }
     if (s == "EOT") { return 0x2; }
@@ -52,8 +59,7 @@ function hbjs(Module) {
 
   function _language_to_string(language) {
     var ptr = exports.hb_language_to_string(language);
-    var str = utf8Decoder.decode(Module.HEAPU8.subarray(ptr, Module.HEAPU8.indexOf(0, ptr)));
-    return str;
+    return _utf8_ptr_to_string(ptr);
   }
 
   function _language_from_string(str) {
@@ -411,8 +417,7 @@ function hbjs(Module) {
         nameBuffer,
         nameBufferSize
       );
-      var array = Module.HEAPU8.subarray(nameBuffer, nameBuffer + nameBufferSize);
-      return utf8Decoder.decode(array.slice(0, array.indexOf(0)));
+      return _utf8_ptr_to_string(nameBuffer);
     }
 
     return {
@@ -649,7 +654,7 @@ function hbjs(Module) {
       setGlyphFromNameFunc: function (func) {
         let funcPtr = addFunction(function (fontPtr, font_data, namePtr, len, glyphPtr, user_data) {
           let font = createFont(null, fontPtr);
-          let name = utf8Decoder.decode(Module.HEAPU8.subarray(namePtr, namePtr + len));
+          let name = _utf8_ptr_to_string(namePtr, len);
           let glyph = func(font, name);
           font.destroy();
           if (glyph) {
@@ -1124,7 +1129,7 @@ function hbjs(Module) {
     var traceBufPtr = exports.malloc(traceBufLen);
 
     var traceFunc = function (bufferPtr, fontPtr, messagePtr, user_data) {
-      var message = utf8Decoder.decode(Module.HEAPU8.subarray(messagePtr, Module.HEAPU8.indexOf(0, messagePtr)));
+      var message = _utf8_ptr_to_string(messagePtr);
       if (message.startsWith("start table GSUB"))
         currentPhase = GSUB_PHASE;
       else if (message.startsWith("start table GPOS"))
@@ -1152,7 +1157,7 @@ function hbjs(Module) {
 
       trace.push({
         m: message,
-        t: JSON.parse(utf8Decoder.decode(Module.HEAPU8.subarray(traceBufPtr, Module.HEAPU8.indexOf(0, traceBufPtr)))),
+        t: JSON.parse(_utf8_ptr_to_string(traceBufPtr)),
         glyphs: exports.hb_buffer_get_content_type(bufferPtr) == HB_BUFFER_CONTENT_TYPE_GLYPHS,
       });
 
@@ -1182,8 +1187,7 @@ function hbjs(Module) {
 
   function version_string() {
     var versionPtr = exports.hb_version_string();
-    var version = utf8Decoder.decode(Module.HEAPU8.subarray(versionPtr, Module.HEAPU8.indexOf(0, versionPtr)));
-    return version;
+    return _utf8_ptr_to_string(versionPtr);
   }
 
   /**
