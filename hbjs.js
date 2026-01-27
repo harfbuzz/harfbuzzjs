@@ -1187,6 +1187,28 @@ function hbjs(Module) {
     return version;
   }
 
+  /**
+   * Convert an OpenType script tag to HarfBuzz script.
+   * @param {string} tag: The tag to convert.
+   * @returns {string}: The script.
+   */
+  function otTagToScript(tag) {
+    var hbTag = hb_tag(tag);
+    var script = exports.hb_ot_tag_to_script(hbTag);
+    return _hb_untag(script);
+  }
+
+  /**
+   * Convert an OpenType language tag to HarfBuzz language.
+   * @param {string} tag: The tag to convert.
+   * @returns {string}: The language.
+   */
+  function otTagToLanguage(tag) {
+    var hbTag = hb_tag(tag);
+    var language = exports.hb_ot_tag_to_language(hbTag);
+    return _language_to_string(language);
+  }
+
   return {
     createBlob: createBlob,
     createFace: createFace,
@@ -1197,6 +1219,8 @@ function hbjs(Module) {
     shapeWithTrace: shapeWithTrace,
     version: version,
     version_string: version_string,
+    otTagToScript: otTagToScript,
+    otTagToLanguage: otTagToLanguage,
   };
 }
 
