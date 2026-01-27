@@ -57,7 +57,7 @@ function hbjs(Module) {
   * Faster than encoding to UTF-8
   **/
   function _string_to_ascii_ptr(text) {
-    var ptr = exports.malloc(text.length + 1);
+    const ptr = exports.malloc(text.length + 1);
     for (let i = 0; i < text.length; ++i) {
       const char = text.charCodeAt(i);
       if (char > 127) throw new Error('Expected ASCII text');
