@@ -9,12 +9,12 @@ function hbjs(Module) {
 
   var freeFuncPtr = addFunction(function (ptr) { exports.free(ptr); }, 'vi');
 
-  var HB_MEMORY_MODE_WRITABLE = 2;
-  var HB_SET_VALUE_INVALID = -1;
-  var HB_BUFFER_CONTENT_TYPE_GLYPHS = 2;
-  var DONT_STOP = 0;
-  var GSUB_PHASE = 1;
-  var GPOS_PHASE = 2;
+  const HB_MEMORY_MODE_WRITABLE = 2;
+  const HB_SET_VALUE_INVALID = -1;
+  const HB_BUFFER_CONTENT_TYPE_GLYPHS = 2;
+  const DONT_STOP = 0;
+  const GSUB_PHASE = 1;
+  const GPOS_PHASE = 2;
 
   const STATIC_ARRAY_SIZE = 128
 
@@ -27,8 +27,8 @@ function hbjs(Module) {
     );
   }
 
-  var HB_BUFFER_SERIALIZE_FORMAT_JSON = _hb_tag('JSON');
-  var HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES = 4;
+  const HB_BUFFER_SERIALIZE_FORMAT_JSON = _hb_tag('JSON');
+  const HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES = 4;
 
   const HB_OT_NAME_ID_INVALID = 0xFFFF;
 
