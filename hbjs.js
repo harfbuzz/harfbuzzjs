@@ -9,14 +9,18 @@ function hbjs(Module) {
 
   var freeFuncPtr = addFunction(function (ptr) { exports.free(ptr); }, 'vi');
 
-  const HB_MEMORY_MODE_WRITABLE = 2;
-  const HB_SET_VALUE_INVALID = -1;
-  const HB_BUFFER_CONTENT_TYPE_GLYPHS = 2;
   const DONT_STOP = 0;
   const GSUB_PHASE = 1;
   const GPOS_PHASE = 2;
 
   const STATIC_ARRAY_SIZE = 128
+
+  const HB_MEMORY_MODE_WRITABLE = 2;
+  const HB_SET_VALUE_INVALID = -1;
+  const HB_BUFFER_CONTENT_TYPE_GLYPHS = 2;
+  const HB_BUFFER_SERIALIZE_FORMAT_JSON = _hb_tag('JSON');
+  const HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES = 4;
+  const HB_OT_NAME_ID_INVALID = 0xFFFF;
 
   function _hb_tag(s) {
     return (
@@ -26,11 +30,6 @@ function hbjs(Module) {
       (s.charCodeAt(3) & 0xFF) << 0
     );
   }
-
-  const HB_BUFFER_SERIALIZE_FORMAT_JSON = _hb_tag('JSON');
-  const HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES = 4;
-
-  const HB_OT_NAME_ID_INVALID = 0xFFFF;
 
   function _hb_untag(tag) {
     return [
