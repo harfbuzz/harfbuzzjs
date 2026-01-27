@@ -31,7 +31,7 @@ HB_LDFLAGS = \
 	-lexports.js
 
 HB_SRCS = harfbuzz/src/harfbuzz.cc
-HB_DEPS = config-override.h hb.symbols
+HB_DEPS = config-override.h hb.symbols em.runtime
 HB_TARGET = hb.js
 
 HB_SUBSET_CXXFLAGS = \

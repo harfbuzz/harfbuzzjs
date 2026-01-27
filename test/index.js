@@ -758,8 +758,36 @@ describe('misc', function () {
     expect(version).to.have.property('micro').that.is.a('number');
     expect(version.major).to.be.at.least(10);
   });
+
   it('get version string', function () {
     const version_string = hb.version_string();
     expect(version_string).to.match(/^\d+\.\d+\.\d+$/);
+  });
+
+  it("test that calling functions repeatedly doesn't exhaust memory", function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    for (let i = 0; i < 10000; i++) {
+      expect(face.listNames()).to.not.be.null;
+      expect(face.getName(0, "en")).to.not.be.null;
+      expect(font.hExtents()).to.not.be.null;
+      expect(font.vExtents()).to.not.be.null;
+      expect(font.glyphHOrigin(0)).to.not.be.null;
+      expect(font.glyphVOrigin(0)).to.be.null;
+      expect(font.glyphExtents(0)).to.not.be.null;
+      expect(font.glyphFromName("a")).to.not.be.null;
+      for (let tableTag of ["GSUB", "GPOS"]) {
+        expect(face.getTableFeatureTags(tableTag)).to.not.be.null;
+        expect(face.getTableScriptTags(tableTag)).to.not.be.null;
+        expect(face.getScriptLanguageTags(tableTag, 0)).to.not.be.null;
+        expect(face.getLanguageFeatureTags(tableTag, 0, 0)).to.not.be.null;
+        if (tableTag === "GSUB") {
+          expect(face.getFeatureNameIds(tableTag, 50)).to.not.be.null;
+        } else {
+          expect(face.getFeatureNameIds(tableTag, 50)).to.be.null;
+        }
+      }
+    }
   });
 });

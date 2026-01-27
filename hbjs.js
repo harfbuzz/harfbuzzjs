@@ -156,6 +156,7 @@ function hbjs(Module) {
        * @param {string} table: The table to query, either "GSUB" or "GPOS".
        **/
       getTableScriptTags: function (table) {
+        var sp = Module.stackSave();
         var tableTag = hb_tag(table);
         var startOffset = 0;
         var scriptCount = STATIC_ARRAY_SIZE;
@@ -172,6 +173,7 @@ function hbjs(Module) {
           tags.push(...Array.from(scriptTags).map(_hb_untag));
           startOffset += scriptCount;
         }
+        Module.stackRestore(sp);
         return tags;
       },
       /**
@@ -180,6 +182,7 @@ function hbjs(Module) {
        * @param {string} table: The table to query, either "GSUB" or "GPOS".
        **/
       getTableFeatureTags: function (table) {
+        var sp = Module.stackSave();
         var tableTag = hb_tag(table);
         var startOffset = 0;
         var featureCount = STATIC_ARRAY_SIZE;
@@ -196,7 +199,9 @@ function hbjs(Module) {
           tags.push(...Array.from(scriptTags).map(_hb_untag));
           startOffset += featureCount;
         }
+        Module.stackRestore(sp);
         return tags;
+
       },
       /**
        * Return language tags in the given face's GSUB or GPOS table, underneath
@@ -205,6 +210,7 @@ function hbjs(Module) {
        * @param {number} scriptIndex: The index of the script to query.
        **/
       getScriptLanguageTags: function (table, scriptIndex) {
+        var sp = Module.stackSave();
         var tableTag = hb_tag(table);
         var startOffset = 0;
         var languageCount = STATIC_ARRAY_SIZE;
@@ -221,6 +227,7 @@ function hbjs(Module) {
           tags.push(...Array.from(languageTags).map(_hb_untag));
           startOffset += languageCount;
         }
+        Module.stackRestore(sp);
         return tags;
       },
       /**
@@ -231,6 +238,7 @@ function hbjs(Module) {
        * @param {number} languageIndex: The index of the language to query.
        **/
       getLanguageFeatureTags: function (table, scriptIndex, languageIndex) {
+        var sp = Module.stackSave();
         var tableTag = hb_tag(table);
         var startOffset = 0;
         var featureCount = STATIC_ARRAY_SIZE;
@@ -247,12 +255,14 @@ function hbjs(Module) {
           tags.push(...Array.from(featureTags).map(_hb_untag));
           startOffset += featureCount;
         }
+        Module.stackRestore(sp);
         return tags;
       },
       /**
        * Return all names in the specified face's name table.
        **/
       listNames: function () {
+        var sp = Module.stackSave();
         var numEntriesPtr = Module.stackAlloc(4);
         var entriesPtr = exports.hb_ot_name_list_names(ptr, numEntriesPtr);
         var numEntries = Module.HEAPU32[numEntriesPtr / 4];
@@ -266,6 +276,7 @@ function hbjs(Module) {
             language: _language_to_string(Module.HEAPU32[(entriesPtr / 4) + (i * 3) + 2])
           });
         }
+        Module.stackRestore(sp);
         return entries;
       },
       /**
@@ -274,6 +285,7 @@ function hbjs(Module) {
        * @param {string} language The language of the name to get.
        **/
       getName: function (nameId, language) {
+        var sp = Module.stackSave();
         var languagePtr = _language_from_string(language);
         var nameLen = exports.hb_ot_name_get_utf16(ptr, nameId, languagePtr, 0, 0) + 1;
         var textSizePtr = Module.stackAlloc(4);
@@ -282,6 +294,7 @@ function hbjs(Module) {
         exports.hb_ot_name_get_utf16(ptr, nameId, languagePtr, textSizePtr, textPtr);
         var name = String.fromCharCode.apply(null, Module.HEAPU16.subarray(textPtr / 2, textPtr / 2 + nameLen - 1));
         exports.free(textPtr);
+        Module.stackRestore(sp);
         return name;
       },
       /**
@@ -290,6 +303,7 @@ function hbjs(Module) {
        * @param {number} featureIndex The index of the feature to query.
        **/
       getFeatureNameIds: function (table, featureIndex) {
+        var sp = Module.stackSave();
         var tableTag = hb_tag(table);
         var labelIdPtr = Module.stackAlloc(4);
         var tooltipIdPtr = Module.stackAlloc(4);
@@ -300,6 +314,7 @@ function hbjs(Module) {
         var found = exports.hb_ot_layout_feature_get_name_ids(ptr, tableTag, featureIndex,
           labelIdPtr, tooltipIdPtr, sampleIdPtr, numNamedParametersPtr, firstParameterIdPtr);
 
+        var names = null;
         if (found) {
           let uiLabelNameId = Module.HEAPU32[labelIdPtr / 4];
           let uiTooltipTextNameId = Module.HEAPU32[tooltipIdPtr / 4];
@@ -307,7 +322,7 @@ function hbjs(Module) {
           let numNamedParameters = Module.HEAPU32[numNamedParametersPtr / 4];
           let firstParameterId = Module.HEAPU32[firstParameterIdPtr / 4];
           let paramUiLabelNameIds = Array(numNamedParameters).fill().map((_, i) => firstParameterId + i);
-          return {
+          names = {
             uiLabelNameId: uiLabelNameId == HB_OT_NAME_ID_INVALID ? null : uiLabelNameId,
             uiTooltipTextNameId: uiTooltipTextNameId == HB_OT_NAME_ID_INVALID ? null : uiTooltipTextNameId,
             sampleTextNameId: sampleTextNameId == HB_OT_NAME_ID_INVALID ? null : sampleTextNameId,
@@ -315,7 +330,8 @@ function hbjs(Module) {
           };
         }
 
-        return null;
+        Module.stackRestore(sp);
+        return names;
       },
       /**
        * Free the object.
@@ -414,26 +430,32 @@ function hbjs(Module) {
        * @returns {object} Object with ascender, descender, and lineGap properties.
        **/
       hExtents: function () {
+        var sp = Module.stackSave();
         var extentsPtr = Module.stackAlloc(12);
         exports.hb_font_get_h_extents(ptr, extentsPtr);
-        return {
+        var extents = {
           ascender: Module.HEAP32[extentsPtr / 4],
           descender: Module.HEAP32[extentsPtr / 4 + 1],
           lineGap: Module.HEAP32[extentsPtr / 4 + 2],
         };
+        Module.stackRestore(sp);
+        return extents;
       },
       /**
        * Return font vertical extents.
        * @returns {object} Object with ascender, descender, and lineGap properties.
        **/
       vExtents: function () {
+        var sp = Module.stackSave();
         var extentsPtr = Module.stackAlloc(12);
         exports.hb_font_get_v_extents(ptr, extentsPtr);
-        return {
+        var extents = {
           ascender: Module.HEAP32[extentsPtr / 4],
           descender: Module.HEAP32[extentsPtr / 4 + 1],
           lineGap: Module.HEAP32[extentsPtr / 4 + 2],
         };
+        Module.stackRestore(sp);
+        return extents;
       },
       glyphName: glyphName,
       glyphToPath: glyphToPath,
@@ -456,54 +478,65 @@ function hbjs(Module) {
        * @param {number} glyphId ID of the requested glyph in the font.
        **/
       glyphHOrigin: function (glyphId) {
+        var sp = Module.stackSave();
         let xPtr = Module.stackAlloc(4);
         let yPtr = Module.stackAlloc(4);
+        let origin = null;
         if (exports.hb_font_get_glyph_h_origin(ptr, glyphId, xPtr, yPtr)) {
-          return [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
+          origin = [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
         }
-        return null;
+        Module.stackRestore(sp);
+        return origin;
       },
       /**
        * Return glyph vertical origin.
        * @param {number} glyphId ID of the requested glyph in the font.
        **/
       glyphVOrigin: function (glyphId) {
+        var sp = Module.stackSave();
         let xPtr = Module.stackAlloc(4);
         let yPtr = Module.stackAlloc(4);
+        let origin = null;
         if (exports.hb_font_get_glyph_v_origin(ptr, glyphId, xPtr, yPtr)) {
-          return [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
+          origin = [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
         }
-        return null;
+        Module.stackRestore(sp);
+        return origin;
       },
       /**
        * Return glyph extents.
        * @param {number} glyphId ID of the requested glyph in the font.
        **/
       glyphExtents: function (glyphId) {
+        var sp = Module.stackSave();
         var extentsPtr = Module.stackAlloc(16);
+        var extents = null;
         if (exports.hb_font_get_glyph_extents(ptr, glyphId, extentsPtr)) {
-          return {
+          extents = {
             xBearing: Module.HEAP32[extentsPtr / 4],
             yBearing: Module.HEAP32[extentsPtr / 4 + 1],
             width: Module.HEAP32[extentsPtr / 4 + 2],
             height: Module.HEAP32[extentsPtr / 4 + 3]
           };
         }
-        return null;
+        Module.stackRestore(sp);
+        return extents;
       },
       /**
        * Return glyph ID from name.
        * @param {string} name Name of the requested glyph in the font.
        **/
       glyphFromName: function (name) {
-        var glyphId = null;
+        var sp = Module.stackSave();
         var glyphIdPtr = Module.stackAlloc(4);
         var namePtr = exports.malloc(name.length + 1);
         utf8Encoder.encodeInto(name, Module.HEAPU8.subarray(namePtr, namePtr + name.length));
+        var glyphId = null;
         if (exports.hb_font_get_glyph_from_name(ptr, namePtr, name.length, glyphIdPtr)) {
           glyphId = Module.HEAPU32[glyphIdPtr / 4];
         }
         exports.free(namePtr);
+        Module.stackRestore(sp);
         return glyphId;
       },
       /**
