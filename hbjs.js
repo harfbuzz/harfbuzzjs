@@ -47,6 +47,36 @@ function hbjs(Module) {
     return utf8Decoder.decode(Module.HEAPU8.subarray(ptr, end));
   }
 
+  /**
+  * Use when you know the input range should be ASCII.
+  * Faster than encoding to UTF-8
+  **/
+  function _string_to_ascii_ptr(text) {
+    var ptr = exports.malloc(text.length + 1);
+    for (let i = 0; i < text.length; ++i) {
+      const char = text.charCodeAt(i);
+      if (char > 127) throw new Error('Expected ASCII text');
+      Module.HEAPU8[ptr + i] = char;
+    }
+    Module.HEAPU8[ptr + text.length] = 0;
+    return {
+      ptr: ptr,
+      length: text.length,
+      free: function () { exports.free(ptr); }
+    };
+  }
+
+  function _string_to_utf16_ptr(text) {
+    const ptr = exports.malloc(text.length * 2);
+    const words = new Uint16Array(Module.wasmMemory.buffer, ptr, text.length);
+    for (let i = 0; i < words.length; ++i) words[i] = text.charCodeAt(i);
+    return {
+      ptr: ptr,
+      length: words.length,
+      free: function () { exports.free(ptr); }
+    };
+  }
+
   function _buffer_flag(s) {
     if (s == "BOT") { return 0x1; }
     if (s == "EOT") { return 0x2; }
@@ -63,7 +93,7 @@ function hbjs(Module) {
   }
 
   function _language_from_string(str) {
-    var languageStr = createAsciiString(str);
+    var languageStr = _string_to_ascii_ptr(str);
     var languagePtr = exports.hb_language_from_string(languageStr.ptr, -1);
     languageStr.free();
     return languagePtr;
@@ -902,36 +932,6 @@ function hbjs(Module) {
   }
 
   /**
-  * Use when you know the input range should be ASCII.
-  * Faster than encoding to UTF-8
-  **/
-  function createAsciiString(text) {
-    var ptr = exports.malloc(text.length + 1);
-    for (let i = 0; i < text.length; ++i) {
-      const char = text.charCodeAt(i);
-      if (char > 127) throw new Error('Expected ASCII text');
-      Module.HEAPU8[ptr + i] = char;
-    }
-    Module.HEAPU8[ptr + text.length] = 0;
-    return {
-      ptr: ptr,
-      length: text.length,
-      free: function () { exports.free(ptr); }
-    };
-  }
-
-  function createJsString(text) {
-    const ptr = exports.malloc(text.length * 2);
-    const words = new Uint16Array(Module.wasmMemory.buffer, ptr, text.length);
-    for (let i = 0; i < words.length; ++i) words[i] = text.charCodeAt(i);
-    return {
-      ptr: ptr,
-      length: words.length,
-      free: function () { exports.free(ptr); }
-    };
-  }
-
-  /**
   * Create an object representing a Harfbuzz buffer.
   **/
   function createBuffer() {
@@ -945,7 +945,7 @@ function hbjs(Module) {
       * @param {number} itemLength Optional. The number of characters to add to the buffer, or null for the end of text.
       **/
       addText: function (text, itemOffset = 0, itemLength = null) {
-        const str = createJsString(text);
+        const str = _string_to_utf16_ptr(text);
         if (itemLength == null) itemLength = str.length;
         exports.hb_buffer_add_utf16(ptr, str.ptr, str.length, itemOffset, itemLength);
         str.free();
@@ -1007,7 +1007,7 @@ function hbjs(Module) {
       * @param {string} language: The buffer language
       */
       setLanguage: function (language) {
-        var str = createAsciiString(language);
+        var str = _string_to_ascii_ptr(language);
         exports.hb_buffer_set_language(ptr, exports.hb_language_from_string(str.ptr, -1));
         str.free();
       },
@@ -1016,7 +1016,7 @@ function hbjs(Module) {
       * @param {string} script: The buffer script
       */
       setScript: function (script) {
-        var str = createAsciiString(script);
+        var str = _string_to_ascii_ptr(script);
         exports.hb_buffer_set_script(ptr, exports.hb_script_from_string(str.ptr, -1));
         str.free();
       },
@@ -1090,7 +1090,7 @@ function hbjs(Module) {
       features = features.split(",");
       featuresPtr = exports.malloc(16 * features.length);
       features.forEach(function (feature, i) {
-        var str = createAsciiString(feature);
+        var str = _string_to_ascii_ptr(feature);
         if (exports.hb_feature_from_string(str.ptr, -1, featuresPtr + featuresLen * 16))
           featuresLen++;
         str.free();
