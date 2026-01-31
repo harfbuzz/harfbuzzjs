@@ -30,9 +30,13 @@ HB_LDFLAGS = \
 	-s ALLOW_TABLE_GROWTH \
 	-lexports.js
 
+HB_ESM_LDFLAGS = \
+	-s EXPORT_ES6=1
+
 HB_SRCS = harfbuzz/src/harfbuzz.cc
 HB_DEPS = config-override.h hb.symbols em.runtime
 HB_TARGET = hb.js
+HB_ESM_TARGET = hb.mjs
 
 HB_SUBSET_CXXFLAGS = \
 	$(COMMON_CXXFLAGS) \
@@ -49,9 +53,11 @@ HB_SUBSET_TARGET = hb-subset.wasm
 
 .PHONY: all clean hb hb-subset test
 
-all: hb hb-subset
+all: hb hb-subset hb-esm
 
 hb: $(HB_TARGET)
+
+hb-esm: ${HB_ESM_TARGET}
 
 hb-subset: $(HB_SUBSET_TARGET)
 
@@ -61,6 +67,10 @@ test: all
 $(HB_TARGET): $(HB_SRCS) $(HB_DEPS)
 	echo "  CXX      $@"
 	$(CXX) $(HB_CXXFLAGS) $(HB_LDFLAGS) -o $@ $(HB_SRCS)
+
+$(HB_ESM_TARGET): $(HB_SRCS) $(HB_DEPS)
+	echo "  CXX      $@"
+	$(CXX) $(HB_CXXFLAGS) $(HB_LDFLAGS) ${HB_ESM_LDFLAGS} -o $@ $(HB_SRCS)
 
 $(HB_SUBSET_TARGET): $(HB_SUBSET_SRCS) $(HB_SUBSET_DEPS)
 	echo "  CXX      $@"
