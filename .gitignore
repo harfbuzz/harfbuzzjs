@@ -1,3 +1,5 @@
 *.wasm
 hb.js
+hb.mjs
+hbjs.mjs
 .DS_Store
