@@ -40,7 +40,9 @@ function hbjs(Module) {
     "PRESERVE_DEFAULT_IGNORABLES": 0x00000004,
     "REMOVE_DEFAULT_IGNORABLES": 0x00000008,
     "DO_NOT_INSERT_DOTTED_CIRCLE": 0x00000010,
+    "VERIFY": 0x00000020,
     "PRODUCE_UNSAFE_TO_CONCAT": 0x00000040,
+    "PRODUCE_SAFE_TO_INSERT_TATWEEL": 0x00000080,
   };
 
   function _hb_tag(s) {
@@ -1016,7 +1018,9 @@ function hbjs(Module) {
       * "PRESERVE_DEFAULT_IGNORABLES"
       * "REMOVE_DEFAULT_IGNORABLES"
       * "DO_NOT_INSERT_DOTTED_CIRCLE"
+      * "VERIFY"
       * "PRODUCE_UNSAFE_TO_CONCAT"
+      * "PRODUCE_SAFE_TO_INSERT_TATWEEL"
       */
       setFlags: function (flags) {
         var flagsValue = 0

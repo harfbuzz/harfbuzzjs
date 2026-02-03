@@ -583,6 +583,28 @@ describe('Buffer', function () {
     expect(glyphs[0].g).to.equal(68 /* a */);
   });
 
+  it('setFlags with PRODUCE_SAFE_TO_INSERT_TATWEEL affects glyph flags', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addText('بلا');
+    buffer.setFlags(['PRODUCE_SAFE_TO_INSERT_TATWEEL']);
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer)
+    const flags = Array.from(buffer.json().map(g => g.flags));
+    expect(flags).to.deep.equal([5, 0]);
+    buffer.destroy();
+
+    buffer = hb.createBuffer();
+    buffer.addText('بلا');
+    buffer.setFlags([]);
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer)
+    const flags2 = Array.from(buffer.json().map(g => g.flags));
+    expect(flags2).to.deep.equal([1, 0]);
+  });
+
   it('serialize ignores invalid flags', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);
