@@ -594,9 +594,8 @@ describe('Buffer', function () {
     hb.shape(font, buffer)
     const flags = Array.from(buffer.json().map(g => g.flags));
     expect(flags).to.deep.equal([5, 0]);
-    buffer.destroy();
 
-    buffer = hb.createBuffer();
+    buffer.clearContents();
     buffer.addText('بلا');
     buffer.setFlags([]);
     buffer.guessSegmentProperties();
@@ -615,6 +614,20 @@ describe('Buffer', function () {
     hb.shape(font, buffer)
     const glyphs = buffer.serialize(font, 0, null, "TEXT", ["invalidFlag"]);
     expect(glyphs).to.deep.equal("[a=0+561|b=1+615|c=2+480]");
+  });
+
+  it('reset resets the buffer', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addText('abc');
+    buffer.guessSegmentProperties();
+    expect(buffer.getContentType()).to.equal("UNICODE");
+    hb.shape(font, buffer)
+    expect(buffer.getContentType()).to.equal("GLYPHS");
+    buffer.reset();
+    expect(buffer.getContentType()).to.equal("INVALID");
   });
 
 });
@@ -762,9 +775,8 @@ describe('shape', function () {
     var glyphs = buffer.json();
     expect(glyphs).to.have.lengthOf(2);
     expect(glyphs[0].g).to.equal(118);
-    buffer.destroy();
 
-    buffer = hb.createBuffer();
+    buffer.clearContents();
     buffer.addText('५ल');
     buffer.setLanguage('dty');
     buffer.guessSegmentProperties();
@@ -785,9 +797,8 @@ describe('shape', function () {
     var glyphs = buffer.json();
     expect(glyphs).to.have.lengthOf(2);
     expect(glyphs[0].g).to.equal(118);
-    buffer.destroy();
 
-    buffer = hb.createBuffer();
+    buffer.clearContents();
     buffer.addText('५ल');
     buffer.setLanguage('x-hbot-4e455020'); // 'NEP '
     buffer.guessSegmentProperties();
