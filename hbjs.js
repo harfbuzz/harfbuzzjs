@@ -6,6 +6,9 @@ function hbjs(Module) {
   var utf8Encoder = new TextEncoder("utf8");
   let addFunction = Module.addFunction;
   let removeFunction = Module.removeFunction;
+  let stackSave = Module.stackSave;
+  let stackRestore = Module.stackRestore;
+  let stackAlloc = Module.stackAlloc;
 
   var freeFuncPtr = addFunction(function (ptr) { exports.free(ptr); }, 'vi');
 
@@ -182,9 +185,9 @@ function hbjs(Module) {
        * Return variation axis infos
        */
       getAxisInfos: function () {
-        var sp = Module.stackSave();
-        var axis = Module.stackAlloc(64 * 32);
-        var c = Module.stackAlloc(4);
+        var sp = stackSave();
+        var axis = stackAlloc(64 * 32);
+        var c = stackAlloc(4);
         Module.HEAPU32[c / 4] = 64;
         exports.hb_ot_var_get_axis_infos(ptr, 0, c, axis);
         var result = {};
@@ -195,7 +198,7 @@ function hbjs(Module) {
             max: Module.HEAPF32[axis / 4 + i * 8 + 6]
           };
         });
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return result;
       },
       /**
@@ -214,12 +217,12 @@ function hbjs(Module) {
        * @param {string} table: The table to query, either "GSUB" or "GPOS".
        **/
       getTableScriptTags: function (table) {
-        var sp = Module.stackSave();
+        var sp = stackSave();
         var tableTag = _hb_tag(table);
         var startOffset = 0;
         var scriptCount = STATIC_ARRAY_SIZE;
-        var scriptCountPtr = Module.stackAlloc(4);
-        var scriptTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+        var scriptCountPtr = stackAlloc(4);
+        var scriptTagsPtr = stackAlloc(STATIC_ARRAY_SIZE * 4);
         var tags = [];
         while (scriptCount == STATIC_ARRAY_SIZE) {
           Module.HEAPU32[scriptCountPtr / 4] = scriptCount;
@@ -231,7 +234,7 @@ function hbjs(Module) {
           tags.push(...Array.from(scriptTags).map(_hb_untag));
           startOffset += scriptCount;
         }
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return tags;
       },
       /**
@@ -240,12 +243,12 @@ function hbjs(Module) {
        * @param {string} table: The table to query, either "GSUB" or "GPOS".
        **/
       getTableFeatureTags: function (table) {
-        var sp = Module.stackSave();
+        var sp = stackSave();
         var tableTag = _hb_tag(table);
         var startOffset = 0;
         var featureCount = STATIC_ARRAY_SIZE;
-        var featureCountPtr = Module.stackAlloc(4);
-        var featureTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+        var featureCountPtr = stackAlloc(4);
+        var featureTagsPtr = stackAlloc(STATIC_ARRAY_SIZE * 4);
         var tags = [];
         while (featureCount == STATIC_ARRAY_SIZE) {
           Module.HEAPU32[featureCountPtr / 4] = featureCount;
@@ -257,7 +260,7 @@ function hbjs(Module) {
           tags.push(...Array.from(scriptTags).map(_hb_untag));
           startOffset += featureCount;
         }
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return tags;
 
       },
@@ -268,12 +271,12 @@ function hbjs(Module) {
        * @param {number} scriptIndex: The index of the script to query.
        **/
       getScriptLanguageTags: function (table, scriptIndex) {
-        var sp = Module.stackSave();
+        var sp = stackSave();
         var tableTag = _hb_tag(table);
         var startOffset = 0;
         var languageCount = STATIC_ARRAY_SIZE;
-        var languageCountPtr = Module.stackAlloc(4);
-        var languageTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+        var languageCountPtr = stackAlloc(4);
+        var languageTagsPtr = stackAlloc(STATIC_ARRAY_SIZE * 4);
         var tags = [];
         while (languageCount == STATIC_ARRAY_SIZE) {
           Module.HEAPU32[languageCountPtr / 4] = languageCount;
@@ -285,7 +288,7 @@ function hbjs(Module) {
           tags.push(...Array.from(languageTags).map(_hb_untag));
           startOffset += languageCount;
         }
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return tags;
       },
       /**
@@ -296,12 +299,12 @@ function hbjs(Module) {
        * @param {number} languageIndex: The index of the language to query.
        **/
       getLanguageFeatureTags: function (table, scriptIndex, languageIndex) {
-        var sp = Module.stackSave();
+        var sp = stackSave();
         var tableTag = _hb_tag(table);
         var startOffset = 0;
         var featureCount = STATIC_ARRAY_SIZE;
-        var featureCountPtr = Module.stackAlloc(4);
-        var featureTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+        var featureCountPtr = stackAlloc(4);
+        var featureTagsPtr = stackAlloc(STATIC_ARRAY_SIZE * 4);
         var tags = [];
         while (featureCount == STATIC_ARRAY_SIZE) {
           Module.HEAPU32[featureCountPtr / 4] = featureCount;
@@ -313,15 +316,15 @@ function hbjs(Module) {
           tags.push(...Array.from(featureTags).map(_hb_untag));
           startOffset += featureCount;
         }
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return tags;
       },
       /**
        * Return all names in the specified face's name table.
        **/
       listNames: function () {
-        var sp = Module.stackSave();
-        var numEntriesPtr = Module.stackAlloc(4);
+        var sp = stackSave();
+        var numEntriesPtr = stackAlloc(4);
         var entriesPtr = exports.hb_ot_name_list_names(ptr, numEntriesPtr);
         var numEntries = Module.HEAPU32[numEntriesPtr / 4];
         var entries = [];
@@ -334,7 +337,7 @@ function hbjs(Module) {
             language: _language_to_string(Module.HEAPU32[(entriesPtr / 4) + (i * 3) + 2])
           });
         }
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return entries;
       },
       /**
@@ -343,16 +346,16 @@ function hbjs(Module) {
        * @param {string} language The language of the name to get.
        **/
       getName: function (nameId, language) {
-        var sp = Module.stackSave();
+        var sp = stackSave();
         var languagePtr = _language_from_string(language);
         var nameLen = exports.hb_ot_name_get_utf16(ptr, nameId, languagePtr, 0, 0) + 1;
-        var textSizePtr = Module.stackAlloc(4);
+        var textSizePtr = stackAlloc(4);
         var textPtr = exports.malloc(nameLen * 2);
         Module.HEAPU32[textSizePtr / 4] = nameLen;
         exports.hb_ot_name_get_utf16(ptr, nameId, languagePtr, textSizePtr, textPtr);
         var name = _utf16_ptr_to_string(textPtr, nameLen - 1);
         exports.free(textPtr);
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return name;
       },
       /**
@@ -361,13 +364,13 @@ function hbjs(Module) {
        * @param {number} featureIndex The index of the feature to query.
        **/
       getFeatureNameIds: function (table, featureIndex) {
-        var sp = Module.stackSave();
+        var sp = stackSave();
         var tableTag = _hb_tag(table);
-        var labelIdPtr = Module.stackAlloc(4);
-        var tooltipIdPtr = Module.stackAlloc(4);
-        var sampleIdPtr = Module.stackAlloc(4);
-        var numNamedParametersPtr = Module.stackAlloc(4);
-        var firstParameterIdPtr = Module.stackAlloc(4);
+        var labelIdPtr = stackAlloc(4);
+        var tooltipIdPtr = stackAlloc(4);
+        var sampleIdPtr = stackAlloc(4);
+        var numNamedParametersPtr = stackAlloc(4);
+        var firstParameterIdPtr = stackAlloc(4);
 
         var found = exports.hb_ot_layout_feature_get_name_ids(ptr, tableTag, featureIndex,
           labelIdPtr, tooltipIdPtr, sampleIdPtr, numNamedParametersPtr, firstParameterIdPtr);
@@ -388,7 +391,7 @@ function hbjs(Module) {
           };
         }
 
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return names;
       },
       /**
@@ -461,12 +464,12 @@ function hbjs(Module) {
      * @param {number} glyphId ID of the requested glyph in the font.
      **/
     function glyphName(glyphId) {
-      var sp = Module.stackSave();
+      var sp = stackSave();
       var strSize = 256;
-      var strPtr = Module.stackAlloc(strSize);
+      var strPtr = stackAlloc(strSize);
       exports.hb_font_glyph_to_string(ptr, glyphId, strPtr, strSize);
       var name = _utf8_ptr_to_string(strPtr);
-      Module.stackRestore(sp);
+      stackRestore(sp);
       return name;
     }
 
@@ -484,15 +487,15 @@ function hbjs(Module) {
        * @returns {object} Object with ascender, descender, and lineGap properties.
        **/
       hExtents: function () {
-        var sp = Module.stackSave();
-        var extentsPtr = Module.stackAlloc(12);
+        var sp = stackSave();
+        var extentsPtr = stackAlloc(12);
         exports.hb_font_get_h_extents(ptr, extentsPtr);
         var extents = {
           ascender: Module.HEAP32[extentsPtr / 4],
           descender: Module.HEAP32[extentsPtr / 4 + 1],
           lineGap: Module.HEAP32[extentsPtr / 4 + 2],
         };
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return extents;
       },
       /**
@@ -500,15 +503,15 @@ function hbjs(Module) {
        * @returns {object} Object with ascender, descender, and lineGap properties.
        **/
       vExtents: function () {
-        var sp = Module.stackSave();
-        var extentsPtr = Module.stackAlloc(12);
+        var sp = stackSave();
+        var extentsPtr = stackAlloc(12);
         exports.hb_font_get_v_extents(ptr, extentsPtr);
         var extents = {
           ascender: Module.HEAP32[extentsPtr / 4],
           descender: Module.HEAP32[extentsPtr / 4 + 1],
           lineGap: Module.HEAP32[extentsPtr / 4 + 2],
         };
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return extents;
       },
       glyphName: glyphName,
@@ -532,14 +535,14 @@ function hbjs(Module) {
        * @param {number} glyphId ID of the requested glyph in the font.
        **/
       glyphHOrigin: function (glyphId) {
-        var sp = Module.stackSave();
-        let xPtr = Module.stackAlloc(4);
-        let yPtr = Module.stackAlloc(4);
+        var sp = stackSave();
+        let xPtr = stackAlloc(4);
+        let yPtr = stackAlloc(4);
         let origin = null;
         if (exports.hb_font_get_glyph_h_origin(ptr, glyphId, xPtr, yPtr)) {
           origin = [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
         }
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return origin;
       },
       /**
@@ -547,14 +550,14 @@ function hbjs(Module) {
        * @param {number} glyphId ID of the requested glyph in the font.
        **/
       glyphVOrigin: function (glyphId) {
-        var sp = Module.stackSave();
-        let xPtr = Module.stackAlloc(4);
-        let yPtr = Module.stackAlloc(4);
+        var sp = stackSave();
+        let xPtr = stackAlloc(4);
+        let yPtr = stackAlloc(4);
         let origin = null;
         if (exports.hb_font_get_glyph_v_origin(ptr, glyphId, xPtr, yPtr)) {
           origin = [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
         }
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return origin;
       },
       /**
@@ -562,8 +565,8 @@ function hbjs(Module) {
        * @param {number} glyphId ID of the requested glyph in the font.
        **/
       glyphExtents: function (glyphId) {
-        var sp = Module.stackSave();
-        var extentsPtr = Module.stackAlloc(16);
+        var sp = stackSave();
+        var extentsPtr = stackAlloc(16);
         var extents = null;
         if (exports.hb_font_get_glyph_extents(ptr, glyphId, extentsPtr)) {
           extents = {
@@ -573,7 +576,7 @@ function hbjs(Module) {
             height: Module.HEAP32[extentsPtr / 4 + 3]
           };
         }
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return extents;
       },
       /**
@@ -581,15 +584,15 @@ function hbjs(Module) {
        * @param {string} name Name of the requested glyph in the font.
        **/
       glyphFromName: function (name) {
-        var sp = Module.stackSave();
-        var glyphIdPtr = Module.stackAlloc(4);
+        var sp = stackSave();
+        var glyphIdPtr = stackAlloc(4);
         var namePtr = _string_to_utf8_ptr(name);
         var glyphId = null;
         if (exports.hb_font_get_glyph_from_name(ptr, namePtr.ptr, namePtr.length, glyphIdPtr)) {
           glyphId = Module.HEAPU32[glyphIdPtr / 4];
         }
         namePtr.free();
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return glyphId;
       },
       /**
@@ -1085,11 +1088,11 @@ function hbjs(Module) {
       * @returns {string} The serialized buffer contents.
       */
       serialize: function (font, start = 0, end = null, format = "TEXT", flags = []) {
-        var sp = Module.stackSave();
+        var sp = stackSave();
         if (end == null) end = exports.hb_buffer_get_length(ptr);
         var bufLen = 32 * 1024;
         var bufPtr = exports.malloc(bufLen);
-        var bufConsumedPtr = Module.stackAlloc(4);
+        var bufConsumedPtr = stackAlloc(4);
         var flagsValue = 0;
         flags.forEach(flag => flagsValue |= bufferSerializeFlags[flag] || 0);
         var result = "";
@@ -1102,7 +1105,7 @@ function hbjs(Module) {
           result += _utf8_ptr_to_string(bufPtr, bufConsumed);
         }
         exports.free(bufPtr);
-        Module.stackRestore(sp);
+        stackRestore(sp);
         return result;
       },
       /**
@@ -1223,15 +1226,15 @@ function hbjs(Module) {
   }
 
   function version() {
-    var sp = Module.stackSave();
-    var versionPtr = Module.stackAlloc(12);
+    var sp = stackSave();
+    var versionPtr = stackAlloc(12);
     exports.hb_version(versionPtr, versionPtr + 4, versionPtr + 8);
     var version = {
       major: Module.HEAPU32[versionPtr / 4],
       minor: Module.HEAPU32[(versionPtr + 4) / 4],
       micro: Module.HEAPU32[(versionPtr + 8) / 4],
     };
-    Module.stackRestore(sp);
+    stackRestore(sp);
     return version;
   }
 
