@@ -6,6 +6,7 @@ _hb_buffer_add_utf16
 _hb_buffer_add_utf8
 _hb_buffer_add_codepoints
 _hb_buffer_create
+_hb_buffer_reference
 _hb_buffer_destroy
 _hb_buffer_get_glyph_infos
 _hb_buffer_get_glyph_positions
