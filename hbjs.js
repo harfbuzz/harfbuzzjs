@@ -20,9 +20,13 @@ function hbjs(Module) {
 
   const HB_MEMORY_MODE_WRITABLE = 2;
   const HB_SET_VALUE_INVALID = -1;
-  const HB_BUFFER_CONTENT_TYPE_GLYPHS = 2;
   const HB_OT_NAME_ID_INVALID = 0xFFFF;
 
+  const bufferContentType = {
+    0: "INVALID",
+    1: "UNICODE",
+    2: "GLYPHS",
+  };
   const bufferSerializeFlags = {
     "DEFAULT": 0x00000000,
     "NO_CLUSTERS": 0x00000001,
@@ -1045,7 +1049,6 @@ function hbjs(Module) {
         exports.hb_buffer_set_script(ptr, exports.hb_script_from_string(str.ptr, -1));
         str.free();
       },
-
       /**
       * Set the Harfbuzz clustering level.
       *
@@ -1055,6 +1058,19 @@ function hbjs(Module) {
       **/
       setClusterLevel: function (level) {
         exports.hb_buffer_set_cluster_level(ptr, level)
+      },
+      /**
+      * Reset the buffer to its initial status.
+      **/
+      reset: function () {
+        exports.hb_buffer_reset(ptr);
+      },
+      /**
+      * Similar to reset(), but does not clear the Unicode functions and the
+      * replacement code point.
+      **/
+      clearContents: function () {
+        exports.hb_buffer_clear_contents(ptr);
       },
       /**
       * Set message func.
@@ -1117,6 +1133,17 @@ function hbjs(Module) {
         exports.free(bufPtr);
         stackRestore(sp);
         return result;
+      },
+      /**
+      * Return the buffer content type.
+      *
+      * @returns {string} The buffer content type. One of:
+      * "INVALID"
+      * "UNICODE"
+      * "GLYPHS"
+      */
+      getContentType: function () {
+        return bufferContentType[exports.hb_buffer_get_content_type(ptr)];
       },
       /**
       * Return the buffer contents as a JSON object.
@@ -1225,7 +1252,7 @@ function hbjs(Module) {
       trace.push({
         m: message,
         t: JSON.parse(traceBuf),
-        glyphs: exports.hb_buffer_get_content_type(buffer.ptr) == HB_BUFFER_CONTENT_TYPE_GLYPHS,
+        glyphs: buffer.getContentType() == "GLYPHS",
       });
 
       return true;
