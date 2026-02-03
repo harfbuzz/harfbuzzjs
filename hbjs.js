@@ -955,9 +955,10 @@ function hbjs(Module) {
 
   /**
   * Create an object representing a Harfbuzz buffer.
+  * @param {number} ptr Optional. The pointer to the buffer.
   **/
-  function createBuffer() {
-    var ptr = exports.hb_buffer_create();
+  function createBuffer(ptr) {
+    var ptr = ptr ? exports.hb_buffer_reference(ptr) : exports.hb_buffer_create();
     return {
       ptr: ptr,
       /**
@@ -1052,6 +1053,30 @@ function hbjs(Module) {
       **/
       setClusterLevel: function (level) {
         exports.hb_buffer_set_cluster_level(ptr, level)
+      },
+      /**
+      * Set message func.
+      * @param {function} func The function to set.
+      *
+      * The function should accept three arguments:
+      * @param {object} buffer The buffer
+      * @param {object} font The font
+      * @param {string} message The message
+      *
+      * Returning false from this function will skip this shaping step and move to the next one.
+      */
+      setMessageFunc: function (func) {
+        var traceFunc = function (bufferPtr, fontPtr, messagePtr, user_data) {
+          var message = _utf8_ptr_to_string(messagePtr);
+          var buffer = createBuffer(bufferPtr);
+          var font = createFont(null, fontPtr);
+          var result = func(buffer, font, message);
+          buffer.destroy();
+          font.destroy();
+          return result ? 1 : 0;
+        }
+        var traceFuncPtr = addFunction(traceFunc, 'iiiii');
+        exports.hb_buffer_set_message_func(ptr, traceFuncPtr, 0, 0);
       },
       /**
       * Serialize the buffer contents to a string.
@@ -1167,8 +1192,7 @@ function hbjs(Module) {
     var stopping = false;
     var failure = false;
 
-    var traceFunc = function (bufferPtr, fontPtr, messagePtr, user_data) {
-      var message = _utf8_ptr_to_string(messagePtr);
+    buffer.setMessageFunc((buffer, font, message) => {
       if (message.startsWith("start table GSUB"))
         currentPhase = TRACE_PHASE_GSUB;
       else if (message.startsWith("start table GPOS"))
@@ -1178,30 +1202,26 @@ function hbjs(Module) {
         stopping = false;
 
       if (failure)
-        return 1;
+        return true;
 
       if (stop_phase != TRACE_PHASE_DONT_STOP && currentPhase == stop_phase && message.startsWith("end lookup " + stop_at))
         stopping = true;
 
       if (stopping)
-        return 0;
+        return false;
 
       var traceBuf = buffer.serialize(font, 0, null, "JSON", ["noGlyphNames"]);
 
       trace.push({
         m: message,
         t: JSON.parse(traceBuf),
-        glyphs: exports.hb_buffer_get_content_type(bufferPtr) == HB_BUFFER_CONTENT_TYPE_GLYPHS,
+        glyphs: exports.hb_buffer_get_content_type(buffer.ptr) == HB_BUFFER_CONTENT_TYPE_GLYPHS,
       });
 
-      return 1;
-    }
+      return true;
+    });
 
-    var traceFuncPtr = addFunction(traceFunc, 'iiiii');
-    exports.hb_buffer_set_message_func(buffer.ptr, traceFuncPtr, 0, 0);
     shape(font, buffer, features, 0);
-    removeFunction(traceFuncPtr);
-
     return trace;
   }
 
