@@ -182,8 +182,9 @@ function hbjs(Module) {
        * Return variation axis infos
        */
       getAxisInfos: function () {
-        var axis = exports.malloc(64 * 32);
-        var c = exports.malloc(4);
+        var sp = Module.stackSave();
+        var axis = Module.stackAlloc(64 * 32);
+        var c = Module.stackAlloc(4);
         Module.HEAPU32[c / 4] = 64;
         exports.hb_ot_var_get_axis_infos(ptr, 0, c, axis);
         var result = {};
@@ -194,8 +195,7 @@ function hbjs(Module) {
             max: Module.HEAPF32[axis / 4 + i * 8 + 6]
           };
         });
-        exports.free(c);
-        exports.free(axis);
+        Module.stackRestore(sp);
         return result;
       },
       /**
@@ -402,9 +402,6 @@ function hbjs(Module) {
 
   var pathBuffer = "";
 
-  var nameBufferSize = 256; // should be enough for most glyphs
-  var nameBuffer = exports.malloc(nameBufferSize); // permanently allocated
-
   /**
   * Create an object representing a Harfbuzz font.
   * @param {object} blob An object returned from `createFace`.
@@ -464,13 +461,13 @@ function hbjs(Module) {
      * @param {number} glyphId ID of the requested glyph in the font.
      **/
     function glyphName(glyphId) {
-      exports.hb_font_glyph_to_string(
-        ptr,
-        glyphId,
-        nameBuffer,
-        nameBufferSize
-      );
-      return _utf8_ptr_to_string(nameBuffer);
+      var sp = Module.stackSave();
+      var strSize = 256;
+      var strPtr = Module.stackAlloc(strSize);
+      exports.hb_font_glyph_to_string(ptr, glyphId, strPtr, strSize);
+      var name = _utf8_ptr_to_string(strPtr);
+      Module.stackRestore(sp);
+      return name;
     }
 
     return {
@@ -1226,14 +1223,15 @@ function hbjs(Module) {
   }
 
   function version() {
-    var versionPtr = exports.malloc(12);
+    var sp = Module.stackSave();
+    var versionPtr = Module.stackAlloc(12);
     exports.hb_version(versionPtr, versionPtr + 4, versionPtr + 8);
     var version = {
       major: Module.HEAPU32[versionPtr / 4],
       minor: Module.HEAPU32[(versionPtr + 4) / 4],
       micro: Module.HEAPU32[(versionPtr + 8) / 4],
     };
-    exports.free(versionPtr);
+    Module.stackRestore(sp);
     return version;
   }
 
