@@ -24,13 +24,23 @@ function hbjs(Module) {
   const HB_OT_NAME_ID_INVALID = 0xFFFF;
 
   const bufferSerializeFlags = {
-    "default": 0x00000000,
-    "noClusters": 0x00000001,
-    "noPositions": 0x00000002,
-    "noGlyphNames": 0x00000004,
-    "glyphExtents": 0x00000008,
-    "glyphFlags": 0x00000010,
-    "noAdvances": 0x00000020,
+    "DEFAULT": 0x00000000,
+    "NO_CLUSTERS": 0x00000001,
+    "NO_POSITIONS": 0x00000002,
+    "NO_GLYPH_NAMES": 0x00000004,
+    "GLYPH_EXTENTS": 0x00000008,
+    "GLYPH_FLAGS": 0x00000010,
+    "NO_ADVANCES": 0x00000020,
+  };
+
+  const bufferFlags = {
+    "DEFAULT": 0x00000000,
+    "BOT": 0x00000001,
+    "EOT": 0x00000002,
+    "PRESERVE_DEFAULT_IGNORABLES": 0x00000004,
+    "REMOVE_DEFAULT_IGNORABLES": 0x00000008,
+    "DO_NOT_INSERT_DOTTED_CIRCLE": 0x00000010,
+    "PRODUCE_UNSAFE_TO_CONCAT": 0x00000040,
   };
 
   function _hb_tag(s) {
@@ -101,16 +111,6 @@ function hbjs(Module) {
       length: words.length,
       free: function () { exports.free(ptr); }
     };
-  }
-
-  function _buffer_flag(s) {
-    if (s == "BOT") { return 0x1; }
-    if (s == "EOT") { return 0x2; }
-    if (s == "PRESERVE_DEFAULT_IGNORABLES") { return 0x4; }
-    if (s == "REMOVE_DEFAULT_IGNORABLES") { return 0x8; }
-    if (s == "DO_NOT_INSERT_DOTTED_CIRCLE") { return 0x10; }
-    if (s == "PRODUCE_UNSAFE_TO_CONCAT") { return 0x40; }
-    return 0x0;
   }
 
   function _language_to_string(language) {
@@ -1010,6 +1010,7 @@ function hbjs(Module) {
       /**
       * Set buffer flags explicitly.
       * @param {string[]} flags: A list of strings which may be either:
+      * "DEFAULT"
       * "BOT"
       * "EOT"
       * "PRESERVE_DEFAULT_IGNORABLES"
@@ -1018,12 +1019,9 @@ function hbjs(Module) {
       * "PRODUCE_UNSAFE_TO_CONCAT"
       */
       setFlags: function (flags) {
-        var flagValue = 0
-        flags.forEach(function (s) {
-          flagValue |= _buffer_flag(s);
-        })
-
-        exports.hb_buffer_set_flags(ptr, flagValue);
+        var flagsValue = 0
+        flags.forEach(s => flagsValue |= bufferFlags[s] || 0);
+        exports.hb_buffer_set_flags(ptr, flagsValue);
       },
       /**
       * Set buffer language explicitly.
@@ -1084,7 +1082,15 @@ function hbjs(Module) {
       * @param {number} start Optional. The starting index of the glyphs to serialize.
       * @param {number} end Optional. The ending index of the glyphs to serialize.
       * @param {string} format Optional. The format to serialize the buffer contents to.
-      * @param {array<string>} flags Optional. The flags to use for serialization.
+      * @param {string[]} flags Optional. The flags to use for serialization. A list of strings which may be either:
+      * "DEFAULT"
+      * "NO_CLUSTERS"
+      * "NO_POSITIONS"
+      * "NO_GLYPH_NAMES"
+      * "GLYPH_EXTENTS"
+      * "GLYPH_FLAGS"
+      * "NO_ADVANCES"
+      *
       * @returns {string} The serialized buffer contents.
       */
       serialize: function (font, start = 0, end = null, format = "TEXT", flags = []) {
@@ -1123,7 +1129,7 @@ function hbjs(Module) {
       *   - flags: Glyph flags like `HB_GLYPH_FLAG_UNSAFE_TO_BREAK` (0x1)
       **/
       json: function () {
-        var buf = this.serialize(null, 0, null, "JSON", ["noGlyphNames", "glyphFlags"]);
+        var buf = this.serialize(null, 0, null, "JSON", ["NO_GLYPH_NAMES", "GLYPH_FLAGS"]);
         var json = JSON.parse(buf);
         // For backward compatibility, as harfbuzz uses 'fl' for flags but earlier
         // we were doing the serialization ourselves and used 'flags'.
@@ -1210,7 +1216,7 @@ function hbjs(Module) {
       if (stopping)
         return false;
 
-      var traceBuf = buffer.serialize(font, 0, null, "JSON", ["noGlyphNames"]);
+      var traceBuf = buffer.serialize(font, 0, null, "JSON", ["NO_GLYPH_NAMES"]);
 
       trace.push({
         m: message,
