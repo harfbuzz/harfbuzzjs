@@ -569,6 +569,32 @@ describe('Buffer', function () {
     const glyphs = buffer.json();
     expect(glyphs[0].g).not.to.equal(3 /* space */);
   });
+
+  it('setFlags ignores invalid flags', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addText('abc');
+    buffer.setFlags(['invalidFlag']);
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer)
+    const glyphs = buffer.json();
+    expect(glyphs[0].g).to.equal(68 /* a */);
+  });
+
+  it('serialize ignores invalid flags', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addText('abc');
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer)
+    const glyphs = buffer.serialize(font, 0, null, "TEXT", ["invalidFlag"]);
+    expect(glyphs).to.deep.equal("[a=0+561|b=1+615|c=2+480]");
+  });
+
 });
 
 describe('shape', function () {
