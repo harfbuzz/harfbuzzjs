@@ -18,9 +18,17 @@ function hbjs(Module) {
   const HB_MEMORY_MODE_WRITABLE = 2;
   const HB_SET_VALUE_INVALID = -1;
   const HB_BUFFER_CONTENT_TYPE_GLYPHS = 2;
-  const HB_BUFFER_SERIALIZE_FORMAT_JSON = _hb_tag('JSON');
-  const HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES = 4;
   const HB_OT_NAME_ID_INVALID = 0xFFFF;
+
+  const bufferSerializeFlags = {
+    "default": 0x00000000,
+    "noClusters": 0x00000001,
+    "noPositions": 0x00000002,
+    "noGlyphNames": 0x00000004,
+    "glyphExtents": 0x00000008,
+    "glyphFlags": 0x00000010,
+    "noAdvances": 0x00000020,
+  };
 
   function _hb_tag(s) {
     return (
@@ -1046,6 +1054,36 @@ function hbjs(Module) {
         exports.hb_buffer_set_cluster_level(ptr, level)
       },
       /**
+      * Serialize the buffer contents to a string.
+      * @param {object} font Optional. The font to use for serialization.
+      * @param {number} start Optional. The starting index of the glyphs to serialize.
+      * @param {number} end Optional. The ending index of the glyphs to serialize.
+      * @param {string} format Optional. The format to serialize the buffer contents to.
+      * @param {array<string>} flags Optional. The flags to use for serialization.
+      * @returns {string} The serialized buffer contents.
+      */
+      serialize: function (font, start = 0, end = null, format = "TEXT", flags = []) {
+        var sp = Module.stackSave();
+        if (end == null) end = exports.hb_buffer_get_length(ptr);
+        var bufLen = 32 * 1024;
+        var bufPtr = exports.malloc(bufLen);
+        var bufConsumedPtr = Module.stackAlloc(4);
+        var flagsValue = 0;
+        flags.forEach(flag => flagsValue |= bufferSerializeFlags[flag] || 0);
+        var result = "";
+        while (start < end) {
+          start += exports.hb_buffer_serialize(ptr, start, end,
+            bufPtr, bufLen, bufConsumedPtr,
+            font ? font.ptr : 0, _hb_tag(format), flagsValue);
+          var bufConsumed = Module.HEAPU32[bufConsumedPtr / 4];
+          if (bufConsumed == 0) break;
+          result += _utf8_ptr_to_string(bufPtr, bufConsumed);
+        }
+        exports.free(bufPtr);
+        Module.stackRestore(sp);
+        return result;
+      },
+      /**
       * Return the buffer contents as a JSON object.
       *
       * After shaping, this function will return an array of glyph information
@@ -1060,25 +1098,15 @@ function hbjs(Module) {
       *   - flags: Glyph flags like `HB_GLYPH_FLAG_UNSAFE_TO_BREAK` (0x1)
       **/
       json: function () {
-        var length = exports.hb_buffer_get_length(ptr);
-        var result = [];
-        var infosPtr = exports.hb_buffer_get_glyph_infos(ptr, 0);
-        var infosPtr32 = infosPtr / 4;
-        var positionsPtr32 = exports.hb_buffer_get_glyph_positions(ptr, 0) / 4;
-        var infos = Module.HEAPU32.subarray(infosPtr32, infosPtr32 + 5 * length);
-        var positions = Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + 5 * length);
-        for (var i = 0; i < length; ++i) {
-          result.push({
-            g: infos[i * 5 + 0],
-            cl: infos[i * 5 + 2],
-            ax: positions[i * 5 + 0],
-            ay: positions[i * 5 + 1],
-            dx: positions[i * 5 + 2],
-            dy: positions[i * 5 + 3],
-            flags: exports.hb_glyph_info_get_glyph_flags(infosPtr + i * 20)
-          });
-        }
-        return result;
+        var buf = this.serialize(null, 0, null, "JSON", ["noGlyphNames", "glyphFlags"]);
+        var json = JSON.parse(buf);
+        // For backward compatibility, as harfbuzz uses 'fl' for flags but earlier
+        // we were doing the serialization ourselves and used 'flags'.
+        json.forEach(function (glyph) {
+          glyph.flags = glyph.fl || 0;
+          delete glyph.fl;
+        });
+        return json;
       },
       /**
       * Free the object.
@@ -1139,9 +1167,6 @@ function hbjs(Module) {
     var stopping = false;
     var failure = false;
 
-    var traceBufLen = 1024 * 1024;
-    var traceBufPtr = exports.malloc(traceBufLen);
-
     var traceFunc = function (bufferPtr, fontPtr, messagePtr, user_data) {
       var message = _utf8_ptr_to_string(messagePtr);
       if (message.startsWith("start table GSUB"))
@@ -1161,17 +1186,11 @@ function hbjs(Module) {
       if (stopping)
         return 0;
 
-      exports.hb_buffer_serialize_glyphs(
-        bufferPtr,
-        0, exports.hb_buffer_get_length(bufferPtr),
-        traceBufPtr, traceBufLen, 0,
-        fontPtr,
-        HB_BUFFER_SERIALIZE_FORMAT_JSON,
-        HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES);
+      var traceBuf = buffer.serialize(font, 0, null, "JSON", ["noGlyphNames"]);
 
       trace.push({
         m: message,
-        t: JSON.parse(_utf8_ptr_to_string(traceBufPtr)),
+        t: JSON.parse(traceBuf),
         glyphs: exports.hb_buffer_get_content_type(bufferPtr) == HB_BUFFER_CONTENT_TYPE_GLYPHS,
       });
 
@@ -1181,7 +1200,6 @@ function hbjs(Module) {
     var traceFuncPtr = addFunction(traceFunc, 'iiiii');
     exports.hb_buffer_set_message_func(buffer.ptr, traceFuncPtr, 0, 0);
     shape(font, buffer, features, 0);
-    exports.free(traceBufPtr);
     removeFunction(traceFuncPtr);
 
     return trace;
