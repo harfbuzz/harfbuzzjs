@@ -1156,6 +1156,26 @@ function hbjs(Module) {
         return positions;
       },
       /**
+      * Update the glyph positions in the buffer.
+      * @param {object[]} positions The new glyph positions.
+      *
+      * WARNING: Do not use unless you know what you are doing.
+      */
+      updateGlyphPositions: function (positions) {
+        var positionsPtr32 = exports.hb_buffer_get_glyph_positions(ptr, 0) / 4;
+        if (positionsPtr32 == 0) {
+          return;
+        }
+        var len = Math.min(positions.length, this.getLength());
+        var positionsArray = Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + len * 5);
+        for (var i = 0; i < len; i++) {
+          positionsArray[i * 5] = positions[i].x_advance;
+          positionsArray[i * 5 + 1] = positions[i].y_advance;
+          positionsArray[i * 5 + 2] = positions[i].x_offset;
+          positionsArray[i * 5 + 3] = positions[i].y_offset;
+        }
+      },
+      /**
       * Serialize the buffer contents to a string.
       * @param {object} font Optional. The font to use for serialization.
       * @param {number} start Optional. The starting index of the glyphs to serialize.
