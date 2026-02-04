@@ -642,6 +642,75 @@ describe('Buffer', function () {
     expect(buffer.getLength()).to.equal(1);
   });
 
+  it('getInfos and getPositions return empty arrays for empty buffer', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    expect(buffer.getGlyphInfos()).to.deep.equal([]);
+    expect(buffer.getGlyphPositions()).to.deep.equal([]);
+  });
+
+  it('getInfos and getPositions return non empty arrays for non empty buffer', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addText('x\u0300fi'); // combining mark and ligature to make the test more interesting
+    buffer.guessSegmentProperties();
+
+    // before shaping
+    expect(buffer.getGlyphInfos()).to.deep.equal([
+      { codepoint: 120, cluster: 0 },
+      { codepoint: 768, cluster: 1 },
+      { codepoint: 102, cluster: 2 },
+      { codepoint: 105, cluster: 3 }
+    ]);
+    expect(buffer.getGlyphPositions()).to.deep.equal([
+      { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 },
+      { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 },
+      { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 },
+      { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 }
+    ]);
+
+    hb.shape(font, buffer);
+    // after shaping
+    expect(buffer.getGlyphInfos()).to.deep.equal([
+      { codepoint: 91, cluster: 0 },
+      { codepoint: 2662, cluster: 0 },
+      { codepoint: 1652, cluster: 2 }
+    ]);
+    expect(buffer.getGlyphPositions()).to.deep.equal([
+      { x_advance: 529, y_advance: 0, x_offset: 0, y_offset: 0 },
+      { x_advance: 0, y_advance: 0, x_offset: 97, y_offset: 0 },
+      { x_advance: 602, y_advance: 0, x_offset: 0, y_offset: 0 }
+    ]);
+  });
+
+  it('getPositions returns empty array for buffer without positions', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addText('abc');
+    buffer.guessSegmentProperties();
+    var currentPhase = "";
+    buffer.setMessageFunc((buffer, font, message) => {
+      if (message.startsWith("start table GSUB"))
+        currentPhase = "GSUB";
+      else if (message.startsWith("start table GPOS"))
+        currentPhase = "GPOS";
+
+      if (currentPhase === "GSUB")
+        expect(buffer.getGlyphPositions()).to.deep.equal([]);
+      else if (currentPhase === "GPOS")
+        expect(buffer.getGlyphPositions()).to.not.deep.equal([]);
+
+      return true;
+    });
+    hb.shape(font, buffer);
+  });
+
 });
 
 describe('shape', function () {
