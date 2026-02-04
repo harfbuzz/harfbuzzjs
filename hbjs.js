@@ -1097,6 +1097,13 @@ function hbjs(Module) {
         exports.hb_buffer_set_message_func(ptr, traceFuncPtr, 0, 0);
       },
       /**
+      * Get the the number of items in the buffer.
+      * @returns {number} The buffer length.
+      */
+      getLength: function () {
+        return exports.hb_buffer_get_length(ptr);
+      },
+      /**
       * Serialize the buffer contents to a string.
       * @param {object} font Optional. The font to use for serialization.
       * @param {number} start Optional. The starting index of the glyphs to serialize.
@@ -1115,7 +1122,7 @@ function hbjs(Module) {
       */
       serialize: function (font, start = 0, end = null, format = "TEXT", flags = []) {
         var sp = stackSave();
-        if (end == null) end = exports.hb_buffer_get_length(ptr);
+        if (end == null) end = this.getLength();
         var bufLen = 32 * 1024;
         var bufPtr = exports.malloc(bufLen);
         var bufConsumedPtr = stackAlloc(4);
