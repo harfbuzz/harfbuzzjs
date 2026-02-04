@@ -711,6 +711,53 @@ describe('Buffer', function () {
     hb.shape(font, buffer);
   });
 
+  it('updateGlyphPositions updates the glyph positions', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+
+    // text with a base glyph and two marks to test mkmk after manually updating glyph positions
+    var text = 'x\u0302\u0300';
+
+    // without updateGlyphPositions
+    buffer.addText(text);
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer);
+    var positions = buffer.getGlyphPositions();
+    expect(positions[1].y_offset).to.equal(0);
+    expect(positions[2].y_offset).to.equal(229);
+
+    // with updateGlyphPositions inside buffer message callback
+    buffer.clearContents();
+    buffer.addText(text);
+    buffer.guessSegmentProperties();
+    var currentPhase = "";
+    buffer.setMessageFunc((buffer, font, message) => {
+      if (message.startsWith("start table GSUB"))
+        currentPhase = "GSUB";
+      else if (message.startsWith("start table GPOS"))
+        currentPhase = "GPOS";
+
+      // modify the 2nd glyph y_offset after the last mark lookup and before mkmk lookups
+      if (currentPhase === "GPOS" && message.startsWith("end lookup 4 feature 'mark'")) {
+        var positions = buffer.getGlyphPositions();
+        expect(positions[1].y_offset).to.equal(0);
+        expect(positions[2].y_offset).to.equal(0);
+        positions[1].y_offset += 10;
+        buffer.updateGlyphPositions(positions);
+      }
+
+      return true;
+    });
+
+    hb.shape(font, buffer);
+    var positions = buffer.getGlyphPositions();
+
+    // both mark glyphs now be offset vertiaclly by 10, since the second mark attaches to the first mark
+    expect(positions[1].y_offset).to.equal(10);
+    expect(positions[2].y_offset).to.equal(239);
+  });
 });
 
 describe('shape', function () {
