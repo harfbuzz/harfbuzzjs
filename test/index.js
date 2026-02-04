@@ -754,7 +754,7 @@ describe('Buffer', function () {
     hb.shape(font, buffer);
     var positions = buffer.getGlyphPositions();
 
-    // both mark glyphs now be offset vertiaclly by 10, since the second mark attaches to the first mark
+    // both mark glyphs now be offset vertically by 10, since the second mark attaches to the first mark
     expect(positions[1].y_offset).to.equal(10);
     expect(positions[2].y_offset).to.equal(239);
   });
