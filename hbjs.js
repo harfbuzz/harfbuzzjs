@@ -1104,6 +1104,58 @@ function hbjs(Module) {
         return exports.hb_buffer_get_length(ptr);
       },
       /**
+      * Get the glyph information from the buffer.
+      * @returns {object[]} The glyph information.
+      *
+      * The glyph information is returned as an array of objects with the
+      * following properties:
+      * @param {number} codepoint either a Unicode code point (before shaping) or a glyph index (after shaping).
+      * @param {number} cluster The cluster index of the glyph.
+      */
+      getGlyphInfos: function () {
+        var infosPtr32 = exports.hb_buffer_get_glyph_infos(ptr, 0) / 4;
+        // hb_glyph_info_t struct: { codepoint, mask, cluster, var1, var2 } (5 uint32s)
+        var infosArray = Module.HEAPU32.subarray(infosPtr32, infosPtr32 + this.getLength() * 5);
+        var infos = [];
+        for (var i = 0; i < infosArray.length; i += 5) {
+          infos.push({
+            codepoint: infosArray[i],
+            cluster: infosArray[i + 2],
+          });
+        }
+        return infos;
+      },
+      /**
+      * Get the glyph positions from the buffer.
+      * @returns {object[]} The glyph positions.
+      *
+      * The glyph positions are returned as an array of objects with the
+      * following properties:
+      * @param {number} x_advance The x advance of the glyph.
+      * @param {number} y_advance The y advance of the glyph.
+      * @param {number} x_offset The x offset of the glyph.
+      * @param {number} y_offset The y offset of the glyph.
+      *
+      */
+      getGlyphPositions: function () {
+        var positionsPtr32 = exports.hb_buffer_get_glyph_positions(ptr, 0) / 4;
+        if (positionsPtr32 == 0) {
+          return [];
+        }
+        // hb_glyph_position_t struct: { x_advance, y_advance, x_offset, y_offset, var } (5 int32s)
+        var positionsArray = Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + this.getLength() * 5);
+        var positions = [];
+        for (var i = 0; i < positionsArray.length; i += 5) {
+          positions.push({
+            x_advance: positionsArray[i],
+            y_advance: positionsArray[i + 1],
+            x_offset: positionsArray[i + 2],
+            y_offset: positionsArray[i + 3],
+          });
+        }
+        return positions;
+      },
+      /**
       * Serialize the buffer contents to a string.
       * @param {object} font Optional. The font to use for serialization.
       * @param {number} start Optional. The starting index of the glyphs to serialize.
