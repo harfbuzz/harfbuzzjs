@@ -630,6 +630,18 @@ describe('Buffer', function () {
     expect(buffer.getContentType()).to.equal("INVALID");
   });
 
+  it('getLength gets the length before and after shaping', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addText('fi');
+    expect(buffer.getLength()).to.equal(2);
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer)
+    expect(buffer.getLength()).to.equal(1);
+  });
+
 });
 
 describe('shape', function () {
