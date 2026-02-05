@@ -110,7 +110,7 @@ function hbjs(Module) {
 
   function _string_to_utf16_ptr(text) {
     const ptr = exports.malloc(text.length * 2);
-    const words = new Uint16Array(Module.wasmMemory.buffer, ptr, text.length);
+    const words = Module.HEAPU16.subarray(ptr / 2, ptr / 2 + text.length);
     for (let i = 0; i < words.length; ++i) words[i] = text.charCodeAt(i);
     return {
       ptr: ptr,
@@ -987,7 +987,7 @@ function hbjs(Module) {
       */
       addCodePoints: function (codePoints, itemOffset = 0, itemLength = null) {
         let codePointsPtr = exports.malloc(codePoints.length * 4);
-        let codePointsArray = new Uint32Array(Module.wasmMemory.buffer, codePointsPtr, codePoints.length);
+        let codePointsArray = Module.HEAPU32.subarray(codePointsPtr / 4, codePointsPtr / 4 + codePoints.length);
         codePointsArray.set(codePoints);
         if (itemLength == null) itemLength = codePoints.length;
         exports.hb_buffer_add_codepoints(ptr, codePointsPtr, codePoints.length, itemOffset, itemLength);
