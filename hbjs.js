@@ -1,3 +1,15 @@
+/** @typedef {import('./types').HBModule} HBModule */
+/** @typedef {import('./types').HBHandle} HBHandle */
+/** @typedef {import('./types').HBBlob} HBBlob */
+/** @typedef {import('./types').HBFace} HBFace */
+/** @typedef {import('./types').HBFont} HBFont */
+/** @typedef {import('./types').HBBuffer} HBBuffer */
+/** @typedef {import('./types').HBFontFuncs} HBFontFuncs */
+
+/**
+ * @param {HBModule} Module
+ * @returns {HBHandle}
+ */
 function hbjs(Module) {
   'use strict';
 
@@ -133,7 +145,8 @@ function hbjs(Module) {
 
   /**
   * Create an object representing a Harfbuzz blob.
-  * @param {string} blob A blob of binary data (usually the contents of a font file).
+  * @param {ArrayBuffer|Uint8Array} blob A blob of binary data (usually the contents of a font file).
+  * @returns {HBBlob}
   **/
   function createBlob(blob) {
     var blobPtr = exports.malloc(blob.byteLength);
@@ -165,9 +178,10 @@ function hbjs(Module) {
 
   /**
   * Create an object representing a Harfbuzz face.
-  * @param {object} blob An object returned from `createBlob`.
+  * @param {HBBlob} blob An object returned from `createBlob`.
   * @param {number} index The index of the font in the blob. (0 for most files,
   *  or a 0-indexed font number if the `blob` came form a TTC/OTC file.)
+  * @returns {HBFace}
   **/
   function createFace(blob, index) {
     var ptr = exports.hb_face_create(blob.ptr, index);
@@ -413,8 +427,9 @@ function hbjs(Module) {
 
   /**
   * Create an object representing a Harfbuzz font.
-  * @param {object} blob An object returned from `createFace`.
-  * @param {number} ptr Optional pointer to an existing font.
+  * @param {HBFace|null} face An object returned from `createFace`.
+  * @param {number} [ptr] Optional pointer to an existing font.
+  * @returns {HBFont}
   **/
   function createFont(face, ptr) {
     var ptr = ptr ? exports.hb_font_reference(ptr) : exports.hb_font_create(face.ptr);
@@ -662,7 +677,8 @@ function hbjs(Module) {
   }
 
   /**
-  * Create a object representing a HarfBuzz font functions.
+  * Create an object representing HarfBuzz font functions.
+  * @returns {HBFontFuncs}
   **/
   function createFontFuncs() {
     var ptr = exports.hb_font_funcs_create();
@@ -961,7 +977,8 @@ function hbjs(Module) {
 
   /**
   * Create an object representing a Harfbuzz buffer.
-  * @param {number} ptr Optional. The pointer to the buffer.
+  * @param {number} [ptr] Optional. The pointer to the buffer.
+  * @returns {HBBuffer}
   **/
   function createBuffer(ptr) {
     var ptr = ptr ? exports.hb_buffer_reference(ptr) : exports.hb_buffer_create();
@@ -1261,10 +1278,10 @@ function hbjs(Module) {
   *
   * This returns nothing, but modifies the buffer.
   *
-  * @param {object} font: A font returned from `createFont`
-  * @param {object} buffer: A buffer returned from `createBuffer` and suitably
+  * @param {HBFont} font A font returned from `createFont`
+  * @param {HBBuffer} buffer A buffer returned from `createBuffer` and suitably
   *   prepared.
-  * @param {object} features: A string of comma-separated OpenType features to apply.
+  * @param {string} [features] A string of comma-separated OpenType features to apply.
   */
   function shape(font, buffer, features) {
     var featuresPtr = 0;
