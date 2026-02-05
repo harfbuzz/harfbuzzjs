@@ -3,7 +3,6 @@ removeFunction
 stackAlloc
 stackSave
 stackRestore
-wasmMemory
 wasmExports
 HEAP8
 HEAPU8
