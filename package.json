@@ -18,14 +18,11 @@
 		}
 	},
 	"files": [
-		"dist",
-		"hb.js",
-		"hb.wasm",
-		"hbjs.js"
+		"dist"
 	],
 	"scripts": {
 		"build:wasm": "make",
-		"build:ts": "tsdown",
+		"build:ts": "tsdown && cp hb.wasm dist/",
 		"build": "npm run build:wasm && npm run build:ts",
 		"prepare": "npm run build",
 		"test": "make test"
