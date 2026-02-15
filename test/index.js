@@ -687,6 +687,52 @@ describe('Buffer', function () {
     ]);
   });
 
+  it('getInfos provides ligature info', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addText('ـلَحَىٰ'); // A base, a ligature, and three marks attched to it
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer);
+
+    const infos = buffer.getGlyphInfos();
+    expect(infos.length).to.equal(5);
+    const base = infos[4];
+    const liga = infos[3];
+    const mark1 = infos[2];
+    const mark2 = infos[1];
+    const mark3 = infos[0];
+
+    // Base glyph has no ligature id
+    expect(base.ligatureInfo.id).to.equal(0);
+    expect(base.ligatureInfo.component).to.equal(0);
+    // and has one component
+    expect(base.ligatureInfo.numComponents).to.equal(1);
+
+    // Ligature glyph has a ligature id
+    expect(liga.ligatureInfo.id).to.not.equal(0);
+    expect(liga.ligatureInfo.component).to.equal(0);
+    // and has three components
+    expect(liga.ligatureInfo.numComponents).to.equal(3);
+
+    // First mark has a ligature id matching that of the ligature glyph
+    expect(mark1.ligatureInfo.id).to.equal(liga.ligatureInfo.id);
+    // and attaches to the first component
+    expect(mark1.ligatureInfo.component).to.equal(1);
+    expect(mark1.ligatureInfo.numComponents).to.equal(1);
+
+    // Second mark has a ligature id matching that of the ligature glyph
+    expect(mark2.ligatureInfo.id).to.equal(liga.ligatureInfo.id);
+    // and attaches to the second component
+    expect(mark2.ligatureInfo.component).to.equal(2);
+    expect(mark2.ligatureInfo.numComponents).to.equal(1);
+
+    // Last mark has a different ligature id, so it attaches to the last component
+    expect(mark3.ligatureInfo.id).to.not.equal(liga.ligatureInfo.id);
+    expect(mark3.ligatureInfo.numComponents).to.equal(1);
+  });
+
   it('getPositions returns empty array for buffer without positions', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);
@@ -993,3 +1039,4 @@ describe('misc', function () {
     }
   });
 });
+

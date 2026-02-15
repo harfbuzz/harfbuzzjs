@@ -131,6 +131,9 @@ function hbjs(Module) {
     return languagePtr;
   }
 
+  const _IS_LIG_BASE = 0x10;
+  const _GLYPH_PROPS_LIGATURE = 0x04;
+
   /**
   * Create an object representing a Harfbuzz blob.
   * @param {string} blob A blob of binary data (usually the contents of a font file).
@@ -1118,10 +1121,29 @@ function hbjs(Module) {
         var infosArray = Module.HEAPU32.subarray(infosPtr32, infosPtr32 + this.getLength() * 5);
         var infos = [];
         for (var i = 0; i < infosArray.length; i += 5) {
-          infos.push({
+          var info = {
             codepoint: infosArray[i],
             cluster: infosArray[i + 2],
+          };
+          const var1 = infosArray[i + 3];
+          // info->glyph_props()
+          // the first 16 bits of var1
+          const glyph_props = var1 & 0xFFFF;
+          // info->lig_props()
+          // the 3rd 8 bits of var1
+          const lig_props = (var1 >> 16) & 0xFF;
+          Object.defineProperty(info, 'ligatureInfo', {
+            value: {
+              // _hb_glyph_info_get_lig_id()
+              id: lig_props >> 5,
+              // _hb_glyph_info_get_lig_comp()
+              component: (lig_props & _IS_LIG_BASE) ? 0 : (lig_props & 0x0F),
+              // _hb_glyph_info_get_lig_num_comps()
+              numComponents: ((glyph_props & _GLYPH_PROPS_LIGATURE) && (lig_props & _IS_LIG_BASE)) ? (lig_props & 0x0F) : 1
+            },
+            enumerable: false
           });
+          infos.push(info);
         }
         return infos;
       },
