@@ -28,8 +28,7 @@ Download from the [releases tab](https://github.com/harfbuzz/harfbuzzjs/releases
 ### TL;DR
 
 ```javascript
-hb = require("hbjs.js")
-WebAssembly.instantiateStreaming(fetch("hb.wasm")).then(function (result) {
+require("harfbuzzjs").then(function (hb) {
   fetch('myfont.ttf').then(function (data) {
     return data.arrayBuffer();
   }).then(function (fontdata) {
@@ -45,7 +44,7 @@ WebAssembly.instantiateStreaming(fetch("hb.wasm")).then(function (result) {
     // Enumerate the glyphs
     var xCursor = 0;
     var yCursor = 0;
-    for (glyph of output) {
+    for (var glyph of output) {
         var glyphId = glyph.g;
         var xAdvance = glyph.ax;
         var xDisplacement = glyph.dx;
@@ -56,6 +55,7 @@ WebAssembly.instantiateStreaming(fetch("hb.wasm")).then(function (result) {
         drawAGlyph(svgPath, xCursor + xDisplacement, yDisplacement);
 
         xCursor += xAdvance;
+        yCursor += yAdvance;
     }
 
     // Release memory
