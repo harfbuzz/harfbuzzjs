@@ -1118,10 +1118,17 @@ function hbjs(Module) {
         var infosArray = Module.HEAPU32.subarray(infosPtr32, infosPtr32 + this.getLength() * 5);
         var infos = [];
         for (var i = 0; i < infosArray.length; i += 5) {
-          infos.push({
+          var info = {
             codepoint: infosArray[i],
             cluster: infosArray[i + 2],
-          });
+          };
+          for (var [name, idx] of [['mask', 1], ['var1', 3], ['var2', 4]]) {
+            Object.defineProperty(info, name, {
+              value: infosArray[i + idx],
+              enumerable: false
+            });
+          }
+          infos.push(info);
         }
         return infos;
       },
@@ -1146,12 +1153,17 @@ function hbjs(Module) {
         var positionsArray = Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + this.getLength() * 5);
         var positions = [];
         for (var i = 0; i < positionsArray.length; i += 5) {
-          positions.push({
+          var position = {
             x_advance: positionsArray[i],
             y_advance: positionsArray[i + 1],
             x_offset: positionsArray[i + 2],
             y_offset: positionsArray[i + 3],
+          };
+          Object.defineProperty(position, 'var', {
+            value: positionsArray[i + 4],
+            enumerable: false
           });
+          positions.push(position);
         }
         return positions;
       },
