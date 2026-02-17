@@ -111,6 +111,16 @@ describe('Face', function () {
     });
   });
 
+  it('getGlyphClass returns the class of a glyph', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    expect(face.getGlyphClass(0)).to.equal('UNCLASSIFIED');
+    expect(face.getGlyphClass(font.glyphFromName('w'))).to.equal('BASE_GLYPH');
+    expect(face.getGlyphClass(font.glyphFromName('fi'))).to.equal('LIGATURE');
+    expect(face.getGlyphClass(font.glyphFromName('gravecomb'))).to.equal('MARK');
+  });
+
   it('listNames fetches all names', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);

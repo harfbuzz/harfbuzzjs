@@ -326,6 +326,27 @@ function hbjs(Module) {
         return tags;
       },
       /**
+       * Get the GDEF class of the requested glyph.
+       * @param {number} glyph The glyph to get the class of.
+       * @returns {string} The class of the glyph. Which can be either
+       *   UNCLASSIFIED, BASE_GLYPH, LIGATURE, MARK, or COMPONENT.
+       **/
+      getGlyphClass: function (glyph) {
+        const gclass = exports.hb_ot_layout_get_glyph_class(ptr, glyph);
+        switch (gclass) {
+          case 0:
+            return 'UNCLASSIFIED';
+          case 1:
+            return 'BASE_GLYPH';
+          case 2:
+            return 'LIGATURE';
+          case 3:
+            return 'MARK';
+          case 4:
+            return 'COMPONENT';
+        }
+      },
+      /**
        * Return all names in the specified face's name table.
        **/
       listNames: function () {
