@@ -687,6 +687,27 @@ describe('Buffer', function () {
     ]);
   });
 
+  it('glyph infos and positions have private properties', function () {
+    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = hb.createFace(blob);
+    font = hb.createFont(face);
+    buffer = hb.createBuffer();
+    buffer.addText('fi');
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer);
+    const infos = buffer.getGlyphInfos();
+    const positions = buffer.getGlyphPositions();
+
+    expect(infos.length).to.equal(1);
+    expect(positions.length).to.equal(1);
+    expect(Object.keys(infos[0])).to.deep.equal(['codepoint', 'cluster']);
+    expect(Object.keys(positions[0])).to.deep.equal(['x_advance', 'y_advance', 'x_offset', 'y_offset']);
+    expect(infos[0].mask).to.not.be.undefined;
+    expect(infos[0].var1).to.not.be.undefined;
+    expect(infos[0].var2).to.not.be.undefined;
+    expect(positions[0].var).to.not.be.undefined;
+  });
+
   it('getPositions returns empty array for buffer without positions', function () {
     blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = hb.createFace(blob);
@@ -993,3 +1014,4 @@ describe('misc', function () {
     }
   });
 });
+
