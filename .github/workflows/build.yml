@@ -52,7 +52,7 @@ jobs:
       - name: Test hb-subset.wasm
         run: node examples/hb-subset.example.node.js
       - name: Archive artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: wasm
           path: |
@@ -69,19 +69,19 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: wasm
 
-#     - name: Setup Node.js
-#       uses: actions/setup-node@v6
-#       with:
-#         node-version: '24'
-#         registry-url: 'https://registry.npmjs.org'
-#     - name: Publish on NPM
-#       run: npm publish
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Publish on NPM
+        run: npm publish --provenance --access public
 
       - name: Check for release
         id: create_release
