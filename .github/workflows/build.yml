@@ -70,6 +70,8 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: true
       - name: Download artifacts
         uses: actions/download-artifact@v7
         with:
