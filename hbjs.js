@@ -1189,6 +1189,46 @@ function hbjs(Module) {
         return positions;
       },
       /**
+      * Get the glyph information and positions from the buffer.
+      * @returns {object[]} The glyph information and positions.
+      *
+      * The glyph information is returned as an array of objects with the
+      * properties from getGlyphInfos and getGlyphPositions combined.
+      */
+      getGlyphInfosAndPositions: function () {
+        var infosPtr32 = exports.hb_buffer_get_glyph_infos(ptr, 0) / 4;
+        var infosArray = Module.HEAPU32.subarray(infosPtr32, infosPtr32 + this.getLength() * 5);
+
+        var positionsPtr32 = exports.hb_buffer_get_glyph_positions(ptr, 0) / 4;
+        var positionsArray = positionsPtr32 ? Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + this.getLength() * 5) : null;
+
+        var out = [];
+        for (var i = 0; i < infosArray.length; i += 5) {
+          var info = {
+            codepoint: infosArray[i],
+            cluster: infosArray[i + 2],
+          };
+          for (var [name, idx] of [['mask', 1], ['var1', 3], ['var2', 4]]) {
+            Object.defineProperty(info, name, {
+              value: infosArray[i + idx],
+              enumerable: false
+            });
+          }
+          if (positionsArray) {
+            info.x_advance = positionsArray[i];
+            info.y_advance = positionsArray[i + 1];
+            info.x_offset = positionsArray[i + 2];
+            info.y_offset = positionsArray[i + 3];
+            Object.defineProperty(info, 'var', {
+              value: positionsArray[i + 4],
+              enumerable: false
+            });
+          }
+          out.push(info);
+        }
+        return out;
+      },
+      /**
       * Update the glyph positions in the buffer.
       * @param {object[]} positions The new glyph positions.
       *
