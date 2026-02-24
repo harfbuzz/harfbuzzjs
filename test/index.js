@@ -659,6 +659,7 @@ describe('Buffer', function () {
     buffer = hb.createBuffer();
     expect(buffer.getGlyphInfos()).to.deep.equal([]);
     expect(buffer.getGlyphPositions()).to.deep.equal([]);
+    expect(buffer.getGlyphInfosAndPositions()).to.deep.equal([]);
   });
 
   it('getInfos and getPositions return non empty arrays for non empty buffer', function () {
@@ -670,31 +671,46 @@ describe('Buffer', function () {
     buffer.guessSegmentProperties();
 
     // before shaping
-    expect(buffer.getGlyphInfos()).to.deep.equal([
+    let infos = buffer.getGlyphInfos();
+    let positions = buffer.getGlyphPositions();
+    let infosAndPositions = buffer.getGlyphInfosAndPositions();
+
+    expect(infos).to.deep.equal([
       { codepoint: 120, cluster: 0 },
       { codepoint: 768, cluster: 1 },
       { codepoint: 102, cluster: 2 },
       { codepoint: 105, cluster: 3 }
     ]);
-    expect(buffer.getGlyphPositions()).to.deep.equal([
+    expect(positions).to.deep.equal([
       { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 },
       { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 },
       { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 },
       { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 }
     ]);
 
+    for (let i = 0; i < infosAndPositions.length; i++) {
+      expect(infosAndPositions[i]).to.deep.equal({ ...infos[i], ...positions[i] });
+    }
+
     hb.shape(font, buffer);
     // after shaping
-    expect(buffer.getGlyphInfos()).to.deep.equal([
+    infos = buffer.getGlyphInfos();
+    positions = buffer.getGlyphPositions();
+    infosAndPositions = buffer.getGlyphInfosAndPositions();
+
+    expect(infos).to.deep.equal([
       { codepoint: 91, cluster: 0 },
       { codepoint: 2662, cluster: 0 },
       { codepoint: 1652, cluster: 2 }
     ]);
-    expect(buffer.getGlyphPositions()).to.deep.equal([
+    expect(positions).to.deep.equal([
       { x_advance: 529, y_advance: 0, x_offset: 0, y_offset: 0 },
       { x_advance: 0, y_advance: 0, x_offset: 97, y_offset: 0 },
       { x_advance: 602, y_advance: 0, x_offset: 0, y_offset: 0 }
     ]);
+    for (let i = 0; i < infosAndPositions.length; i++) {
+      expect(infosAndPositions[i]).to.deep.equal({ ...infos[i], ...positions[i] });
+    }
   });
 
   it('glyph infos and positions have private properties', function () {
@@ -707,15 +723,22 @@ describe('Buffer', function () {
     hb.shape(font, buffer);
     const infos = buffer.getGlyphInfos();
     const positions = buffer.getGlyphPositions();
+    const infosAndPositions = buffer.getGlyphInfosAndPositions();
 
     expect(infos.length).to.equal(1);
     expect(positions.length).to.equal(1);
+    expect(infosAndPositions.length).to.equal(1);
     expect(Object.keys(infos[0])).to.deep.equal(['codepoint', 'cluster']);
     expect(Object.keys(positions[0])).to.deep.equal(['x_advance', 'y_advance', 'x_offset', 'y_offset']);
+    expect(Object.keys(infosAndPositions[0])).to.deep.equal(['codepoint', 'cluster', 'x_advance', 'y_advance', 'x_offset', 'y_offset']);
     expect(infos[0].mask).to.not.be.undefined;
     expect(infos[0].var1).to.not.be.undefined;
     expect(infos[0].var2).to.not.be.undefined;
     expect(positions[0].var).to.not.be.undefined;
+    expect(infosAndPositions[0].mask).to.equal(infos[0].mask);
+    expect(infosAndPositions[0].var1).to.equal(infos[0].var1);
+    expect(infosAndPositions[0].var2).to.equal(infos[0].var2);
+    expect(infosAndPositions[0].var).to.equal(positions[0].var);
   });
 
   it('getPositions returns empty array for buffer without positions', function () {
