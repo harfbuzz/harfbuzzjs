@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "moduleResolution": "node",
+    "target": "ES2020",
+    "module": "CommonJS",
+    "skipLibCheck": true
+  },
+  "include": ["hbjs.js", "index.js", "types.d.ts"],
+  "exclude": ["node_modules", "dist", "hb.js"]
+}
