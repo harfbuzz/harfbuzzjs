@@ -2,9 +2,29 @@
 	"name": "harfbuzzjs",
 	"version": "0.10.0",
 	"description": "Minimal version of HarfBuzz for JavaScript use",
-	"main": "index.js",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"dist"
+	],
 	"scripts": {
-		"prepare": "make",
+		"build:wasm": "make",
+		"build:ts": "tsdown && cp hb.wasm dist/",
+		"build": "npm run build:wasm && npm run build:ts",
+		"prepare": "npm run build",
 		"test": "make test"
 	},
 	"keywords": [
@@ -33,6 +53,9 @@
 	"homepage": "https://github.com/harfbuzz/harfbuzzjs#readme",
 	"devDependencies": {
 		"chai": "^4.3.7",
-		"mocha": "^10.2.0"
+		"mocha": "^10.2.0",
+		"rolldown-plugin-wasm": "^0.2.1",
+		"tsdown": "^0.20.2",
+		"typescript": "^5.9.3"
 	}
 }
