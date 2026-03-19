@@ -882,8 +882,8 @@ describe('shape', function () {
     buffer.addText('abc');
     buffer.guessSegmentProperties();
     const result = hb.shapeWithTrace(font, buffer, "", 0, 0)
-    expect(result).to.have.lengthOf(42);
-    expect(result[0]).to.deep.equal({
+    expect(result).to.have.lengthOf(44);
+    expect(result[2]).to.deep.equal({
       "m": "start table GSUB script tag 'latn'",
       "glyphs": true,
       "t": [
@@ -892,7 +892,7 @@ describe('shape', function () {
         { cl: 2, g: 70 },
       ],
     });
-    expect(result[41]).to.deep.equal({
+    expect(result[43]).to.deep.equal({
       "m": "end table GPOS script tag 'latn'",
       "glyphs": true,
       "t": [
@@ -911,8 +911,8 @@ describe('shape', function () {
     buffer.addText('fi AV');
     buffer.guessSegmentProperties();
     const result = hb.shapeWithTrace(font, buffer, "-liga,-kern", 0, 0)
-    expect(result).to.have.lengthOf(29);
-    expect(result[0]).to.deep.equal({
+    expect(result).to.have.lengthOf(31);
+    expect(result[2]).to.deep.equal({
       "m": "start table GSUB script tag 'latn'",
       "glyphs": true,
       "t": [
@@ -923,7 +923,7 @@ describe('shape', function () {
         { cl: 4, g: 57 },
       ],
     });
-    expect(result[28]).to.deep.equal({
+    expect(result[30]).to.deep.equal({
       "m": "end table GPOS script tag 'latn'",
       "glyphs": true,
       "t": [
