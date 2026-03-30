@@ -515,7 +515,7 @@ function hbjs(Module) {
        **/
       hExtents: function () {
         var sp = stackSave();
-        var extentsPtr = stackAlloc(12);
+        var extentsPtr = stackAlloc(48);
         exports.hb_font_get_h_extents(ptr, extentsPtr);
         var extents = {
           ascender: Module.HEAP32[extentsPtr / 4],
@@ -531,7 +531,7 @@ function hbjs(Module) {
        **/
       vExtents: function () {
         var sp = stackSave();
-        var extentsPtr = stackAlloc(12);
+        var extentsPtr = stackAlloc(48);
         exports.hb_font_get_v_extents(ptr, extentsPtr);
         var extents = {
           ascender: Module.HEAP32[extentsPtr / 4],
