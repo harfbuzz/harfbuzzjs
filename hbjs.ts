@@ -44,7 +44,7 @@ export interface JsonGlyph {
   /** Y displacement (adjustment in Y dimension when painting this glyph). */
   dy: number;
   /** Glyph flags like `HB_GLYPH_FLAG_UNSAFE_TO_BREAK` (0x1). */
-  flags: number;
+  fl: number;
 }
 
 export interface SvgPathCommand {
@@ -1378,12 +1378,7 @@ export class Buffer {
    */
   json(): JsonGlyph[] {
     var buf = this.serialize(null, 0, null, "JSON", ["NO_GLYPH_NAMES", "GLYPH_FLAGS"]);
-    var json = JSON.parse(buf);
-    json.forEach(function (glyph: Record<string, unknown>) {
-      glyph.flags = glyph.fl || 0;
-      delete glyph.fl;
-    });
-    return json;
+    return JSON.parse(buf);
   }
 
   /** Free the object. */

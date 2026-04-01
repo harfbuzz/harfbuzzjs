@@ -607,16 +607,16 @@ describe('Buffer', function () {
     buffer.setFlags(['PRODUCE_SAFE_TO_INSERT_TATWEEL']);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
-    const flags = Array.from(buffer.json().map(g => g.flags));
-    expect(flags).to.deep.equal([5, 0]);
+    const flags = Array.from(buffer.json().map(g => g.fl));
+    expect(flags).to.deep.equal([5, undefined]);
 
     buffer.clearContents();
     buffer.addText('بلا');
     buffer.setFlags([]);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
-    const flags2 = Array.from(buffer.json().map(g => g.flags));
-    expect(flags2).to.deep.equal([1, 0]);
+    const flags2 = Array.from(buffer.json().map(g => g.fl));
+    expect(flags2).to.deep.equal([1, undefined]);
   });
 
   it('serialize ignores invalid flags', function () {
@@ -819,9 +819,9 @@ describe('shape', function () {
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
     const glyphs = buffer.json();
-    expect(glyphs[0]).to.deep.equal({ cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0, flags: 0 } /* a */);
-    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 69, ax: 615, ay: 0, dx: 0, dy: 0, flags: 0 } /* b */);
-    expect(glyphs[2]).to.deep.equal({ cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0, flags: 0 } /* c */);
+    expect(glyphs[0]).to.deep.equal({ cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0 } /* a */);
+    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 69, ax: 615, ay: 0, dx: 0, dy: 0 } /* b */);
+    expect(glyphs[2]).to.deep.equal({ cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0 } /* c */);
   });
 
   it('shape Latin string code points', function () {
@@ -833,9 +833,9 @@ describe('shape', function () {
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
     const glyphs = buffer.json();
-    expect(glyphs[0]).to.deep.equal({ cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0, flags: 0 } /* a */);
-    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 69, ax: 615, ay: 0, dx: 0, dy: 0, flags: 0 } /* b */);
-    expect(glyphs[2]).to.deep.equal({ cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0, flags: 0 } /* c */);
+    expect(glyphs[0]).to.deep.equal({ cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0 } /* a */);
+    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 69, ax: 615, ay: 0, dx: 0, dy: 0 } /* b */);
+    expect(glyphs[2]).to.deep.equal({ cl: 2, g: 70, ax: 480, ay: 0, dx: 0, dy: 0 } /* c */);
   });
 
   it('shape Arabic string', function () {
@@ -847,10 +847,10 @@ describe('shape', function () {
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
     const glyphs = buffer.json();
-    expect(glyphs[0]).to.deep.equal({ cl: 3, g: 213, ax: 532, ay: 0, dx: 0, dy: 0, flags: 1 } /* د */);
-    expect(glyphs[1]).to.deep.equal({ cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, flags: 1 } /* ج */);
-    expect(glyphs[2]).to.deep.equal({ cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0, flags: 0 } /* ب */);
-    expect(glyphs[3]).to.deep.equal({ cl: 0, g: 50, ax: 235, ay: 0, dx: 0, dy: 0, flags: 0 } /* أ */);
+    expect(glyphs[0]).to.deep.equal({ cl: 3, g: 213, ax: 532, ay: 0, dx: 0, dy: 0, fl: 1 } /* د */);
+    expect(glyphs[1]).to.deep.equal({ cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, fl: 1 } /* ج */);
+    expect(glyphs[2]).to.deep.equal({ cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0 } /* ب */);
+    expect(glyphs[3]).to.deep.equal({ cl: 0, g: 50, ax: 235, ay: 0, dx: 0, dy: 0 } /* أ */);
   });
 
   it('shape Arabic string item', function () {
@@ -862,8 +862,8 @@ describe('shape', function () {
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
     const glyphs = buffer.json();
-    expect(glyphs[0]).to.deep.equal({ cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, flags: 1 } /* ج */);
-    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0, flags: 0 } /* ب */);
+    expect(glyphs[0]).to.deep.equal({ cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, fl: 1 } /* ج */);
+    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0 } /* ب */);
   });
 
   it('shape Arabic code points item', function () {
@@ -875,8 +875,8 @@ describe('shape', function () {
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
     const glyphs = buffer.json();
-    expect(glyphs[0]).to.deep.equal({ cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, flags: 1 } /* ج */);
-    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0, flags: 0 } /* ب */);
+    expect(glyphs[0]).to.deep.equal({ cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, fl: 1 } /* ج */);
+    expect(glyphs[1]).to.deep.equal({ cl: 1, g: 101, ax: 269, ay: 0, dx: 0, dy: 0 } /* ب */);
   });
 
   it('shape with tracing', function () {
