@@ -886,7 +886,7 @@ describe('shape', function () {
     buffer = new hb.Buffer();
     buffer.addText('abc');
     buffer.guessSegmentProperties();
-    const result = hb.shapeWithTrace(font, buffer, "", 0, 0)
+    const result = hb.shapeWithTrace(font, buffer, "", 0, hb.TracePhase.DONT_STOP)
     expect(result).to.have.lengthOf(59);
     expect(result[2]).to.deep.equal({
       "m": "start table GSUB script tag 'latn'",
@@ -915,7 +915,7 @@ describe('shape', function () {
     buffer = new hb.Buffer();
     buffer.addText('fi AV');
     buffer.guessSegmentProperties();
-    const result = hb.shapeWithTrace(font, buffer, "-liga,-kern", 0, 0)
+    const result = hb.shapeWithTrace(font, buffer, "-liga,-kern", 0, hb.TracePhase.DONT_STOP)
     expect(result).to.have.lengthOf(46);
     expect(result[2]).to.deep.equal({
       "m": "start table GSUB script tag 'latn'",
