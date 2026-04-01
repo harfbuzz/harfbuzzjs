@@ -25,12 +25,19 @@ export interface GlyphPosition {
 }
 
 export interface JsonGlyph {
+  /** The glyph ID. */
   g: number;
+  /** The cluster ID. */
   cl: number;
+  /** Advance width (width to advance after this glyph is painted). */
   ax: number;
+  /** Advance height (height to advance after this glyph is painted). */
   ay: number;
+  /** X displacement (adjustment in X dimension when painting this glyph). */
   dx: number;
+  /** Y displacement (adjustment in Y dimension when painting this glyph). */
   dy: number;
+  /** Glyph flags like `HB_GLYPH_FLAG_UNSAFE_TO_BREAK` (0x1). */
   flags: number;
 }
 
@@ -115,6 +122,11 @@ const bufferFlags: Record<string, number> = {
   "PRODUCE_SAFE_TO_INSERT_TATWEEL": 0x00000080,
 };
 
+/**
+ * Initialize the HarfBuzz module. Must be called (and awaited) before
+ * using any other functions or classes.
+ * @param module The Emscripten module instance.
+ */
 export function init(module: any) {
   Module = module;
   exports = module.wasmExports;
@@ -223,12 +235,15 @@ function _typed_array_from_set(setPtr: number): Uint32Array {
 // Classes
 
 /**
- * Create an object representing a HarfBuzz blob.
- * @param data A blob of binary data (usually the contents of a font file).
+ * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-blob.html | HarfBuzz blob}.
+ * A blob wraps a chunk of binary data, typically the contents of a font file.
  */
 export class Blob {
   readonly ptr: number;
 
+  /**
+   * @param data Binary font data.
+   */
   constructor(data: ArrayBuffer) {
     var blobPtr = exports.malloc(data.byteLength);
     Module.HEAPU8.set(new Uint8Array(data), blobPtr);
@@ -240,15 +255,19 @@ export class Blob {
 }
 
 /**
- * Create an object representing a HarfBuzz face.
- * @param blob A Blob object.
- * @param index The index of the font in the blob. (0 for most files,
- *  or a 0-indexed font number if the `blob` came from a TTC/OTC file.)
+ * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-face.html | HarfBuzz face}.
+ * A face represents a single face in a binary font file and is the
+ * foundation for creating Font objects used in text shaping.
  */
 export class Face {
   readonly ptr: number;
   readonly upem: number;
 
+  /**
+   * @param blob A Blob containing font data.
+   * @param index The index of the font in the blob. (0 for most files,
+   *  or a 0-indexed font number if the `blob` came from a font collection file.)
+   */
   constructor(blob: Blob, index: number = 0) {
     this.ptr = exports.hb_face_create(blob.ptr, index);
     this.upem = exports.hb_face_get_upem(this.ptr);
@@ -257,6 +276,7 @@ export class Face {
   /**
    * Return the binary contents of an OpenType table.
    * @param table Table name
+   * @returns A Uint8Array of the table data, or undefined if the table is not found.
    */
   reference_table(table: string): Uint8Array | undefined {
     var blob = exports.hb_face_reference_table(this.ptr, _hb_tag(table));
@@ -266,7 +286,10 @@ export class Face {
     return Module.HEAPU8.subarray(blobptr, blobptr + length);
   }
 
-  /** Return variation axis infos. */
+  /**
+   * Return variation axis infos.
+   * @returns A dictionary mapping axis tags to {min, default, max} values.
+   */
   getAxisInfos(): Record<string, AxisInfo> {
     var sp = Module.stackSave();
     var axis = Module.stackAlloc(64 * 32);
@@ -285,7 +308,10 @@ export class Face {
     return result;
   }
 
-  /** Return unicodes the face supports. */
+  /**
+   * Return unicodes the face supports.
+   * @returns A Uint32Array of supported Unicode code points.
+   */
   collectUnicodes(): Uint32Array {
     var unicodeSetPtr = exports.hb_set_create();
     exports.hb_face_collect_unicodes(this.ptr, unicodeSetPtr);
@@ -298,6 +324,7 @@ export class Face {
    * Return all scripts enumerated in the specified face's
    * GSUB table or GPOS table.
    * @param table The table to query, either "GSUB" or "GPOS".
+   * @returns An array of 4-character script tag strings.
    */
   getTableScriptTags(table: string): string[] {
     var sp = Module.stackSave();
@@ -325,6 +352,7 @@ export class Face {
    * Return all features enumerated in the specified face's
    * GSUB table or GPOS table.
    * @param table The table to query, either "GSUB" or "GPOS".
+   * @returns An array of 4-character feature tag strings.
    */
   getTableFeatureTags(table: string): string[] {
     var sp = Module.stackSave();
@@ -353,6 +381,7 @@ export class Face {
    * the specified script index.
    * @param table The table to query, either "GSUB" or "GPOS".
    * @param scriptIndex The index of the script to query.
+   * @returns An array of 4-character language tag strings.
    */
   getScriptLanguageTags(table: string, scriptIndex: number): string[] {
     var sp = Module.stackSave();
@@ -382,6 +411,7 @@ export class Face {
    * @param table The table to query, either "GSUB" or "GPOS".
    * @param scriptIndex The index of the script to query.
    * @param languageIndex The index of the language to query.
+   * @returns An array of 4-character feature tag strings.
    */
   getLanguageFeatureTags(table: string, scriptIndex: number, languageIndex: number): string[] {
     var sp = Module.stackSave();
@@ -422,7 +452,10 @@ export class Face {
     }
   }
 
-  /** Return all names in the specified face's name table. */
+  /**
+   * Return all names in the specified face's name table.
+   * @returns An array of {nameId, language} entries.
+   */
   listNames(): NameEntry[] {
     var sp = Module.stackSave();
     var numEntriesPtr = Module.stackAlloc(4);
@@ -443,6 +476,7 @@ export class Face {
    * Get the name of the specified face.
    * @param nameId The ID of the name to get.
    * @param language The language of the name to get.
+   * @returns The name string.
    */
   getName(nameId: number, language: string): string {
     var sp = Module.stackSave();
@@ -462,6 +496,7 @@ export class Face {
    * Get the name IDs of the specified feature.
    * @param table The table to query, either "GSUB" or "GPOS".
    * @param featureIndex The index of the feature to query.
+   * @returns An object with name IDs, or null if not found.
    */
   getFeatureNameIds(table: string, featureIndex: number): FeatureNameIds | null {
     var sp = Module.stackSave();
@@ -504,8 +539,10 @@ export class Face {
 var pathBuffer = "";
 
 /**
- * Create an object representing a HarfBuzz font.
- * @param face A Face object to create the font from.
+ * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-font.html | HarfBuzz font}.
+ * A font represents a face at a specific size and with certain other
+ * parameters (pixels-per-em, variation settings) specified. Fonts are the
+ * primary input to the shaping process.
  */
 export class Font {
   readonly ptr: number;
@@ -516,7 +553,11 @@ export class Font {
   private quadToPtr: number | null = null;
   private closePathPtr: number | null = null;
 
+  /**
+   * @param face A Face to create the font from.
+   */
   constructor(face: Face);
+  /** @internal Wrap an existing font pointer. */
   constructor(existingPtr: number);
   constructor(arg: Face | number) {
     if (typeof arg === 'number') {
@@ -526,7 +567,10 @@ export class Font {
     }
   }
 
-  /** Create a sub font. */
+  /**
+   * Create a sub font that inherits this font's properties.
+   * @returns A new Font object representing the sub font.
+   */
   subFont(): Font {
     return new Font(exports.hb_font_create_sub_font(this.ptr));
   }
@@ -568,6 +612,7 @@ export class Font {
   /**
    * Return glyph name.
    * @param glyphId ID of the requested glyph in the font.
+   * @returns The glyph name string.
    */
   glyphName(glyphId: number): string {
     var sp = Module.stackSave();
@@ -582,6 +627,7 @@ export class Font {
   /**
    * Return a glyph as an SVG path string.
    * @param glyphId ID of the requested glyph in the font.
+   * @returns SVG path data string.
    */
   glyphToPath(glyphId: number): string {
     if (!this.drawFuncsPtr) {
@@ -622,6 +668,7 @@ export class Font {
   /**
    * Return glyph horizontal advance.
    * @param glyphId ID of the requested glyph in the font.
+   * @returns The horizontal advance width.
    */
   glyphHAdvance(glyphId: number): number {
     return exports.hb_font_get_glyph_h_advance(this.ptr, glyphId);
@@ -630,6 +677,7 @@ export class Font {
   /**
    * Return glyph vertical advance.
    * @param glyphId ID of the requested glyph in the font.
+   * @returns The vertical advance height.
    */
   glyphVAdvance(glyphId: number): number {
     return exports.hb_font_get_glyph_v_advance(this.ptr, glyphId);
@@ -638,6 +686,7 @@ export class Font {
   /**
    * Return glyph horizontal origin.
    * @param glyphId ID of the requested glyph in the font.
+   * @returns [x, y] origin coordinates, or null if not available.
    */
   glyphHOrigin(glyphId: number): [number, number] | null {
     var sp = Module.stackSave();
@@ -654,6 +703,7 @@ export class Font {
   /**
    * Return glyph vertical origin.
    * @param glyphId ID of the requested glyph in the font.
+   * @returns [x, y] origin coordinates, or null if not available.
    */
   glyphVOrigin(glyphId: number): [number, number] | null {
     var sp = Module.stackSave();
@@ -670,6 +720,7 @@ export class Font {
   /**
    * Return glyph extents.
    * @param glyphId ID of the requested glyph in the font.
+   * @returns An object with xBearing, yBearing, width, and height, or null.
    */
   glyphExtents(glyphId: number): GlyphExtents | null {
     var sp = Module.stackSave();
@@ -690,6 +741,7 @@ export class Font {
   /**
    * Return glyph ID from name.
    * @param name Name of the requested glyph in the font.
+   * @returns The glyph ID, or null if not found.
    */
   glyphFromName(name: string): number | null {
     var sp = Module.stackSave();
@@ -708,6 +760,7 @@ export class Font {
    * Return a glyph as a JSON path string
    * based on format described on https://svgwg.org/specs/paths/#InterfaceSVGPathSegment
    * @param glyphId ID of the requested glyph in the font.
+   * @returns An array of path segment objects with type and values.
    */
   glyphToJson(glyphId: number): SvgPathCommand[] {
     var path = this.glyphToPath(glyphId);
@@ -762,7 +815,12 @@ export class Font {
   }
 }
 
-/** Create an object representing HarfBuzz font functions. */
+/**
+ * An object representing {@link https://harfbuzz.github.io/harfbuzz-hb-font.html | HarfBuzz font functions}.
+ * Font functions define the methods used by a Font for lower-level queries
+ * like glyph advances and extents. HarfBuzz provides built-in default
+ * implementations which can be selectively overridden.
+ */
 export class FontFuncs {
   readonly ptr: number;
 
@@ -1002,11 +1060,16 @@ export class FontFuncs {
   }
 }
 
-/** Create an object representing a HarfBuzz buffer. */
+/**
+ * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-buffer.html | HarfBuzz buffer}.
+ * A buffer holds the input text and its properties before shaping, and the
+ * output glyphs and their information after shaping.
+ */
 export class Buffer {
   readonly ptr: number;
 
   constructor();
+  /** @internal Wrap an existing buffer pointer. */
   constructor(existingPtr: number);
   constructor(existingPtr?: number) {
     if (existingPtr !== undefined) {
@@ -1317,17 +1380,7 @@ export class Buffer {
 
   /**
    * Return the buffer contents as a JSON object.
-   *
-   * After shaping, this function will return an array of glyph information
-   * objects. Each object will have the following attributes:
-   *
-   *   - g: The glyph ID
-   *   - cl: The cluster ID
-   *   - ax: Advance width (width to advance after this glyph is painted)
-   *   - ay: Advance height (height to advance after this glyph is painted)
-   *   - dx: X displacement (adjustment in X dimension when painting this glyph)
-   *   - dy: Y displacement (adjustment in Y dimension when painting this glyph)
-   *   - flags: Glyph flags like `HB_GLYPH_FLAG_UNSAFE_TO_BREAK` (0x1)
+   * @returns An array of {@link JsonGlyph} objects.
    */
   json(): JsonGlyph[] {
     var buf = this.serialize(null, 0, null, "JSON", ["NO_GLYPH_NAMES", "GLYPH_FLAGS"]);
@@ -1346,9 +1399,14 @@ export class Buffer {
 // Free functions
 
 /**
- * Shape a buffer with a given font. This returns nothing, but modifies the buffer.
- * @param font A Font object.
- * @param buffer A Buffer object, suitably prepared.
+ * Shape a buffer with a given font.
+ *
+ * Converts the Unicode text in the buffer into positioned glyphs.
+ * The buffer is modified in place.
+ *
+ * @param font The Font to shape with.
+ * @param buffer The Buffer containing text to shape, suitably prepared
+ *   (text added, segment properties set).
  * @param features A string of comma-separated OpenType features to apply.
  */
 export function shape(font: Font, buffer: Buffer, features?: string): void {
@@ -1375,12 +1433,14 @@ export function shape(font: Font, buffer: Buffer, features?: string): void {
  *
  * This function supports "partial shaping", where the shaping process is
  * terminated after a given lookup ID is reached.
- * @param font A Font object.
- * @param buffer A Buffer object, suitably prepared.
+ *
+ * @param font The Font to shape with.
+ * @param buffer The Buffer containing text to shape, suitably prepared.
  * @param features A string of comma-separated OpenType features to apply.
  * @param stop_at A lookup ID at which to terminate shaping.
  * @param stop_phase Either 0 (don't terminate shaping), 1 (stop_at refers to
  *   GSUB table), 2 (stop_at refers to GPOS table).
+ * @returns An array of trace entries, each with a message, serialized glyphs, and phase info.
  */
 export function shapeWithTrace(font: Font, buffer: Buffer, features: string, stop_at: number, stop_phase: number): TraceEntry[] {
   var trace: TraceEntry[] = [];
@@ -1421,6 +1481,10 @@ export function shapeWithTrace(font: Font, buffer: Buffer, features: string, sto
   return trace;
 }
 
+/**
+ * Return the HarfBuzz version.
+ * @returns An object with major, minor, and micro version numbers.
+ */
 export function version(): { major: number; minor: number; micro: number } {
   var sp = Module.stackSave();
   var versionPtr = Module.stackAlloc(12);
@@ -1434,6 +1498,10 @@ export function version(): { major: number; minor: number; micro: number } {
   return ver;
 }
 
+/**
+ * Return the HarfBuzz version as a string.
+ * @returns A version string in the form "major.minor.micro".
+ */
 export function version_string(): string {
   var versionPtr = exports.hb_version_string();
   return _utf8_ptr_to_string(versionPtr);
