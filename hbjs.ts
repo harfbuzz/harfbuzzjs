@@ -90,9 +90,11 @@ let freeFuncPtr: number;
 const utf8Decoder = new TextDecoder("utf8");
 const utf8Encoder = new TextEncoder();
 
-const TRACE_PHASE_DONT_STOP = 0;
-const TRACE_PHASE_GSUB = 1;
-const TRACE_PHASE_GPOS = 2;
+export enum TracePhase {
+  DONT_STOP = 0,
+  GSUB = 1,
+  GPOS = 2,
+}
 
 const STATIC_ARRAY_SIZE = 128;
 
@@ -1425,25 +1427,24 @@ export function shape(font: Font, buffer: Buffer, features?: string): void {
  * @param buffer The Buffer containing text to shape, suitably prepared.
  * @param features A string of comma-separated OpenType features to apply.
  * @param stop_at A lookup ID at which to terminate shaping.
- * @param stop_phase Either 0 (don't terminate shaping), 1 (stop_at refers to
- *   GSUB table), 2 (stop_at refers to GPOS table).
+ * @param stop_phase The {@link TracePhase} at which to stop shaping.
  * @returns An array of trace entries, each with a message, serialized glyphs, and phase info.
  */
-export function shapeWithTrace(font: Font, buffer: Buffer, features: string, stop_at: number, stop_phase: number): TraceEntry[] {
+export function shapeWithTrace(font: Font, buffer: Buffer, features: string, stop_at: number, stop_phase: TracePhase): TraceEntry[] {
   const trace: TraceEntry[] = [];
-  let currentPhase = TRACE_PHASE_DONT_STOP;
+  let currentPhase = TracePhase.DONT_STOP;
   let stopping = false;
 
   buffer.setMessageFunc((buffer, font, message) => {
     if (message.startsWith("start table GSUB"))
-      currentPhase = TRACE_PHASE_GSUB;
+      currentPhase = TracePhase.GSUB;
     else if (message.startsWith("start table GPOS"))
-      currentPhase = TRACE_PHASE_GPOS;
+      currentPhase = TracePhase.GPOS;
 
     if (currentPhase != stop_phase)
       stopping = false;
 
-    if (stop_phase != TRACE_PHASE_DONT_STOP && currentPhase == stop_phase && message.startsWith("end lookup " + stop_at))
+    if (stop_phase != TracePhase.DONT_STOP && currentPhase == stop_phase && message.startsWith("end lookup " + stop_at))
       stopping = true;
 
     if (stopping)
