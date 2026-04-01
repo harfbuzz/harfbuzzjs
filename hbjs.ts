@@ -262,9 +262,8 @@ function _typed_array_from_set(setPtr: number): Uint32Array {
   const setCount = exports.hb_set_get_population(setPtr);
   const arrayPtr = exports.malloc(setCount << 2);
   const arrayOffset = arrayPtr >> 2;
-  const array = Module.HEAPU32.subarray(arrayOffset, arrayOffset + setCount);
-  Module.HEAPU32.set(array, arrayOffset);
   exports.hb_set_next_many(setPtr, HB_SET_VALUE_INVALID, arrayPtr, setCount);
+  const array = Module.HEAPU32.subarray(arrayOffset, arrayOffset + setCount);
   return array;
 }
 
