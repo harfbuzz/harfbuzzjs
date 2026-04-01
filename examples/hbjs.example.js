@@ -9,7 +9,7 @@ function example(hb, fontBlob, text) {
   var buffer = new hb.Buffer();
   buffer.addText(text || 'abc');
   buffer.guessSegmentProperties();
-  // buffer.setDirection('ltr'); // optional as can be set by guessSegmentProperties also
+  // buffer.setDirection(hb.Direction.LTR); // optional as can be set by guessSegmentProperties also
   hb.shape(font, buffer); // features are not supported yet
   var result = buffer.json(font);
 
