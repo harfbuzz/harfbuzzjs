@@ -43,10 +43,10 @@ jobs:
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-      - name: NPM install
-        run: npm install
+      - name: Build
+        run: make
       - name: Run tests
-        run: npm test
+        run: make test
       - name: Test hb.wasm
         run: node examples/hbjs.example.node.js
       - name: Test hb-subset.wasm
