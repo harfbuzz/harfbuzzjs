@@ -48,9 +48,10 @@ HB_SUBSET_SRCS = harfbuzz/src/harfbuzz-subset.cc
 HB_SUBSET_DEPS = config-override-subset.h hb-subset.symbols
 HB_SUBSET_TARGET = hb-subset.wasm
 
-.PHONY: all clean hb hb-subset build test typecheck doc
+.PHONY: all clean hb hb-subset test typecheck doc
 
-all: hb hb-subset
+all: hb hb-subset node_modules
+	npx tsdown
 
 hb: $(HB_TARGET)
 
@@ -68,13 +69,10 @@ node_modules: package.json
 	npm install
 	touch $@
 
-build: node_modules
-	npx tsdown
-
-typecheck: node_modules
+typecheck: all
 	npx tsc --noEmit
 
-test: build typecheck
+test: all typecheck
 	npx mocha test/index.js
 
 doc: node_modules
