@@ -1,5 +1,7 @@
 import createHarfBuzz from './hb.js';
-import hbjs from './hbjs';
+import * as hbjs from './hbjs';
 
-const harfbuzz = createHarfBuzz().then((instance) => hbjs(instance));
-export default harfbuzz;
+export default createHarfBuzz().then((module) => {
+  hbjs.init(module);
+  return hbjs;
+});

@@ -1,16 +1,36 @@
-<script src="../hb.js"></script>
-<script src="../hbjs.js"></script>
-<script src="hbjs.example.js"></script>
-<script>
+<script type="module">
+import harfbuzz from '../dist/index.mjs';
+const hb = await harfbuzz;
 
-let harfBuzzModule; // not really needed with the hbjs wrapper
-createHarfBuzz().then(hbmodule=>{
-  harfBuzzModule = hbmodule;
-  fetch('../test/fonts/noto/NotoSans-Regular.ttf').then(function (x) {
-    return x.arrayBuffer();
-  }).then(function (blob) {
-    document.body.innerText = JSON.stringify(example(hbjs(hbmodule), new Uint8Array(blob)), undefined, 2);
+fetch('../test/fonts/noto/NotoSans-Regular.ttf')
+  .then(x => x.arrayBuffer())
+  .then(fontData => {
+    var blob = new hb.Blob(fontData);
+    var face = new hb.Face(blob, 0);
+    var font = new hb.Font(face);
+
+    var buffer = new hb.Buffer();
+    buffer.addText('abc');
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer);
+
+    var result = buffer.json(font);
+    var glyphs = {};
+    result.forEach(function (x) {
+      if (glyphs[x.g]) return;
+      glyphs[x.g] = {
+        name: font.glyphName(x.g),
+        path: font.glyphToPath(x.g),
+        json: font.glyphToJson(x.g)
+      };
+    });
+
+    document.body.innerText = JSON.stringify({ shape: result, glyphs: glyphs }, undefined, 2);
     document.body.style.whiteSpace = 'pre';
+
+    buffer.destroy();
+    font.destroy();
+    face.destroy();
+    blob.destroy();
   });
-});
 </script>
