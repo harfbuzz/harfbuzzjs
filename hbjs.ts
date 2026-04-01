@@ -1438,7 +1438,6 @@ export function shapeWithTrace(font: Font, buffer: Buffer, features: string, sto
   const trace: TraceEntry[] = [];
   let currentPhase = TRACE_PHASE_DONT_STOP;
   let stopping = false;
-  const failure = false;
 
   buffer.setMessageFunc((buffer, font, message) => {
     if (message.startsWith("start table GSUB"))
@@ -1448,9 +1447,6 @@ export function shapeWithTrace(font: Font, buffer: Buffer, features: string, sto
 
     if (currentPhase != stop_phase)
       stopping = false;
-
-    if (failure)
-      return true;
 
     if (stop_phase != TRACE_PHASE_DONT_STOP && currentPhase == stop_phase && message.startsWith("end lookup " + stop_at))
       stopping = true;
