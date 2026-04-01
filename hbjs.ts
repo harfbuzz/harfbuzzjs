@@ -100,33 +100,33 @@ const HB_MEMORY_MODE_WRITABLE = 2;
 const HB_SET_VALUE_INVALID = -1;
 const HB_OT_NAME_ID_INVALID = 0xFFFF;
 
-const bufferContentType: Record<number, string> = {
-  0: "INVALID",
-  1: "UNICODE",
-  2: "GLYPHS",
-};
+export enum BufferContentType {
+  INVALID = 0,
+  UNICODE = 1,
+  GLYPHS = 2,
+}
 
-const bufferSerializeFlags: Record<string, number> = {
-  "DEFAULT": 0x00000000,
-  "NO_CLUSTERS": 0x00000001,
-  "NO_POSITIONS": 0x00000002,
-  "NO_GLYPH_NAMES": 0x00000004,
-  "GLYPH_EXTENTS": 0x00000008,
-  "GLYPH_FLAGS": 0x00000010,
-  "NO_ADVANCES": 0x00000020,
-};
+export enum BufferSerializeFlag {
+  DEFAULT = 0x00000000,
+  NO_CLUSTERS = 0x00000001,
+  NO_POSITIONS = 0x00000002,
+  NO_GLYPH_NAMES = 0x00000004,
+  GLYPH_EXTENTS = 0x00000008,
+  GLYPH_FLAGS = 0x00000010,
+  NO_ADVANCES = 0x00000020,
+}
 
-const bufferFlags: Record<string, number> = {
-  "DEFAULT": 0x00000000,
-  "BOT": 0x00000001,
-  "EOT": 0x00000002,
-  "PRESERVE_DEFAULT_IGNORABLES": 0x00000004,
-  "REMOVE_DEFAULT_IGNORABLES": 0x00000008,
-  "DO_NOT_INSERT_DOTTED_CIRCLE": 0x00000010,
-  "VERIFY": 0x00000020,
-  "PRODUCE_UNSAFE_TO_CONCAT": 0x00000040,
-  "PRODUCE_SAFE_TO_INSERT_TATWEEL": 0x00000080,
-};
+export enum BufferFlag {
+  DEFAULT = 0x00000000,
+  BOT = 0x00000001,
+  EOT = 0x00000002,
+  PRESERVE_DEFAULT_IGNORABLES = 0x00000004,
+  REMOVE_DEFAULT_IGNORABLES = 0x00000008,
+  DO_NOT_INSERT_DOTTED_CIRCLE = 0x00000010,
+  VERIFY = 0x00000020,
+  PRODUCE_UNSAFE_TO_CONCAT = 0x00000040,
+  PRODUCE_SAFE_TO_INSERT_TATWEEL = 0x00000080,
+}
 
 /**
  * Initialize the HarfBuzz module. Must be called (and awaited) before
@@ -1137,21 +1137,10 @@ export class Buffer {
 
   /**
    * Set buffer flags explicitly.
-   * @param flags A list of strings which may be either:
-   * "DEFAULT"
-   * "BOT"
-   * "EOT"
-   * "PRESERVE_DEFAULT_IGNORABLES"
-   * "REMOVE_DEFAULT_IGNORABLES"
-   * "DO_NOT_INSERT_DOTTED_CIRCLE"
-   * "VERIFY"
-   * "PRODUCE_UNSAFE_TO_CONCAT"
-   * "PRODUCE_SAFE_TO_INSERT_TATWEEL"
+   * @param flags A combination of {@link BufferFlag} values (OR them together).
    */
-  setFlags(flags: string[]): void {
-    let flagsValue = 0;
-    flags.forEach(s => flagsValue |= bufferFlags[s] || 0);
-    exports.hb_buffer_set_flags(this.ptr, flagsValue);
+  setFlags(flags: number): void {
+    exports.hb_buffer_set_flags(this.ptr, flags);
   }
 
   /**
@@ -1330,30 +1319,21 @@ export class Buffer {
    * @param start The starting index of the glyphs to serialize.
    * @param end The ending index of the glyphs to serialize.
    * @param format The format to serialize the buffer contents to.
-   * @param flags The flags to use for serialization. A list of strings which may be either:
-   * "DEFAULT"
-   * "NO_CLUSTERS"
-   * "NO_POSITIONS"
-   * "NO_GLYPH_NAMES"
-   * "GLYPH_EXTENTS"
-   * "GLYPH_FLAGS"
-   * "NO_ADVANCES"
+   * @param flags A combination of {@link BufferSerializeFlag} values (OR them together).
    *
    * @returns The serialized buffer contents.
    */
-  serialize(font?: Font | null, start: number = 0, end?: number | null, format: string = "TEXT", flags: string[] = []): string {
+  serialize(font?: Font | null, start: number = 0, end?: number | null, format: string = "TEXT", flags: number = 0): string {
     const sp = Module.stackSave();
     const endPos = end ?? this.getLength();
     const bufLen = 32 * 1024;
     const bufPtr = exports.malloc(bufLen);
     const bufConsumedPtr = Module.stackAlloc(4);
-    let flagsValue = 0;
-    flags.forEach(flag => flagsValue |= bufferSerializeFlags[flag] || 0);
     let result = "";
     while (start < endPos) {
       start += exports.hb_buffer_serialize(this.ptr, start, endPos,
         bufPtr, bufLen, bufConsumedPtr,
-        font ? font.ptr : 0, _hb_tag(format), flagsValue);
+        font ? font.ptr : 0, _hb_tag(format), flags);
       const bufConsumed = Module.HEAPU32[bufConsumedPtr / 4];
       if (bufConsumed == 0) break;
       result += _utf8_ptr_to_string(bufPtr, bufConsumed);
@@ -1366,13 +1346,10 @@ export class Buffer {
   /**
    * Return the buffer content type.
    *
-   * @returns The buffer content type. One of:
-   * "INVALID"
-   * "UNICODE"
-   * "GLYPHS"
+   * @returns The buffer content type as a {@link BufferContentType} value.
    */
-  getContentType(): string {
-    return bufferContentType[exports.hb_buffer_get_content_type(this.ptr)];
+  getContentType(): BufferContentType {
+    return exports.hb_buffer_get_content_type(this.ptr) as BufferContentType;
   }
 
   /**
@@ -1380,7 +1357,7 @@ export class Buffer {
    * @returns An array of {@link JsonGlyph} objects.
    */
   json(): JsonGlyph[] {
-    const buf = this.serialize(null, 0, null, "JSON", ["NO_GLYPH_NAMES", "GLYPH_FLAGS"]);
+    const buf = this.serialize(null, 0, null, "JSON", BufferSerializeFlag.NO_GLYPH_NAMES | BufferSerializeFlag.GLYPH_FLAGS);
     return JSON.parse(buf);
   }
 
@@ -1454,12 +1431,12 @@ export function shapeWithTrace(font: Font, buffer: Buffer, features: string, sto
     if (stopping)
       return false;
 
-    const traceBuf = buffer.serialize(font, 0, null, "JSON", ["NO_GLYPH_NAMES"]);
+    const traceBuf = buffer.serialize(font, 0, null, "JSON", BufferSerializeFlag.NO_GLYPH_NAMES);
 
     trace.push({
       m: message,
       t: JSON.parse(traceBuf),
-      glyphs: buffer.getContentType() == "GLYPHS",
+      glyphs: buffer.getContentType() == BufferContentType.GLYPHS,
     });
 
     return true;

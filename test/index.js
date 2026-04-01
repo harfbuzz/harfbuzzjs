@@ -578,7 +578,7 @@ describe('Buffer', function () {
     font = new hb.Font(face);
     buffer = new hb.Buffer();
     buffer.addText('\u200dhi');
-    buffer.setFlags(['PRESERVE_DEFAULT_IGNORABLES']);
+    buffer.setFlags(hb.BufferFlag.PRESERVE_DEFAULT_IGNORABLES);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
     const glyphs = buffer.json();
@@ -591,7 +591,7 @@ describe('Buffer', function () {
     font = new hb.Font(face);
     buffer = new hb.Buffer();
     buffer.addText('abc');
-    buffer.setFlags(['invalidFlag']);
+    buffer.setFlags(0);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
     const glyphs = buffer.json();
@@ -604,7 +604,7 @@ describe('Buffer', function () {
     font = new hb.Font(face);
     buffer = new hb.Buffer();
     buffer.addText('بلا');
-    buffer.setFlags(['PRODUCE_SAFE_TO_INSERT_TATWEEL']);
+    buffer.setFlags(hb.BufferFlag.PRODUCE_SAFE_TO_INSERT_TATWEEL);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
     const flags = Array.from(buffer.json().map(g => g.fl));
@@ -612,7 +612,7 @@ describe('Buffer', function () {
 
     buffer.clearContents();
     buffer.addText('بلا');
-    buffer.setFlags([]);
+    buffer.setFlags(0);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
     const flags2 = Array.from(buffer.json().map(g => g.fl));
@@ -627,7 +627,7 @@ describe('Buffer', function () {
     buffer.addText('abc');
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
-    const glyphs = buffer.serialize(font, 0, null, "TEXT", ["invalidFlag"]);
+    const glyphs = buffer.serialize(font, 0, null, "TEXT", 0);
     expect(glyphs).to.deep.equal("[a=0+561|b=1+615|c=2+480]");
   });
 
@@ -638,11 +638,11 @@ describe('Buffer', function () {
     buffer = new hb.Buffer();
     buffer.addText('abc');
     buffer.guessSegmentProperties();
-    expect(buffer.getContentType()).to.equal("UNICODE");
+    expect(buffer.getContentType()).to.equal(hb.BufferContentType.UNICODE);
     hb.shape(font, buffer)
-    expect(buffer.getContentType()).to.equal("GLYPHS");
+    expect(buffer.getContentType()).to.equal(hb.BufferContentType.GLYPHS);
     buffer.reset();
-    expect(buffer.getContentType()).to.equal("INVALID");
+    expect(buffer.getContentType()).to.equal(hb.BufferContentType.INVALID);
   });
 
   it('getLength gets the length before and after shaping', function () {
