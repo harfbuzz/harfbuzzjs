@@ -24,22 +24,22 @@ afterEach(function () {
 
 describe('Face', function () {
   it('collectUnicodes reflects codepoints supported by the font', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     const codepoints = [...face.collectUnicodes()];
     expect(codepoints).to.include('a'.codePointAt(0));
     expect(codepoints).not.to.include('ا'.codePointAt(0));
   });
 
   it('exposes upem', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     expect(face.upem).to.equal(1000);
   });
 
   it('getAxisInfos returns details of a variable font', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = new hb.Face(blob);
     expect(face.getAxisInfos()).to.deep.equal({
       wght: { min: 100, default: 400, max: 900 },
       wdth: { min: 62.5, default: 100, max: 100 }
@@ -47,21 +47,21 @@ describe('Face', function () {
   });
 
   it('getAxisInfos returns an empty object for a non-variable font', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     expect(Object.keys(face.getAxisInfos())).to.have.lengthOf(0);
   });
 
   it('getTableScriptTags returns tags for a font', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     expect(face.getTableScriptTags('GSUB')).to.deep.equal(['DFLT', 'cyrl', 'dev2', 'deva', 'grek', 'latn']);
     expect(face.getTableScriptTags('GPOS')).to.deep.equal(['DFLT', 'cyrl', 'dev2', 'deva', 'grek', 'latn']);
   });
 
   it('getTableFeatureTags returns tags for a font', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     expect(face.getTableFeatureTags('GSUB')).to.deep.equal([
       'aalt', 'abvs', 'akhn', 'blwf', 'blwf', 'blws', 'c2sc', 'case', 'ccmp', 'ccmp',
       'ccmp', 'ccmp', 'cjct', 'cjct', 'dnom', 'frac', 'half', 'half', 'half', 'half',
@@ -74,21 +74,21 @@ describe('Face', function () {
   });
 
   it('getScriptLanguageTags returns tags for a font', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     expect(face.getScriptLanguageTags('GSUB', 1)).to.deep.equal(['MKD ', 'SRB ']);
     expect(face.getScriptLanguageTags('GPOS', 5)).to.deep.equal([]);
   });
 
   it('getScriptLanguageTags returns tags for GPOS table', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansDevanagari-Regular.otf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansDevanagari-Regular.otf')));
+    face = new hb.Face(blob);
     expect(face.getScriptLanguageTags('GPOS', 1)).to.deep.equal(['MAR ', 'NEP ', 'SAN ', 'SAT ']);
   });
 
   it('getLanguageFeatureTags returns tags for a font', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     expect(face.getLanguageFeatureTags('GSUB', 1, 1)).to.deep.equal(['aalt', 'c2sc', 'case', 'ccmp', 'dnom', 'frac',
       'liga', 'lnum', 'locl', 'numr', 'onum', 'ordn', 'pnum', 'rtlm', 'sinf', 'smcp', 'ss03', 'ss06', 'ss07', 'subs',
       'sups', 'tnum', 'zero']);
@@ -96,8 +96,8 @@ describe('Face', function () {
   });
 
   it('getTableScriptTags, getScriptLanguageTags, and getLanguageFeatureTags all together', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = new hb.Face(blob);
     let result = {};
     face.getTableScriptTags('GSUB').forEach((script, scriptIndex) => {
       result[script] = { 'dflt': face.getLanguageFeatureTags('GSUB', scriptIndex, 0xFFFF) };
@@ -117,9 +117,9 @@ describe('Face', function () {
   });
 
   it('getGlyphClass returns the class of a glyph', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     expect(face.getGlyphClass(0)).to.equal('UNCLASSIFIED');
     expect(face.getGlyphClass(font.glyphFromName('w'))).to.equal('BASE_GLYPH');
     expect(face.getGlyphClass(font.glyphFromName('fi'))).to.equal('LIGATURE');
@@ -127,8 +127,8 @@ describe('Face', function () {
   });
 
   it('listNames fetches all names', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     let names = face.listNames();
     expect(names.length).to.equal(38);
     expect(names[0]).to.deep.equal({ nameId: 0, language: 'en' });
@@ -136,15 +136,15 @@ describe('Face', function () {
   })
 
   it('getName fetches a name', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     expect(face.getName(1, 'en')).to.equal('Noto Sans');
     expect(face.getName(256, 'en')).to.equal('florin symbol');
   })
 
   it('getFeatureNameIds returns valid name Ids for ssNN features', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     expect(face.getFeatureNameIds("GSUB",
       face.getTableFeatureTags("GSUB").indexOf("ss03"))).to.deep.equal({
         uiLabelNameId: 256,
@@ -155,22 +155,22 @@ describe('Face', function () {
   })
 
   it('getFeatureNameIds with getName', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     expect(face.getName(face.getFeatureNameIds("GSUB",
       face.getTableFeatureTags("GSUB").indexOf("ss03")).uiLabelNameId, 'en')).to.equal('florin symbol');
   })
 
   it('getFeatureNameIds not found', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
     expect(face.getFeatureNameIds("GSUB",
       face.getTableFeatureTags("GSUB").indexOf("salt"))).to.equal(null);
   })
 
   it('getFeatureNameIds returns valid name Ids for cvNN features', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, '../harfbuzz/test/api/fonts/cv01.otf')));
-    face = hb.createFace(blob);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, '../harfbuzz/test/api/fonts/cv01.otf')));
+    face = new hb.Face(blob);
     expect(face.getFeatureNameIds("GSUB",
       face.getTableFeatureTags("GSUB").indexOf("cv01"))).to.deep.equal({
         uiLabelNameId: 256,
@@ -183,22 +183,22 @@ describe('Face', function () {
 
 describe('Font', function () {
   it('subFont creates a sub font', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     let subFont = font.subFont();
     expect(subFont.ptr).to.not.equal(font.ptr);
     subFont.destroy();
   });
 
   it('subFont font funcs fallback to parent', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     let subFont = font.subFont();
     expect(subFont.ptr).to.not.equal(font.ptr);
 
-    fontFuncs = hb.createFontFuncs();
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setGlyphNameFunc(function (font_, glyph) {
       expect(font_.ptr).to.equal(subFont.ptr);
       return null;
@@ -211,9 +211,9 @@ describe('Font', function () {
   });
 
   it('hExtents returns extents for the font', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     expect(font.hExtents()).to.deep.equal({
       ascender: 1069,
       descender: -293,
@@ -222,9 +222,9 @@ describe('Font', function () {
   });
 
   it('vExtents returns extents for the font', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     expect(font.vExtents()).to.deep.equal({
       ascender: 0,
       descender: 0,
@@ -233,17 +233,17 @@ describe('Font', function () {
   });
 
   it('glyphName returns names for glyph ids', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     expect(font.glyphName(20)).to.equal('one');
   });
 
   it('setScale affects advances', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('a');
     buffer.guessSegmentProperties();
     font.setScale(1000 * 2, 1000 * 2);
@@ -253,9 +253,9 @@ describe('Font', function () {
   });
 
   it('glyphExtents returns extents for glyph ids', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     expect(font.glyphExtents(20)).to.deep.equal({
       xBearing: 89,
       yBearing: 714,
@@ -265,47 +265,47 @@ describe('Font', function () {
   });
 
   it('glyphHAdvance returns advances for glyph ids', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     expect(font.glyphHAdvance(20)).to.equal(572);
   });
 
   it('glyphVAdvance returns advances for glyph ids', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     expect(font.glyphVAdvance(20)).to.equal(-1000);
   });
 
   it('glyphHOrigin returns origins for glyph ids', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     expect(font.glyphHOrigin(20)).to.deep.equal([0, 0]);
   });
 
   it('glyphVOrigin returns origins for glyph ids', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     expect(font.glyphVOrigin(20)).to.equal(null);
   });
 
   it('glyphFromName returns ids for glyph names', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     expect(font.glyphFromName('one')).to.equal(20);
     expect(font.glyphFromName('NonExistentGlyph')).to.equal(null);
   });
 
   it('setVariations affects advances', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     font.setVariations({ 'wght': 789 });
-    buffer = hb.createBuffer();
+    buffer = new hb.Buffer();
     buffer.addText('آلو');
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
@@ -314,9 +314,9 @@ describe('Font', function () {
   });
 
   it('glyphToPath converts quadratic glyph to path', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     const expected21 = 'M520,0L48,0L48,73L235,262Q289,316 326,358Q363,400 382,440.5Q401,481 401,529Q401,\
 588 366,618.5Q331,649 275,649Q223,649 183.5,631Q144,613 103,581L56,640Q98,675 152.5,699.5Q207,724 275,\
 724Q375,724 433,673.5Q491,623 491,534Q491,478 468,429Q445,380 404,332.5Q363,285 308,231L159,84L159,80L520,80L520,0Z';
@@ -330,9 +330,9 @@ describe('Font', function () {
   });
 
   it('glyphToPath converts cubic glyph to path', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.otf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.otf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     const expected21 = 'M520,0L520,80L159,80L159,84L308,231C418,338 491,422 491,534C491,652 408,724 275,724C184,724 112,\
 687 56,640L103,581C158,624 205,649 275,649C350,649 401,607 401,529C401,432 342,370 235,262L48,73L48,0L520,0Z';
     expect(font.glyphToPath(21)).to.equal(expected21);
@@ -345,10 +345,10 @@ describe('Font', function () {
 
 describe('FontFuncs', function () {
   it('setGlyphExtentsFunc', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    fontFuncs = hb.createFontFuncs();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setGlyphExtentsFunc(function (font_, glyph) {
       expect(font_.ptr).to.equal(font.ptr);
       return {
@@ -374,10 +374,10 @@ describe('FontFuncs', function () {
   });
 
   it('setGlyphFromNameFunc', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    fontFuncs = hb.createFontFuncs();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setGlyphFromNameFunc(function (font_, name) {
       expect(font_.ptr).to.equal(font.ptr);
       return name == 'one' ? 20 : null;
@@ -388,10 +388,10 @@ describe('FontFuncs', function () {
   });
 
   it('setGlyphHAdvanceFunc', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    fontFuncs = hb.createFontFuncs();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setGlyphHAdvanceFunc(function (font_, glyph) {
       expect(font_.ptr).to.equal(font.ptr);
       return glyph == 20 ? 100 : 200;
@@ -402,10 +402,10 @@ describe('FontFuncs', function () {
   });
 
   it('setGlyphVAdvanceFunc', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    fontFuncs = hb.createFontFuncs();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setGlyphVAdvanceFunc(function (font_, glyph) {
       expect(font_.ptr).to.equal(font.ptr);
       return glyph == 20 ? 100 : 200;
@@ -416,10 +416,10 @@ describe('FontFuncs', function () {
   });
 
   it('setGlyphHOriginFunc', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    fontFuncs = hb.createFontFuncs();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setGlyphHOriginFunc(function (font_, glyph) {
       expect(font_.ptr).to.equal(font.ptr);
       return glyph == 20 ? [100, 200] : [300, 400];
@@ -430,10 +430,10 @@ describe('FontFuncs', function () {
   });
 
   it('setGlyphVOriginFunc', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    fontFuncs = hb.createFontFuncs();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setGlyphVOriginFunc(function (font_, glyph) {
       expect(font_.ptr).to.equal(font.ptr);
       return glyph == 20 ? [100, 200] : [300, 400];
@@ -444,10 +444,10 @@ describe('FontFuncs', function () {
   });
 
   it('setGlyphNameFunc', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    fontFuncs = hb.createFontFuncs();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setGlyphNameFunc(function (font_, glyph) {
       expect(font_.ptr).to.equal(font.ptr);
       return glyph == 20 ? 'one' : null;
@@ -458,16 +458,16 @@ describe('FontFuncs', function () {
   });
 
   it('setNominalGlyphFunc', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    fontFuncs = hb.createFontFuncs();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setNominalGlyphFunc(function (font_, unicode) {
       expect(font_.ptr).to.equal(font.ptr);
       return unicode == 49 ? 21 : 22;
     });
     font.setFuncs(fontFuncs);
-    buffer = hb.createBuffer();
+    buffer = new hb.Buffer();
     buffer.addText('12');
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
@@ -477,10 +477,10 @@ describe('FontFuncs', function () {
   });
 
   it('setVariationGlyphFunc', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    fontFuncs = hb.createFontFuncs();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setNominalGlyphFunc(function (font_, unicode) {
       expect(font_.ptr).to.equal(font.ptr);
       return unicode == 49 ? 21 : 22;
@@ -490,7 +490,7 @@ describe('FontFuncs', function () {
       return unicode == 49 ? 23 : null;
     });
     font.setFuncs(fontFuncs);
-    buffer = hb.createBuffer();
+    buffer = new hb.Buffer();
     buffer.addText('11\uFE002\uFE00');
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
@@ -501,10 +501,10 @@ describe('FontFuncs', function () {
   });
 
   it('setFontHExtentsFunc', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    fontFuncs = hb.createFontFuncs();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setFontHExtentsFunc(function (font_) {
       expect(font_.ptr).to.equal(font.ptr);
       return {
@@ -522,10 +522,10 @@ describe('FontFuncs', function () {
   });
 
   it('setFontVExtentsFunc', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    fontFuncs = hb.createFontFuncs();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    fontFuncs = new hb.FontFuncs();
     fontFuncs.setFontVExtentsFunc(function (font_) {
       expect(font_.ptr).to.equal(font.ptr);
       return {
@@ -545,10 +545,10 @@ describe('FontFuncs', function () {
 
 describe('Buffer', function () {
   it('setDirection controls direction of glyphs', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('rtl');
     buffer.setDirection('rtl');
     hb.shape(font, buffer)
@@ -559,10 +559,10 @@ describe('Buffer', function () {
   });
 
   it('setClusterLevel affects cluster merging', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.setClusterLevel(1);
     buffer.addText('x́');
     buffer.guessSegmentProperties();
@@ -573,10 +573,10 @@ describe('Buffer', function () {
   });
 
   it('setFlags with PRESERVE_DEFAULT_IGNORABLES affects glyph ids', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('\u200dhi');
     buffer.setFlags(['PRESERVE_DEFAULT_IGNORABLES']);
     buffer.guessSegmentProperties();
@@ -586,10 +586,10 @@ describe('Buffer', function () {
   });
 
   it('setFlags ignores invalid flags', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('abc');
     buffer.setFlags(['invalidFlag']);
     buffer.guessSegmentProperties();
@@ -599,10 +599,10 @@ describe('Buffer', function () {
   });
 
   it('setFlags with PRODUCE_SAFE_TO_INSERT_TATWEEL affects glyph flags', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('بلا');
     buffer.setFlags(['PRODUCE_SAFE_TO_INSERT_TATWEEL']);
     buffer.guessSegmentProperties();
@@ -620,10 +620,10 @@ describe('Buffer', function () {
   });
 
   it('serialize ignores invalid flags', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('abc');
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
@@ -632,10 +632,10 @@ describe('Buffer', function () {
   });
 
   it('reset resets the buffer', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('abc');
     buffer.guessSegmentProperties();
     expect(buffer.getContentType()).to.equal("UNICODE");
@@ -646,10 +646,10 @@ describe('Buffer', function () {
   });
 
   it('getLength gets the length before and after shaping', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('fi');
     expect(buffer.getLength()).to.equal(2);
     buffer.guessSegmentProperties();
@@ -658,20 +658,20 @@ describe('Buffer', function () {
   });
 
   it('getInfos and getPositions return empty arrays for empty buffer', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     expect(buffer.getGlyphInfos()).to.deep.equal([]);
     expect(buffer.getGlyphPositions()).to.deep.equal([]);
     expect(buffer.getGlyphInfosAndPositions()).to.deep.equal([]);
   });
 
   it('getInfos and getPositions return non empty arrays for non empty buffer', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('x\u0300fi'); // combining mark and ligature to make the test more interesting
     buffer.guessSegmentProperties();
 
@@ -719,10 +719,10 @@ describe('Buffer', function () {
   });
 
   it('glyph infos and positions have private properties', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('fi');
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
@@ -737,10 +737,10 @@ describe('Buffer', function () {
   });
 
   it('getPositions returns empty array for buffer without positions', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('abc');
     buffer.guessSegmentProperties();
     var currentPhase = "";
@@ -761,10 +761,10 @@ describe('Buffer', function () {
   });
 
   it('updateGlyphPositions updates the glyph positions', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
 
     // text with a base glyph and two marks to test mkmk after manually updating glyph positions
     var text = 'x\u0302\u0300';
@@ -811,10 +811,10 @@ describe('Buffer', function () {
 
 describe('shape', function () {
   it('shape Latin string', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('abc');
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
@@ -825,10 +825,10 @@ describe('shape', function () {
   });
 
   it('shape Latin string code points', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addCodePoints([...'abc'].map(c => c.codePointAt(0)));
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
@@ -839,10 +839,10 @@ describe('shape', function () {
   });
 
   it('shape Arabic string', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('أبجد');
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
@@ -854,10 +854,10 @@ describe('shape', function () {
   });
 
   it('shape Arabic string item', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('أبجد', 1, 2);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
@@ -867,10 +867,10 @@ describe('shape', function () {
   });
 
   it('shape Arabic code points item', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansArabic-Variable.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addCodePoints([...'أبجد'].map(c => c.codePointAt(0)), 1, 2);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
@@ -880,10 +880,10 @@ describe('shape', function () {
   });
 
   it('shape with tracing', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('abc');
     buffer.guessSegmentProperties();
     const result = hb.shapeWithTrace(font, buffer, "", 0, 0)
@@ -909,10 +909,10 @@ describe('shape', function () {
   });
 
   it('shape with tracing and features', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('fi AV');
     buffer.guessSegmentProperties();
     const result = hb.shapeWithTrace(font, buffer, "-liga,-kern", 0, 0)
@@ -942,10 +942,10 @@ describe('shape', function () {
   });
 
   it('shape with 3-letter languae tag', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansDevanagari-Regular.otf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansDevanagari-Regular.otf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('५ल');
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
@@ -964,10 +964,10 @@ describe('shape', function () {
   });
 
   it('shape with OpenType language tag', function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansDevanagari-Regular.otf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
-    buffer = hb.createBuffer();
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSansDevanagari-Regular.otf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
+    buffer = new hb.Buffer();
     buffer.addText('५ल');
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
@@ -1016,9 +1016,9 @@ describe('misc', function () {
   });
 
   it("test that calling functions repeatedly doesn't exhaust memory", function () {
-    blob = hb.createBlob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
-    face = hb.createFace(blob);
-    font = hb.createFont(face);
+    blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
+    face = new hb.Face(blob);
+    font = new hb.Font(face);
     for (let i = 0; i < 10000; i++) {
       expect(face.listNames()).to.not.be.null;
       expect(face.getName(0, "en")).to.not.be.null;

@@ -1,8 +1,28 @@
-var fs = require('fs');
-var path = require('path');
-var example = require('./hbjs.example.js');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import harfbuzz from '../dist/index.mjs';
 
-require('../').then(function (hbjs) {
-  console.log(example(hbjs, new Uint8Array(fs.readFileSync(path.resolve(__dirname, '../test/fonts/noto/NotoSans-Regular.ttf')))));
-  console.log(example(hbjs, new Uint8Array(fs.readFileSync(path.resolve(__dirname, '../test/fonts/noto/NotoSansArabic-Variable.ttf'))), "أبجد"));
-}, console.log);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const hb = await harfbuzz;
+
+function example(fontPath, text) {
+  var blob = new hb.Blob(fs.readFileSync(fontPath));
+  var face = new hb.Face(blob, 0);
+  var font = new hb.Font(face);
+
+  var buffer = new hb.Buffer();
+  buffer.addText(text || 'abc');
+  buffer.guessSegmentProperties();
+  hb.shape(font, buffer);
+  var result = buffer.json(font);
+
+  buffer.destroy();
+  font.destroy();
+  face.destroy();
+  blob.destroy();
+  return result;
+}
+
+console.log(example(path.resolve(__dirname, '../test/fonts/noto/NotoSans-Regular.ttf')));
+console.log(example(path.resolve(__dirname, '../test/fonts/noto/NotoSansArabic-Variable.ttf'), "أبجد"));
