@@ -74,6 +74,8 @@ typecheck: all
 
 test: all typecheck
 	npx mocha test/index.js
+	node examples/hbjs.example.node.js
+	node examples/hb-subset.example.node.js
 
 doc: node_modules
 	npx typedoc hbjs.ts --out docs

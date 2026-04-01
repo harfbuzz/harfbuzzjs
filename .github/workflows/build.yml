@@ -47,10 +47,6 @@ jobs:
         run: make
       - name: Run tests
         run: make test
-      - name: Test hb.wasm
-        run: node examples/hbjs.example.node.js
-      - name: Test hb-subset.wasm
-        run: node examples/hb-subset.example.node.js
       - name: Archive artifacts
         uses: actions/upload-artifact@v6
         with:
