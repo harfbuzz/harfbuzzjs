@@ -523,7 +523,7 @@ export class Face {
       const sampleTextNameId = Module.HEAPU32[sampleIdPtr / 4];
       const numNamedParameters = Module.HEAPU32[numNamedParametersPtr / 4];
       const firstParameterId = Module.HEAPU32[firstParameterIdPtr / 4];
-      const paramUiLabelNameIds = Array(numNamedParameters).fill(0).map((_: number, i: number) => firstParameterId + i);
+      const paramUiLabelNameIds = Array.from({ length: numNamedParameters }, (_: number, i: number) => firstParameterId + i);
       names = {
         uiLabelNameId: uiLabelNameId == HB_OT_NAME_ID_INVALID ? null : uiLabelNameId,
         uiTooltipTextNameId: uiTooltipTextNameId == HB_OT_NAME_ID_INVALID ? null : uiTooltipTextNameId,
