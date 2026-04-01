@@ -184,7 +184,7 @@ function _string_to_ascii_ptr(text: string): StringPtr {
   }
   Module.HEAPU8[ptr + text.length] = 0;
   return {
-    ptr: ptr,
+    ptr,
     length: text.length,
     free: function () { exports.free(ptr); }
   };
@@ -194,7 +194,7 @@ function _string_to_utf8_ptr(text: string): StringPtr {
   const ptr = exports.malloc(text.length);
   utf8Encoder.encodeInto(text, Module.HEAPU8.subarray(ptr, ptr + text.length));
   return {
-    ptr: ptr,
+    ptr,
     length: text.length,
     free: function () { exports.free(ptr); }
   };
@@ -205,7 +205,7 @@ function _string_to_utf16_ptr(text: string): StringPtr {
   const words = Module.HEAPU16.subarray(ptr / 2, ptr / 2 + text.length);
   for (let i = 0; i < words.length; ++i) words[i] = text.charCodeAt(i);
   return {
-    ptr: ptr,
+    ptr,
     length: words.length,
     free: function () { exports.free(ptr); }
   };
