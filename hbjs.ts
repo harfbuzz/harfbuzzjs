@@ -542,8 +542,6 @@ export class Face {
   }
 }
 
-let pathBuffer = "";
-
 /**
  * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-font.html | HarfBuzz font}.
  * A font represents a face at a specific size and with certain other
@@ -558,6 +556,7 @@ export class Font {
   private cubicToPtr: number | null = null;
   private quadToPtr: number | null = null;
   private closePathPtr: number | null = null;
+  private pathBuffer = "";
 
   /**
    * @param face A Face to create the font from.
@@ -638,19 +637,19 @@ export class Font {
   glyphToPath(glyphId: number): string {
     if (!this.drawFuncsPtr) {
       const moveTo = (dfuncs: number, draw_data: number, draw_state: number, to_x: number, to_y: number, user_data: number) => {
-        pathBuffer += `M${to_x},${to_y}`;
+        this.pathBuffer += `M${to_x},${to_y}`;
       }
       const lineTo = (dfuncs: number, draw_data: number, draw_state: number, to_x: number, to_y: number, user_data: number) => {
-        pathBuffer += `L${to_x},${to_y}`;
+        this.pathBuffer += `L${to_x},${to_y}`;
       }
       const cubicTo = (dfuncs: number, draw_data: number, draw_state: number, c1_x: number, c1_y: number, c2_x: number, c2_y: number, to_x: number, to_y: number, user_data: number) => {
-        pathBuffer += `C${c1_x},${c1_y} ${c2_x},${c2_y} ${to_x},${to_y}`;
+        this.pathBuffer += `C${c1_x},${c1_y} ${c2_x},${c2_y} ${to_x},${to_y}`;
       }
       const quadTo = (dfuncs: number, draw_data: number, draw_state: number, c_x: number, c_y: number, to_x: number, to_y: number, user_data: number) => {
-        pathBuffer += `Q${c_x},${c_y} ${to_x},${to_y}`;
+        this.pathBuffer += `Q${c_x},${c_y} ${to_x},${to_y}`;
       }
       const closePath = (dfuncs: number, draw_data: number, draw_state: number, user_data: number) => {
-        pathBuffer += 'Z';
+        this.pathBuffer += 'Z';
       }
 
       this.moveToPtr = Module.addFunction(moveTo, 'viiiffi');
@@ -666,9 +665,9 @@ export class Font {
       exports.hb_draw_funcs_set_close_path_func(this.drawFuncsPtr, this.closePathPtr, 0, 0);
     }
 
-    pathBuffer = "";
+    this.pathBuffer = "";
     exports.hb_font_draw_glyph(this.ptr, glyphId, this.drawFuncsPtr, 0);
-    return pathBuffer;
+    return this.pathBuffer;
   }
 
   /**
