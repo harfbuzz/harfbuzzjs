@@ -135,6 +135,11 @@ export enum BufferFlag {
   PRODUCE_SAFE_TO_INSERT_TATWEEL = 0x00000080,
 }
 
+export enum BufferSerializeFormat {
+  TEXT = "TEXT",
+  JSON = "JSON",
+}
+
 /**
  * Initialize the HarfBuzz module. Must be called (and awaited) before
  * using any other functions or classes.
@@ -1325,12 +1330,12 @@ export class Buffer {
    * @param font The font to use for serialization.
    * @param start The starting index of the glyphs to serialize.
    * @param end The ending index of the glyphs to serialize.
-   * @param format The format to serialize the buffer contents to.
+   * @param format The {@link BufferSerializeFormat} to serialize the buffer contents to.
    * @param flags A combination of {@link BufferSerializeFlag} values (OR them together).
    *
    * @returns The serialized buffer contents.
    */
-  serialize(font?: Font | null, start: number = 0, end?: number | null, format: string = "TEXT", flags: number = 0): string {
+  serialize(font?: Font | null, start: number = 0, end?: number | null, format: BufferSerializeFormat = BufferSerializeFormat.TEXT, flags: number = 0): string {
     const sp = Module.stackSave();
     const endPos = end ?? this.getLength();
     const bufLen = 32 * 1024;
@@ -1364,7 +1369,7 @@ export class Buffer {
    * @returns An array of {@link JsonGlyph} objects.
    */
   json(): JsonGlyph[] {
-    const buf = this.serialize(null, 0, null, "JSON", BufferSerializeFlag.NO_GLYPH_NAMES | BufferSerializeFlag.GLYPH_FLAGS);
+    const buf = this.serialize(null, 0, null, BufferSerializeFormat.JSON, BufferSerializeFlag.NO_GLYPH_NAMES | BufferSerializeFlag.GLYPH_FLAGS);
     return JSON.parse(buf);
   }
 
@@ -1438,7 +1443,7 @@ export function shapeWithTrace(font: Font, buffer: Buffer, features: string, sto
     if (stopping)
       return false;
 
-    const traceBuf = buffer.serialize(font, 0, null, "JSON", BufferSerializeFlag.NO_GLYPH_NAMES);
+    const traceBuf = buffer.serialize(font, 0, null, BufferSerializeFormat.JSON, BufferSerializeFlag.NO_GLYPH_NAMES);
 
     trace.push({
       m: message,

@@ -627,7 +627,7 @@ describe('Buffer', function () {
     buffer.addText('abc');
     buffer.guessSegmentProperties();
     hb.shape(font, buffer)
-    const glyphs = buffer.serialize(font, 0, null, "TEXT", 0);
+    const glyphs = buffer.serialize(font, 0, null, hb.BufferSerializeFormat.TEXT, 0);
     expect(glyphs).to.deep.equal("[a=0+561|b=1+615|c=2+480]");
   });
 
