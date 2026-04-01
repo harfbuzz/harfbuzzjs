@@ -1,6 +1,7 @@
 *.wasm
 hb.js
 dist/
+docs/
 .DS_Store
 .vscode/
 node_modules/
