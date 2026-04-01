@@ -1,11 +1,16 @@
-const fs = require('fs');
-const path = require('path');
-const { expect } = require('chai');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { expect } from 'chai';
+import harfbuzz from '../dist/index.mjs';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 let hb;
 let blob, face, font, buffer, fontFuncs;
 
 before(async function () {
-  hb = await require('..');
+  hb = await harfbuzz;
 });
 
 afterEach(function () {
@@ -1037,4 +1042,3 @@ describe('misc', function () {
     }
   });
 });
-

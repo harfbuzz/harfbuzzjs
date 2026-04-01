@@ -2,9 +2,20 @@
 	"name": "harfbuzzjs",
 	"version": "0.10.3",
 	"description": "Minimal version of HarfBuzz for JavaScript use",
-	"main": "index.js",
+	"type": "module",
+	"main": "dist/index.mjs",
+	"types": "dist/index.d.mts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.mts",
+			"default": "./dist/index.mjs"
+		}
+	},
+	"files": [
+		"dist"
+	],
 	"scripts": {
-		"prepare": "make",
+		"prepublishOnly": "make",
 		"test": "make test"
 	},
 	"keywords": [
@@ -32,7 +43,11 @@
 	},
 	"homepage": "https://github.com/harfbuzz/harfbuzzjs#readme",
 	"devDependencies": {
+		"@types/emscripten": "^1.41.5",
+		"@types/node": "^25.5.0",
 		"chai": "^4.3.7",
-		"mocha": "^10.2.0"
+		"mocha": "^10.2.0",
+		"tsdown": "^0.21.7",
+		"typescript": "^6.0.2"
 	}
 }
