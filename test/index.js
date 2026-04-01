@@ -120,10 +120,10 @@ describe('Face', function () {
     blob = new hb.Blob(fs.readFileSync(path.join(__dirname, 'fonts/noto/NotoSans-Regular.ttf')));
     face = new hb.Face(blob);
     font = new hb.Font(face);
-    expect(face.getGlyphClass(0)).to.equal('UNCLASSIFIED');
-    expect(face.getGlyphClass(font.glyphFromName('w'))).to.equal('BASE_GLYPH');
-    expect(face.getGlyphClass(font.glyphFromName('fi'))).to.equal('LIGATURE');
-    expect(face.getGlyphClass(font.glyphFromName('gravecomb'))).to.equal('MARK');
+    expect(face.getGlyphClass(0)).to.equal(hb.GlyphClass.UNCLASSIFIED);
+    expect(face.getGlyphClass(font.glyphFromName('w'))).to.equal(hb.GlyphClass.BASE_GLYPH);
+    expect(face.getGlyphClass(font.glyphFromName('fi'))).to.equal(hb.GlyphClass.LIGATURE);
+    expect(face.getGlyphClass(font.glyphFromName('gravecomb'))).to.equal(hb.GlyphClass.MARK);
   });
 
   it('listNames fetches all names', function () {
