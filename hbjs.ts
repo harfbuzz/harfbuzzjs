@@ -168,7 +168,7 @@ function _utf8_ptr_to_string(ptr: number, length?: number): string {
 
 function _utf16_ptr_to_string(ptr: number, length: number): string {
   const end = ptr / 2 + length;
-  return String.fromCharCode.apply(null, Module.HEAPU16.subarray(ptr / 2, end) as any);
+  return String.fromCharCode(...Module.HEAPU16.subarray(ptr / 2, end));
 }
 
 /**
