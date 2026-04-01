@@ -303,7 +303,7 @@ export class Face {
     Module.HEAPU32[c / 4] = 64;
     exports.hb_ot_var_get_axis_infos(this.ptr, 0, c, axis);
     const result: Record<string, AxisInfo> = {};
-    Array.from({ length: Module.HEAPU32[c / 4] }).forEach(function (_, i) {
+    Array.from({ length: Module.HEAPU32[c / 4] }).forEach((_, i) => {
       result[_hb_untag(Module.HEAPU32[axis / 4 + i * 8 + 1])] = {
         min: Module.HEAPF32[axis / 4 + i * 8 + 4],
         default: Module.HEAPF32[axis / 4 + i * 8 + 5],
@@ -637,19 +637,19 @@ export class Font {
    */
   glyphToPath(glyphId: number): string {
     if (!this.drawFuncsPtr) {
-      const moveTo = function (dfuncs: number, draw_data: number, draw_state: number, to_x: number, to_y: number, user_data: number) {
+      const moveTo = (dfuncs: number, draw_data: number, draw_state: number, to_x: number, to_y: number, user_data: number) => {
         pathBuffer += `M${to_x},${to_y}`;
       }
-      const lineTo = function (dfuncs: number, draw_data: number, draw_state: number, to_x: number, to_y: number, user_data: number) {
+      const lineTo = (dfuncs: number, draw_data: number, draw_state: number, to_x: number, to_y: number, user_data: number) => {
         pathBuffer += `L${to_x},${to_y}`;
       }
-      const cubicTo = function (dfuncs: number, draw_data: number, draw_state: number, c1_x: number, c1_y: number, c2_x: number, c2_y: number, to_x: number, to_y: number, user_data: number) {
+      const cubicTo = (dfuncs: number, draw_data: number, draw_state: number, c1_x: number, c1_y: number, c2_x: number, c2_y: number, to_x: number, to_y: number, user_data: number) => {
         pathBuffer += `C${c1_x},${c1_y} ${c2_x},${c2_y} ${to_x},${to_y}`;
       }
-      const quadTo = function (dfuncs: number, draw_data: number, draw_state: number, c_x: number, c_y: number, to_x: number, to_y: number, user_data: number) {
+      const quadTo = (dfuncs: number, draw_data: number, draw_state: number, c_x: number, c_y: number, to_x: number, to_y: number, user_data: number) => {
         pathBuffer += `Q${c_x},${c_y} ${to_x},${to_y}`;
       }
-      const closePath = function (dfuncs: number, draw_data: number, draw_state: number, user_data: number) {
+      const closePath = (dfuncs: number, draw_data: number, draw_state: number, user_data: number) => {
         pathBuffer += 'Z';
       }
 
@@ -770,9 +770,9 @@ export class Font {
    */
   glyphToJson(glyphId: number): SvgPathCommand[] {
     const path = this.glyphToPath(glyphId);
-    return path.replace(/([MLQCZ])/g, '|$1 ').split('|').filter(function (x) { return x.length; }).map(function (x) {
+    return path.replace(/([MLQCZ])/g, '|$1 ').split('|').filter(x => x.length).map(x => {
       const row = x.split(/[ ,]/g);
-      return { type: row[0], values: row.slice(1).filter(function (x) { return x.length; }).map(function (x) { return +x; }) };
+      return { type: row[0], values: row.slice(1).filter(x => x.length).map(x => +x) };
     });
   }
 
@@ -793,7 +793,7 @@ export class Font {
   setVariations(variations: Record<string, number>): void {
     const entries = Object.entries(variations);
     const vars = exports.malloc(8 * entries.length);
-    entries.forEach(function (entry, i) {
+    entries.forEach((entry, i) => {
       Module.HEAPU32[vars / 4 + i * 2 + 0] = _hb_tag(entry[0]);
       Module.HEAPF32[vars / 4 + i * 2 + 1] = entry[1];
     });
@@ -840,7 +840,7 @@ export class FontFuncs {
    * an object with xBearing, yBearing, width, and height, or null on failure.
    */
   setGlyphExtentsFunc(func: (font: Font, glyph: number) => GlyphExtents | null): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, extentsPtr: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, glyph: number, extentsPtr: number, user_data: number) => {
       const font = new Font(fontPtr);
       const extents = func(font, glyph);
       font.destroy();
@@ -862,7 +862,7 @@ export class FontFuncs {
    * the glyph ID, or null on failure.
    */
   setGlyphFromNameFunc(func: (font: Font, name: string) => number | null): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, namePtr: number, len: number, glyphPtr: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, namePtr: number, len: number, glyphPtr: number, user_data: number) => {
       const font = new Font(fontPtr);
       const name = _utf8_ptr_to_string(namePtr, len);
       const glyph = func(font, name);
@@ -882,7 +882,7 @@ export class FontFuncs {
    * the horizontal advance of the glyph.
    */
   setGlyphHAdvanceFunc(func: (font: Font, glyph: number) => number): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, glyph: number, user_data: number) => {
       const font = new Font(fontPtr);
       const advance = func(font, glyph);
       font.destroy();
@@ -897,7 +897,7 @@ export class FontFuncs {
    * the vertical advance of the glyph.
    */
   setGlyphVAdvanceFunc(func: (font: Font, glyph: number) => number): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, glyph: number, user_data: number) => {
       const font = new Font(fontPtr);
       const advance = func(font, glyph);
       font.destroy();
@@ -912,7 +912,7 @@ export class FontFuncs {
    * the [x, y] horizontal origin of the glyph, or null on failure.
    */
   setGlyphHOriginFunc(func: (font: Font, glyph: number) => [number, number] | null): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, xPtr: number, yPtr: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, glyph: number, xPtr: number, yPtr: number, user_data: number) => {
       const font = new Font(fontPtr);
       const origin = func(font, glyph);
       font.destroy();
@@ -932,7 +932,7 @@ export class FontFuncs {
    * the [x, y] vertical origin of the glyph, or null on failure.
    */
   setGlyphVOriginFunc(func: (font: Font, glyph: number) => [number, number] | null): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, xPtr: number, yPtr: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, glyph: number, xPtr: number, yPtr: number, user_data: number) => {
       const font = new Font(fontPtr);
       const origin = func(font, glyph);
       font.destroy();
@@ -952,7 +952,7 @@ export class FontFuncs {
    * It should return the horizontal kerning of the glyphs.
    */
   setGlyphHKerningFunc(func: (font: Font, firstGlyph: number, secondGlyph: number) => number): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, firstGlyph: number, secondGlyph: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, firstGlyph: number, secondGlyph: number, user_data: number) => {
       const font = new Font(fontPtr);
       const kerning = func(font, firstGlyph, secondGlyph);
       font.destroy();
@@ -967,7 +967,7 @@ export class FontFuncs {
    * the name of the glyph, or null on failure.
    */
   setGlyphNameFunc(func: (font: Font, glyph: number) => string | null): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, namePtr: number, size: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, glyph: number, namePtr: number, size: number, user_data: number) => {
       const font = new Font(fontPtr);
       const name = func(font, glyph);
       font.destroy();
@@ -986,7 +986,7 @@ export class FontFuncs {
    * return the nominal glyph of the unicode, or null on failure.
    */
   setNominalGlyphFunc(func: (font: Font, unicode: number) => number | null): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, unicode: number, glyphPtr: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, unicode: number, glyphPtr: number, user_data: number) => {
       const font = new Font(fontPtr);
       const glyph = func(font, unicode);
       font.destroy();
@@ -1005,7 +1005,7 @@ export class FontFuncs {
    * selector. It should return the variation glyph, or null on failure.
    */
   setVariationGlyphFunc(func: (font: Font, unicode: number, variationSelector: number) => number | null): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, unicode: number, variationSelector: number, glyphPtr: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, unicode: number, variationSelector: number, glyphPtr: number, user_data: number) => {
       const font = new Font(fontPtr);
       const glyph = func(font, unicode, variationSelector);
       font.destroy();
@@ -1024,7 +1024,7 @@ export class FontFuncs {
    * ascender, descender, and lineGap, or null on failure.
    */
   setFontHExtentsFunc(func: (font: Font) => FontExtents | null): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, extentsPtr: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, extentsPtr: number, user_data: number) => {
       const font = new Font(fontPtr);
       const extents = func(font);
       font.destroy();
@@ -1045,7 +1045,7 @@ export class FontFuncs {
    * ascender, descender, and lineGap, or null on failure.
    */
   setFontVExtentsFunc(func: (font: Font) => FontExtents | null): void {
-    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, extentsPtr: number, user_data: number) {
+    const funcPtr = Module.addFunction((fontPtr: number, font_data: number, extentsPtr: number, user_data: number) => {
       const font = new Font(fontPtr);
       const extents = func(font);
       font.destroy();
@@ -1201,7 +1201,7 @@ export class Buffer {
    * to the next one.
    */
   setMessageFunc(func: (buffer: Buffer, font: Font, message: string) => boolean): void {
-    const traceFunc = function (bufferPtr: number, fontPtr: number, messagePtr: number, user_data: number) {
+    const traceFunc = (bufferPtr: number, fontPtr: number, messagePtr: number, user_data: number) => {
       const message = _utf8_ptr_to_string(messagePtr);
       const buffer = new Buffer(bufferPtr);
       const font = new Font(fontPtr);
@@ -1404,7 +1404,7 @@ export function shape(font: Font, buffer: Buffer, features?: string): void {
   if (features) {
     const featureList = features.split(",");
     featuresPtr = exports.malloc(16 * featureList.length);
-    featureList.forEach(function (feature) {
+    featureList.forEach(feature => {
       const str = _string_to_ascii_ptr(feature);
       if (exports.hb_feature_from_string(str.ptr, -1, featuresPtr + featuresLen * 16))
         featuresLen++;
