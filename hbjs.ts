@@ -403,9 +403,9 @@ export class Face {
       exports.hb_ot_layout_table_get_feature_tags(this.ptr, tableTag, startOffset,
         featureCountPtr, featureTagsPtr);
       featureCount = Module.HEAPU32[featureCountPtr / 4];
-      const scriptTags = Module.HEAPU32.subarray(featureTagsPtr / 4,
+      const featureTags = Module.HEAPU32.subarray(featureTagsPtr / 4,
         featureTagsPtr / 4 + featureCount);
-      tags.push(...Array.from(scriptTags as Uint32Array).map(_hb_untag));
+      tags.push(...Array.from(featureTags as Uint32Array).map(_hb_untag));
       startOffset += featureCount;
     }
     Module.stackRestore(sp);
