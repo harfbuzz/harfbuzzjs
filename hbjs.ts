@@ -167,7 +167,7 @@ function _utf8_ptr_to_string(ptr: number, length?: number): string {
 }
 
 function _utf16_ptr_to_string(ptr: number, length: number): string {
-  let end = ptr / 2 + length;
+  const end = ptr / 2 + length;
   return String.fromCharCode.apply(null, Module.HEAPU16.subarray(ptr / 2, end) as any);
 }
 
@@ -212,13 +212,13 @@ function _string_to_utf16_ptr(text: string): StringPtr {
 }
 
 function _language_to_string(language: number): string {
-  var ptr = exports.hb_language_to_string(language);
+  const ptr = exports.hb_language_to_string(language);
   return _utf8_ptr_to_string(ptr);
 }
 
 function _language_from_string(str: string): number {
-  var languageStr = _string_to_ascii_ptr(str);
-  var languagePtr = exports.hb_language_from_string(languageStr.ptr, -1);
+  const languageStr = _string_to_ascii_ptr(str);
+  const languagePtr = exports.hb_language_from_string(languageStr.ptr, -1);
   languageStr.free();
   return languagePtr;
 }
@@ -251,7 +251,7 @@ export class Blob {
    * @param data Binary font data.
    */
   constructor(data: ArrayBuffer) {
-    var blobPtr = exports.malloc(data.byteLength);
+    const blobPtr = exports.malloc(data.byteLength);
     Module.HEAPU8.set(new Uint8Array(data), blobPtr);
     this.ptr = exports.hb_blob_create(blobPtr, data.byteLength, HB_MEMORY_MODE_WRITABLE, blobPtr, freeFuncPtr);
   }
@@ -285,10 +285,10 @@ export class Face {
    * @returns A Uint8Array of the table data, or undefined if the table is not found.
    */
   reference_table(table: string): Uint8Array | undefined {
-    var blob = exports.hb_face_reference_table(this.ptr, _hb_tag(table));
-    var length = exports.hb_blob_get_length(blob);
+    const blob = exports.hb_face_reference_table(this.ptr, _hb_tag(table));
+    const length = exports.hb_blob_get_length(blob);
     if (!length) { return; }
-    var blobptr = exports.hb_blob_get_data(blob, 0);
+    const blobptr = exports.hb_blob_get_data(blob, 0);
     return Module.HEAPU8.subarray(blobptr, blobptr + length);
   }
 
@@ -297,12 +297,12 @@ export class Face {
    * @returns A dictionary mapping axis tags to {min, default, max} values.
    */
   getAxisInfos(): Record<string, AxisInfo> {
-    var sp = Module.stackSave();
-    var axis = Module.stackAlloc(64 * 32);
-    var c = Module.stackAlloc(4);
+    const sp = Module.stackSave();
+    const axis = Module.stackAlloc(64 * 32);
+    const c = Module.stackAlloc(4);
     Module.HEAPU32[c / 4] = 64;
     exports.hb_ot_var_get_axis_infos(this.ptr, 0, c, axis);
-    var result: Record<string, AxisInfo> = {};
+    const result: Record<string, AxisInfo> = {};
     Array.from({ length: Module.HEAPU32[c / 4] }).forEach(function (_, i) {
       result[_hb_untag(Module.HEAPU32[axis / 4 + i * 8 + 1])] = {
         min: Module.HEAPF32[axis / 4 + i * 8 + 4],
@@ -319,9 +319,9 @@ export class Face {
    * @returns A Uint32Array of supported Unicode code points.
    */
   collectUnicodes(): Uint32Array {
-    var unicodeSetPtr = exports.hb_set_create();
+    const unicodeSetPtr = exports.hb_set_create();
     exports.hb_face_collect_unicodes(this.ptr, unicodeSetPtr);
-    var result = _typed_array_from_set(unicodeSetPtr);
+    const result = _typed_array_from_set(unicodeSetPtr);
     exports.hb_set_destroy(unicodeSetPtr);
     return result;
   }
@@ -333,19 +333,19 @@ export class Face {
    * @returns An array of 4-character script tag strings.
    */
   getTableScriptTags(table: string): string[] {
-    var sp = Module.stackSave();
-    var tableTag = _hb_tag(table);
-    var startOffset = 0;
-    var scriptCount = STATIC_ARRAY_SIZE;
-    var scriptCountPtr = Module.stackAlloc(4);
-    var scriptTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
-    var tags: string[] = [];
+    const sp = Module.stackSave();
+    const tableTag = _hb_tag(table);
+    let startOffset = 0;
+    let scriptCount = STATIC_ARRAY_SIZE;
+    const scriptCountPtr = Module.stackAlloc(4);
+    const scriptTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+    const tags: string[] = [];
     while (scriptCount == STATIC_ARRAY_SIZE) {
       Module.HEAPU32[scriptCountPtr / 4] = scriptCount;
       exports.hb_ot_layout_table_get_script_tags(this.ptr, tableTag, startOffset,
         scriptCountPtr, scriptTagsPtr);
       scriptCount = Module.HEAPU32[scriptCountPtr / 4];
-      var scriptTags = Module.HEAPU32.subarray(scriptTagsPtr / 4,
+      const scriptTags = Module.HEAPU32.subarray(scriptTagsPtr / 4,
         scriptTagsPtr / 4 + scriptCount);
       tags.push(...Array.from(scriptTags as Uint32Array).map(_hb_untag));
       startOffset += scriptCount;
@@ -361,19 +361,19 @@ export class Face {
    * @returns An array of 4-character feature tag strings.
    */
   getTableFeatureTags(table: string): string[] {
-    var sp = Module.stackSave();
-    var tableTag = _hb_tag(table);
-    var startOffset = 0;
-    var featureCount = STATIC_ARRAY_SIZE;
-    var featureCountPtr = Module.stackAlloc(4);
-    var featureTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
-    var tags: string[] = [];
+    const sp = Module.stackSave();
+    const tableTag = _hb_tag(table);
+    let startOffset = 0;
+    let featureCount = STATIC_ARRAY_SIZE;
+    const featureCountPtr = Module.stackAlloc(4);
+    const featureTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+    const tags: string[] = [];
     while (featureCount == STATIC_ARRAY_SIZE) {
       Module.HEAPU32[featureCountPtr / 4] = featureCount;
       exports.hb_ot_layout_table_get_feature_tags(this.ptr, tableTag, startOffset,
         featureCountPtr, featureTagsPtr);
       featureCount = Module.HEAPU32[featureCountPtr / 4];
-      var scriptTags = Module.HEAPU32.subarray(featureTagsPtr / 4,
+      const scriptTags = Module.HEAPU32.subarray(featureTagsPtr / 4,
         featureTagsPtr / 4 + featureCount);
       tags.push(...Array.from(scriptTags as Uint32Array).map(_hb_untag));
       startOffset += featureCount;
@@ -390,19 +390,19 @@ export class Face {
    * @returns An array of 4-character language tag strings.
    */
   getScriptLanguageTags(table: string, scriptIndex: number): string[] {
-    var sp = Module.stackSave();
-    var tableTag = _hb_tag(table);
-    var startOffset = 0;
-    var languageCount = STATIC_ARRAY_SIZE;
-    var languageCountPtr = Module.stackAlloc(4);
-    var languageTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
-    var tags: string[] = [];
+    const sp = Module.stackSave();
+    const tableTag = _hb_tag(table);
+    let startOffset = 0;
+    let languageCount = STATIC_ARRAY_SIZE;
+    const languageCountPtr = Module.stackAlloc(4);
+    const languageTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+    const tags: string[] = [];
     while (languageCount == STATIC_ARRAY_SIZE) {
       Module.HEAPU32[languageCountPtr / 4] = languageCount;
       exports.hb_ot_layout_script_get_language_tags(this.ptr, tableTag, scriptIndex, startOffset,
         languageCountPtr, languageTagsPtr);
       languageCount = Module.HEAPU32[languageCountPtr / 4];
-      var languageTags = Module.HEAPU32.subarray(languageTagsPtr / 4,
+      const languageTags = Module.HEAPU32.subarray(languageTagsPtr / 4,
         languageTagsPtr / 4 + languageCount);
       tags.push(...Array.from(languageTags as Uint32Array).map(_hb_untag));
       startOffset += languageCount;
@@ -420,19 +420,19 @@ export class Face {
    * @returns An array of 4-character feature tag strings.
    */
   getLanguageFeatureTags(table: string, scriptIndex: number, languageIndex: number): string[] {
-    var sp = Module.stackSave();
-    var tableTag = _hb_tag(table);
-    var startOffset = 0;
-    var featureCount = STATIC_ARRAY_SIZE;
-    var featureCountPtr = Module.stackAlloc(4);
-    var featureTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
-    var tags: string[] = [];
+    const sp = Module.stackSave();
+    const tableTag = _hb_tag(table);
+    let startOffset = 0;
+    let featureCount = STATIC_ARRAY_SIZE;
+    const featureCountPtr = Module.stackAlloc(4);
+    const featureTagsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+    const tags: string[] = [];
     while (featureCount == STATIC_ARRAY_SIZE) {
       Module.HEAPU32[featureCountPtr / 4] = featureCount;
       exports.hb_ot_layout_language_get_feature_tags(this.ptr, tableTag, scriptIndex, languageIndex, startOffset,
         featureCountPtr, featureTagsPtr);
       featureCount = Module.HEAPU32[featureCountPtr / 4];
-      var featureTags = Module.HEAPU32.subarray(featureTagsPtr / 4,
+      const featureTags = Module.HEAPU32.subarray(featureTagsPtr / 4,
         featureTagsPtr / 4 + featureCount);
       tags.push(...Array.from(featureTags as Uint32Array).map(_hb_untag));
       startOffset += featureCount;
@@ -463,12 +463,12 @@ export class Face {
    * @returns An array of {nameId, language} entries.
    */
   listNames(): NameEntry[] {
-    var sp = Module.stackSave();
-    var numEntriesPtr = Module.stackAlloc(4);
-    var entriesPtr = exports.hb_ot_name_list_names(this.ptr, numEntriesPtr);
-    var numEntries = Module.HEAPU32[numEntriesPtr / 4];
-    var entries: NameEntry[] = [];
-    for (var i = 0; i < numEntries; i++) {
+    const sp = Module.stackSave();
+    const numEntriesPtr = Module.stackAlloc(4);
+    const entriesPtr = exports.hb_ot_name_list_names(this.ptr, numEntriesPtr);
+    const numEntries = Module.HEAPU32[numEntriesPtr / 4];
+    const entries: NameEntry[] = [];
+    for (let i = 0; i < numEntries; i++) {
       entries.push({
         nameId: Module.HEAPU32[(entriesPtr / 4) + (i * 3)],
         language: _language_to_string(Module.HEAPU32[(entriesPtr / 4) + (i * 3) + 2])
@@ -485,14 +485,14 @@ export class Face {
    * @returns The name string.
    */
   getName(nameId: number, language: string): string {
-    var sp = Module.stackSave();
-    var languagePtr = _language_from_string(language);
-    var nameLen = exports.hb_ot_name_get_utf16(this.ptr, nameId, languagePtr, 0, 0) + 1;
-    var textSizePtr = Module.stackAlloc(4);
-    var textPtr = exports.malloc(nameLen * 2);
+    const sp = Module.stackSave();
+    const languagePtr = _language_from_string(language);
+    const nameLen = exports.hb_ot_name_get_utf16(this.ptr, nameId, languagePtr, 0, 0) + 1;
+    const textSizePtr = Module.stackAlloc(4);
+    const textPtr = exports.malloc(nameLen * 2);
     Module.HEAPU32[textSizePtr / 4] = nameLen;
     exports.hb_ot_name_get_utf16(this.ptr, nameId, languagePtr, textSizePtr, textPtr);
-    var name = _utf16_ptr_to_string(textPtr, nameLen - 1);
+    const name = _utf16_ptr_to_string(textPtr, nameLen - 1);
     exports.free(textPtr);
     Module.stackRestore(sp);
     return name;
@@ -505,25 +505,25 @@ export class Face {
    * @returns An object with name IDs, or null if not found.
    */
   getFeatureNameIds(table: string, featureIndex: number): FeatureNameIds | null {
-    var sp = Module.stackSave();
-    var tableTag = _hb_tag(table);
-    var labelIdPtr = Module.stackAlloc(4);
-    var tooltipIdPtr = Module.stackAlloc(4);
-    var sampleIdPtr = Module.stackAlloc(4);
-    var numNamedParametersPtr = Module.stackAlloc(4);
-    var firstParameterIdPtr = Module.stackAlloc(4);
+    const sp = Module.stackSave();
+    const tableTag = _hb_tag(table);
+    const labelIdPtr = Module.stackAlloc(4);
+    const tooltipIdPtr = Module.stackAlloc(4);
+    const sampleIdPtr = Module.stackAlloc(4);
+    const numNamedParametersPtr = Module.stackAlloc(4);
+    const firstParameterIdPtr = Module.stackAlloc(4);
 
-    var found = exports.hb_ot_layout_feature_get_name_ids(this.ptr, tableTag, featureIndex,
+    const found = exports.hb_ot_layout_feature_get_name_ids(this.ptr, tableTag, featureIndex,
       labelIdPtr, tooltipIdPtr, sampleIdPtr, numNamedParametersPtr, firstParameterIdPtr);
 
-    var names: FeatureNameIds | null = null;
+    let names: FeatureNameIds | null = null;
     if (found) {
-      let uiLabelNameId = Module.HEAPU32[labelIdPtr / 4];
-      let uiTooltipTextNameId = Module.HEAPU32[tooltipIdPtr / 4];
-      let sampleTextNameId = Module.HEAPU32[sampleIdPtr / 4];
-      let numNamedParameters = Module.HEAPU32[numNamedParametersPtr / 4];
-      let firstParameterId = Module.HEAPU32[firstParameterIdPtr / 4];
-      let paramUiLabelNameIds = Array(numNamedParameters).fill(0).map((_: number, i: number) => firstParameterId + i);
+      const uiLabelNameId = Module.HEAPU32[labelIdPtr / 4];
+      const uiTooltipTextNameId = Module.HEAPU32[tooltipIdPtr / 4];
+      const sampleTextNameId = Module.HEAPU32[sampleIdPtr / 4];
+      const numNamedParameters = Module.HEAPU32[numNamedParametersPtr / 4];
+      const firstParameterId = Module.HEAPU32[firstParameterIdPtr / 4];
+      const paramUiLabelNameIds = Array(numNamedParameters).fill(0).map((_: number, i: number) => firstParameterId + i);
       names = {
         uiLabelNameId: uiLabelNameId == HB_OT_NAME_ID_INVALID ? null : uiLabelNameId,
         uiTooltipTextNameId: uiTooltipTextNameId == HB_OT_NAME_ID_INVALID ? null : uiTooltipTextNameId,
@@ -542,7 +542,7 @@ export class Face {
   }
 }
 
-var pathBuffer = "";
+let pathBuffer = "";
 
 /**
  * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-font.html | HarfBuzz font}.
@@ -586,10 +586,10 @@ export class Font {
    * @returns Object with ascender, descender, and lineGap properties.
    */
   hExtents(): FontExtents {
-    var sp = Module.stackSave();
-    var extentsPtr = Module.stackAlloc(48);
+    const sp = Module.stackSave();
+    const extentsPtr = Module.stackAlloc(48);
     exports.hb_font_get_h_extents(this.ptr, extentsPtr);
-    var extents = {
+    const extents = {
       ascender: Module.HEAP32[extentsPtr / 4],
       descender: Module.HEAP32[extentsPtr / 4 + 1],
       lineGap: Module.HEAP32[extentsPtr / 4 + 2],
@@ -603,10 +603,10 @@ export class Font {
    * @returns Object with ascender, descender, and lineGap properties.
    */
   vExtents(): FontExtents {
-    var sp = Module.stackSave();
-    var extentsPtr = Module.stackAlloc(48);
+    const sp = Module.stackSave();
+    const extentsPtr = Module.stackAlloc(48);
     exports.hb_font_get_v_extents(this.ptr, extentsPtr);
-    var extents = {
+    const extents = {
       ascender: Module.HEAP32[extentsPtr / 4],
       descender: Module.HEAP32[extentsPtr / 4 + 1],
       lineGap: Module.HEAP32[extentsPtr / 4 + 2],
@@ -621,11 +621,11 @@ export class Font {
    * @returns The glyph name string.
    */
   glyphName(glyphId: number): string {
-    var sp = Module.stackSave();
-    var strSize = 256;
-    var strPtr = Module.stackAlloc(strSize);
+    const sp = Module.stackSave();
+    const strSize = 256;
+    const strPtr = Module.stackAlloc(strSize);
     exports.hb_font_glyph_to_string(this.ptr, glyphId, strPtr, strSize);
-    var name = _utf8_ptr_to_string(strPtr);
+    const name = _utf8_ptr_to_string(strPtr);
     Module.stackRestore(sp);
     return name;
   }
@@ -637,19 +637,19 @@ export class Font {
    */
   glyphToPath(glyphId: number): string {
     if (!this.drawFuncsPtr) {
-      var moveTo = function (dfuncs: number, draw_data: number, draw_state: number, to_x: number, to_y: number, user_data: number) {
+      const moveTo = function (dfuncs: number, draw_data: number, draw_state: number, to_x: number, to_y: number, user_data: number) {
         pathBuffer += `M${to_x},${to_y}`;
       }
-      var lineTo = function (dfuncs: number, draw_data: number, draw_state: number, to_x: number, to_y: number, user_data: number) {
+      const lineTo = function (dfuncs: number, draw_data: number, draw_state: number, to_x: number, to_y: number, user_data: number) {
         pathBuffer += `L${to_x},${to_y}`;
       }
-      var cubicTo = function (dfuncs: number, draw_data: number, draw_state: number, c1_x: number, c1_y: number, c2_x: number, c2_y: number, to_x: number, to_y: number, user_data: number) {
+      const cubicTo = function (dfuncs: number, draw_data: number, draw_state: number, c1_x: number, c1_y: number, c2_x: number, c2_y: number, to_x: number, to_y: number, user_data: number) {
         pathBuffer += `C${c1_x},${c1_y} ${c2_x},${c2_y} ${to_x},${to_y}`;
       }
-      var quadTo = function (dfuncs: number, draw_data: number, draw_state: number, c_x: number, c_y: number, to_x: number, to_y: number, user_data: number) {
+      const quadTo = function (dfuncs: number, draw_data: number, draw_state: number, c_x: number, c_y: number, to_x: number, to_y: number, user_data: number) {
         pathBuffer += `Q${c_x},${c_y} ${to_x},${to_y}`;
       }
-      var closePath = function (dfuncs: number, draw_data: number, draw_state: number, user_data: number) {
+      const closePath = function (dfuncs: number, draw_data: number, draw_state: number, user_data: number) {
         pathBuffer += 'Z';
       }
 
@@ -695,9 +695,9 @@ export class Font {
    * @returns [x, y] origin coordinates, or null if not available.
    */
   glyphHOrigin(glyphId: number): [number, number] | null {
-    var sp = Module.stackSave();
-    let xPtr = Module.stackAlloc(4);
-    let yPtr = Module.stackAlloc(4);
+    const sp = Module.stackSave();
+    const xPtr = Module.stackAlloc(4);
+    const yPtr = Module.stackAlloc(4);
     let origin: [number, number] | null = null;
     if (exports.hb_font_get_glyph_h_origin(this.ptr, glyphId, xPtr, yPtr)) {
       origin = [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
@@ -712,9 +712,9 @@ export class Font {
    * @returns [x, y] origin coordinates, or null if not available.
    */
   glyphVOrigin(glyphId: number): [number, number] | null {
-    var sp = Module.stackSave();
-    let xPtr = Module.stackAlloc(4);
-    let yPtr = Module.stackAlloc(4);
+    const sp = Module.stackSave();
+    const xPtr = Module.stackAlloc(4);
+    const yPtr = Module.stackAlloc(4);
     let origin: [number, number] | null = null;
     if (exports.hb_font_get_glyph_v_origin(this.ptr, glyphId, xPtr, yPtr)) {
       origin = [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
@@ -729,9 +729,9 @@ export class Font {
    * @returns An object with xBearing, yBearing, width, and height, or null.
    */
   glyphExtents(glyphId: number): GlyphExtents | null {
-    var sp = Module.stackSave();
-    var extentsPtr = Module.stackAlloc(16);
-    var extents: GlyphExtents | null = null;
+    const sp = Module.stackSave();
+    const extentsPtr = Module.stackAlloc(16);
+    let extents: GlyphExtents | null = null;
     if (exports.hb_font_get_glyph_extents(this.ptr, glyphId, extentsPtr)) {
       extents = {
         xBearing: Module.HEAP32[extentsPtr / 4],
@@ -750,10 +750,10 @@ export class Font {
    * @returns The glyph ID, or null if not found.
    */
   glyphFromName(name: string): number | null {
-    var sp = Module.stackSave();
-    var glyphIdPtr = Module.stackAlloc(4);
-    var namePtr = _string_to_utf8_ptr(name);
-    var glyphId: number | null = null;
+    const sp = Module.stackSave();
+    const glyphIdPtr = Module.stackAlloc(4);
+    const namePtr = _string_to_utf8_ptr(name);
+    let glyphId: number | null = null;
     if (exports.hb_font_get_glyph_from_name(this.ptr, namePtr.ptr, namePtr.length, glyphIdPtr)) {
       glyphId = Module.HEAPU32[glyphIdPtr / 4];
     }
@@ -769,9 +769,9 @@ export class Font {
    * @returns An array of path segment objects with type and values.
    */
   glyphToJson(glyphId: number): SvgPathCommand[] {
-    var path = this.glyphToPath(glyphId);
+    const path = this.glyphToPath(glyphId);
     return path.replace(/([MLQCZ])/g, '|$1 ').split('|').filter(function (x) { return x.length; }).map(function (x) {
-      var row = x.split(/[ ,]/g);
+      const row = x.split(/[ ,]/g);
       return { type: row[0], values: row.slice(1).filter(function (x) { return x.length; }).map(function (x) { return +x; }) };
     });
   }
@@ -791,8 +791,8 @@ export class Font {
    * @param variations Dictionary of variations to set.
    */
   setVariations(variations: Record<string, number>): void {
-    var entries = Object.entries(variations);
-    var vars = exports.malloc(8 * entries.length);
+    const entries = Object.entries(variations);
+    const vars = exports.malloc(8 * entries.length);
     entries.forEach(function (entry, i) {
       Module.HEAPU32[vars / 4 + i * 2 + 0] = _hb_tag(entry[0]);
       Module.HEAPF32[vars / 4 + i * 2 + 1] = entry[1];
@@ -840,9 +840,9 @@ export class FontFuncs {
    * an object with xBearing, yBearing, width, and height, or null on failure.
    */
   setGlyphExtentsFunc(func: (font: Font, glyph: number) => GlyphExtents | null): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, extentsPtr: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let extents = func(font, glyph);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, extentsPtr: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const extents = func(font, glyph);
       font.destroy();
       if (extents) {
         Module.HEAP32[extentsPtr / 4] = extents.xBearing;
@@ -862,10 +862,10 @@ export class FontFuncs {
    * the glyph ID, or null on failure.
    */
   setGlyphFromNameFunc(func: (font: Font, name: string) => number | null): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, namePtr: number, len: number, glyphPtr: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let name = _utf8_ptr_to_string(namePtr, len);
-      let glyph = func(font, name);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, namePtr: number, len: number, glyphPtr: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const name = _utf8_ptr_to_string(namePtr, len);
+      const glyph = func(font, name);
       font.destroy();
       if (glyph) {
         Module.HEAPU32[glyphPtr / 4] = glyph;
@@ -882,9 +882,9 @@ export class FontFuncs {
    * the horizontal advance of the glyph.
    */
   setGlyphHAdvanceFunc(func: (font: Font, glyph: number) => number): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let advance = func(font, glyph);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const advance = func(font, glyph);
       font.destroy();
       return advance;
     }, 'ippip');
@@ -897,9 +897,9 @@ export class FontFuncs {
    * the vertical advance of the glyph.
    */
   setGlyphVAdvanceFunc(func: (font: Font, glyph: number) => number): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let advance = func(font, glyph);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const advance = func(font, glyph);
       font.destroy();
       return advance;
     }, 'ippip');
@@ -912,9 +912,9 @@ export class FontFuncs {
    * the [x, y] horizontal origin of the glyph, or null on failure.
    */
   setGlyphHOriginFunc(func: (font: Font, glyph: number) => [number, number] | null): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, xPtr: number, yPtr: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let origin = func(font, glyph);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, xPtr: number, yPtr: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const origin = func(font, glyph);
       font.destroy();
       if (origin) {
         Module.HEAP32[xPtr / 4] = origin[0];
@@ -932,9 +932,9 @@ export class FontFuncs {
    * the [x, y] vertical origin of the glyph, or null on failure.
    */
   setGlyphVOriginFunc(func: (font: Font, glyph: number) => [number, number] | null): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, xPtr: number, yPtr: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let origin = func(font, glyph);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, xPtr: number, yPtr: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const origin = func(font, glyph);
       font.destroy();
       if (origin) {
         Module.HEAP32[xPtr / 4] = origin[0];
@@ -952,9 +952,9 @@ export class FontFuncs {
    * It should return the horizontal kerning of the glyphs.
    */
   setGlyphHKerningFunc(func: (font: Font, firstGlyph: number, secondGlyph: number) => number): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, firstGlyph: number, secondGlyph: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let kerning = func(font, firstGlyph, secondGlyph);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, firstGlyph: number, secondGlyph: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const kerning = func(font, firstGlyph, secondGlyph);
       font.destroy();
       return kerning;
     }, 'ippiip');
@@ -967,9 +967,9 @@ export class FontFuncs {
    * the name of the glyph, or null on failure.
    */
   setGlyphNameFunc(func: (font: Font, glyph: number) => string | null): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, namePtr: number, size: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let name = func(font, glyph);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, glyph: number, namePtr: number, size: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const name = func(font, glyph);
       font.destroy();
       if (name) {
         utf8Encoder.encodeInto(name, Module.HEAPU8.subarray(namePtr, namePtr + size));
@@ -986,9 +986,9 @@ export class FontFuncs {
    * return the nominal glyph of the unicode, or null on failure.
    */
   setNominalGlyphFunc(func: (font: Font, unicode: number) => number | null): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, unicode: number, glyphPtr: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let glyph = func(font, unicode);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, unicode: number, glyphPtr: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const glyph = func(font, unicode);
       font.destroy();
       if (glyph) {
         Module.HEAPU32[glyphPtr / 4] = glyph;
@@ -1005,9 +1005,9 @@ export class FontFuncs {
    * selector. It should return the variation glyph, or null on failure.
    */
   setVariationGlyphFunc(func: (font: Font, unicode: number, variationSelector: number) => number | null): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, unicode: number, variationSelector: number, glyphPtr: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let glyph = func(font, unicode, variationSelector);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, unicode: number, variationSelector: number, glyphPtr: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const glyph = func(font, unicode, variationSelector);
       font.destroy();
       if (glyph) {
         Module.HEAPU32[glyphPtr / 4] = glyph;
@@ -1024,9 +1024,9 @@ export class FontFuncs {
    * ascender, descender, and lineGap, or null on failure.
    */
   setFontHExtentsFunc(func: (font: Font) => FontExtents | null): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, extentsPtr: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let extents = func(font);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, extentsPtr: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const extents = func(font);
       font.destroy();
       if (extents) {
         Module.HEAP32[extentsPtr / 4] = extents.ascender;
@@ -1045,9 +1045,9 @@ export class FontFuncs {
    * ascender, descender, and lineGap, or null on failure.
    */
   setFontVExtentsFunc(func: (font: Font) => FontExtents | null): void {
-    let funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, extentsPtr: number, user_data: number) {
-      let font = new Font(fontPtr);
-      let extents = func(font);
+    const funcPtr = Module.addFunction(function (fontPtr: number, font_data: number, extentsPtr: number, user_data: number) {
+      const font = new Font(fontPtr);
+      const extents = func(font);
       font.destroy();
       if (extents) {
         Module.HEAP32[extentsPtr / 4] = extents.ascender;
@@ -1105,8 +1105,8 @@ export class Buffer {
    * @param itemLength The number of code points to add to the buffer, or null for the end of the array.
    */
   addCodePoints(codePoints: number[], itemOffset: number = 0, itemLength: number | null = null): void {
-    let codePointsPtr = exports.malloc(codePoints.length * 4);
-    let codePointsArray = Module.HEAPU32.subarray(codePointsPtr / 4, codePointsPtr / 4 + codePoints.length);
+    const codePointsPtr = exports.malloc(codePoints.length * 4);
+    const codePointsArray = Module.HEAPU32.subarray(codePointsPtr / 4, codePointsPtr / 4 + codePoints.length);
     codePointsArray.set(codePoints);
     if (itemLength == null) itemLength = codePoints.length;
     exports.hb_buffer_add_codepoints(this.ptr, codePointsPtr, codePoints.length, itemOffset, itemLength);
@@ -1146,7 +1146,7 @@ export class Buffer {
    * "PRODUCE_SAFE_TO_INSERT_TATWEEL"
    */
   setFlags(flags: string[]): void {
-    var flagsValue = 0;
+    let flagsValue = 0;
     flags.forEach(s => flagsValue |= bufferFlags[s] || 0);
     exports.hb_buffer_set_flags(this.ptr, flagsValue);
   }
@@ -1156,7 +1156,7 @@ export class Buffer {
    * @param language The buffer language
    */
   setLanguage(language: string): void {
-    var str = _string_to_ascii_ptr(language);
+    const str = _string_to_ascii_ptr(language);
     exports.hb_buffer_set_language(this.ptr, exports.hb_language_from_string(str.ptr, -1));
     str.free();
   }
@@ -1166,7 +1166,7 @@ export class Buffer {
    * @param script The buffer script
    */
   setScript(script: string): void {
-    var str = _string_to_ascii_ptr(script);
+    const str = _string_to_ascii_ptr(script);
     exports.hb_buffer_set_script(this.ptr, exports.hb_script_from_string(str.ptr, -1));
     str.free();
   }
@@ -1201,16 +1201,16 @@ export class Buffer {
    * to the next one.
    */
   setMessageFunc(func: (buffer: Buffer, font: Font, message: string) => boolean): void {
-    var traceFunc = function (bufferPtr: number, fontPtr: number, messagePtr: number, user_data: number) {
-      var message = _utf8_ptr_to_string(messagePtr);
-      var buffer = new Buffer(bufferPtr);
-      var font = new Font(fontPtr);
-      var result = func(buffer, font, message);
+    const traceFunc = function (bufferPtr: number, fontPtr: number, messagePtr: number, user_data: number) {
+      const message = _utf8_ptr_to_string(messagePtr);
+      const buffer = new Buffer(bufferPtr);
+      const font = new Font(fontPtr);
+      const result = func(buffer, font, message);
       buffer.destroy();
       font.destroy();
       return result ? 1 : 0;
     }
-    var traceFuncPtr = Module.addFunction(traceFunc, 'iiiii');
+    const traceFuncPtr = Module.addFunction(traceFunc, 'iiiii');
     exports.hb_buffer_set_message_func(this.ptr, traceFuncPtr, 0, 0);
   }
 
@@ -1227,10 +1227,10 @@ export class Buffer {
    * @returns An array of {@link GlyphInfo} objects.
    */
   getGlyphInfos(): GlyphInfo[] {
-    var infosPtr32 = exports.hb_buffer_get_glyph_infos(this.ptr, 0) / 4;
-    var infosArray = Module.HEAPU32.subarray(infosPtr32, infosPtr32 + this.getLength() * 5);
-    var infos: GlyphInfo[] = [];
-    for (var i = 0; i < infosArray.length; i += 5) {
+    const infosPtr32 = exports.hb_buffer_get_glyph_infos(this.ptr, 0) / 4;
+    const infosArray = Module.HEAPU32.subarray(infosPtr32, infosPtr32 + this.getLength() * 5);
+    const infos: GlyphInfo[] = [];
+    for (let i = 0; i < infosArray.length; i += 5) {
       infos.push({
         codepoint: infosArray[i],
         cluster: infosArray[i + 2],
@@ -1244,13 +1244,13 @@ export class Buffer {
    * @returns An array of {@link GlyphPosition} objects.
    */
   getGlyphPositions(): GlyphPosition[] {
-    var positionsPtr32 = exports.hb_buffer_get_glyph_positions(this.ptr, 0) / 4;
+    const positionsPtr32 = exports.hb_buffer_get_glyph_positions(this.ptr, 0) / 4;
     if (positionsPtr32 == 0) {
       return [];
     }
-    var positionsArray = Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + this.getLength() * 5);
-    var positions: GlyphPosition[] = [];
-    for (var i = 0; i < positionsArray.length; i += 5) {
+    const positionsArray = Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + this.getLength() * 5);
+    const positions: GlyphPosition[] = [];
+    for (let i = 0; i < positionsArray.length; i += 5) {
       positions.push({
         x_advance: positionsArray[i],
         y_advance: positionsArray[i + 1],
@@ -1269,19 +1269,19 @@ export class Buffer {
    * properties from getGlyphInfos and getGlyphPositions combined.
    */
   getGlyphInfosAndPositions(): (GlyphInfo & Partial<GlyphPosition>)[] {
-    var infosPtr32 = exports.hb_buffer_get_glyph_infos(this.ptr, 0) / 4;
-    var infosArray = Module.HEAPU32.subarray(infosPtr32, infosPtr32 + this.getLength() * 5);
+    const infosPtr32 = exports.hb_buffer_get_glyph_infos(this.ptr, 0) / 4;
+    const infosArray = Module.HEAPU32.subarray(infosPtr32, infosPtr32 + this.getLength() * 5);
 
-    var positionsPtr32 = exports.hb_buffer_get_glyph_positions(this.ptr, 0) / 4;
-    var positionsArray = positionsPtr32 ? Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + this.getLength() * 5) : null;
+    const positionsPtr32 = exports.hb_buffer_get_glyph_positions(this.ptr, 0) / 4;
+    const positionsArray = positionsPtr32 ? Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + this.getLength() * 5) : null;
 
-    var out: (GlyphInfo & Partial<GlyphPosition>)[] = [];
-    for (var i = 0; i < infosArray.length; i += 5) {
-      var info: any = {
+    const out: (GlyphInfo & Partial<GlyphPosition>)[] = [];
+    for (let i = 0; i < infosArray.length; i += 5) {
+      const info: any = {
         codepoint: infosArray[i],
         cluster: infosArray[i + 2],
       };
-      for (var [name, idx] of [['mask', 1], ['var1', 3], ['var2', 4]] as [string, number][]) {
+      for (const [name, idx] of [['mask', 1], ['var1', 3], ['var2', 4]] as [string, number][]) {
         Object.defineProperty(info, name, {
           value: infosArray[i + idx],
           enumerable: false
@@ -1307,13 +1307,13 @@ export class Buffer {
    * WARNING: Do not use unless you know what you are doing.
    */
   updateGlyphPositions(positions: GlyphPosition[]): void {
-    var positionsPtr32 = exports.hb_buffer_get_glyph_positions(this.ptr, 0) / 4;
+    const positionsPtr32 = exports.hb_buffer_get_glyph_positions(this.ptr, 0) / 4;
     if (positionsPtr32 == 0) {
       return;
     }
-    var len = Math.min(positions.length, this.getLength());
-    var positionsArray = Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + len * 5);
-    for (var i = 0; i < len; i++) {
+    const len = Math.min(positions.length, this.getLength());
+    const positionsArray = Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + len * 5);
+    for (let i = 0; i < len; i++) {
       positionsArray[i * 5] = positions[i].x_advance;
       positionsArray[i * 5 + 1] = positions[i].y_advance;
       positionsArray[i * 5 + 2] = positions[i].x_offset;
@@ -1339,19 +1339,19 @@ export class Buffer {
    * @returns The serialized buffer contents.
    */
   serialize(font?: Font | null, start: number = 0, end?: number | null, format: string = "TEXT", flags: string[] = []): string {
-    var sp = Module.stackSave();
-    var endPos = end ?? this.getLength();
-    var bufLen = 32 * 1024;
-    var bufPtr = exports.malloc(bufLen);
-    var bufConsumedPtr = Module.stackAlloc(4);
-    var flagsValue = 0;
+    const sp = Module.stackSave();
+    const endPos = end ?? this.getLength();
+    const bufLen = 32 * 1024;
+    const bufPtr = exports.malloc(bufLen);
+    const bufConsumedPtr = Module.stackAlloc(4);
+    let flagsValue = 0;
     flags.forEach(flag => flagsValue |= bufferSerializeFlags[flag] || 0);
-    var result = "";
+    let result = "";
     while (start < endPos) {
       start += exports.hb_buffer_serialize(this.ptr, start, endPos,
         bufPtr, bufLen, bufConsumedPtr,
         font ? font.ptr : 0, _hb_tag(format), flagsValue);
-      var bufConsumed = Module.HEAPU32[bufConsumedPtr / 4];
+      const bufConsumed = Module.HEAPU32[bufConsumedPtr / 4];
       if (bufConsumed == 0) break;
       result += _utf8_ptr_to_string(bufPtr, bufConsumed);
     }
@@ -1377,7 +1377,7 @@ export class Buffer {
    * @returns An array of {@link JsonGlyph} objects.
    */
   json(): JsonGlyph[] {
-    var buf = this.serialize(null, 0, null, "JSON", ["NO_GLYPH_NAMES", "GLYPH_FLAGS"]);
+    const buf = this.serialize(null, 0, null, "JSON", ["NO_GLYPH_NAMES", "GLYPH_FLAGS"]);
     return JSON.parse(buf);
   }
 
@@ -1399,13 +1399,13 @@ export class Buffer {
  * @param features A string of comma-separated OpenType features to apply.
  */
 export function shape(font: Font, buffer: Buffer, features?: string): void {
-  var featuresPtr = 0;
-  var featuresLen = 0;
+  let featuresPtr = 0;
+  let featuresLen = 0;
   if (features) {
-    var featureList = features.split(",");
+    const featureList = features.split(",");
     featuresPtr = exports.malloc(16 * featureList.length);
     featureList.forEach(function (feature) {
-      var str = _string_to_ascii_ptr(feature);
+      const str = _string_to_ascii_ptr(feature);
       if (exports.hb_feature_from_string(str.ptr, -1, featuresPtr + featuresLen * 16))
         featuresLen++;
       str.free();
@@ -1432,10 +1432,10 @@ export function shape(font: Font, buffer: Buffer, features?: string): void {
  * @returns An array of trace entries, each with a message, serialized glyphs, and phase info.
  */
 export function shapeWithTrace(font: Font, buffer: Buffer, features: string, stop_at: number, stop_phase: number): TraceEntry[] {
-  var trace: TraceEntry[] = [];
-  var currentPhase = TRACE_PHASE_DONT_STOP;
-  var stopping = false;
-  var failure = false;
+  const trace: TraceEntry[] = [];
+  let currentPhase = TRACE_PHASE_DONT_STOP;
+  let stopping = false;
+  const failure = false;
 
   buffer.setMessageFunc((buffer, font, message) => {
     if (message.startsWith("start table GSUB"))
@@ -1455,7 +1455,7 @@ export function shapeWithTrace(font: Font, buffer: Buffer, features: string, sto
     if (stopping)
       return false;
 
-    var traceBuf = buffer.serialize(font, 0, null, "JSON", ["NO_GLYPH_NAMES"]);
+    const traceBuf = buffer.serialize(font, 0, null, "JSON", ["NO_GLYPH_NAMES"]);
 
     trace.push({
       m: message,
@@ -1475,10 +1475,10 @@ export function shapeWithTrace(font: Font, buffer: Buffer, features: string, sto
  * @returns An object with major, minor, and micro version numbers.
  */
 export function version(): { major: number; minor: number; micro: number } {
-  var sp = Module.stackSave();
-  var versionPtr = Module.stackAlloc(12);
+  const sp = Module.stackSave();
+  const versionPtr = Module.stackAlloc(12);
   exports.hb_version(versionPtr, versionPtr + 4, versionPtr + 8);
-  var ver = {
+  const ver = {
     major: Module.HEAPU32[versionPtr / 4],
     minor: Module.HEAPU32[(versionPtr + 4) / 4],
     micro: Module.HEAPU32[(versionPtr + 8) / 4],
@@ -1492,7 +1492,7 @@ export function version(): { major: number; minor: number; micro: number } {
  * @returns A version string in the form "major.minor.micro".
  */
 export function version_string(): string {
-  var versionPtr = exports.hb_version_string();
+  const versionPtr = exports.hb_version_string();
   return _utf8_ptr_to_string(versionPtr);
 }
 
@@ -1502,8 +1502,8 @@ export function version_string(): string {
  * @returns The script.
  */
 export function otTagToScript(tag: string): string {
-  var hbTag = _hb_tag(tag);
-  var script = exports.hb_ot_tag_to_script(hbTag);
+  const hbTag = _hb_tag(tag);
+  const script = exports.hb_ot_tag_to_script(hbTag);
   return _hb_untag(script);
 }
 
@@ -1513,7 +1513,7 @@ export function otTagToScript(tag: string): string {
  * @returns The language.
  */
 export function otTagToLanguage(tag: string): string {
-  var hbTag = _hb_tag(tag);
-  var language = exports.hb_ot_tag_to_language(hbTag);
+  const hbTag = _hb_tag(tag);
+  const language = exports.hb_ot_tag_to_language(hbTag);
   return _language_to_string(language);
 }
