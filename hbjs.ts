@@ -43,7 +43,7 @@ export interface JsonGlyph {
   dx: number;
   /** Y displacement (adjustment in Y dimension when painting this glyph). */
   dy: number;
-  /** Glyph flags like `HB_GLYPH_FLAG_UNSAFE_TO_BREAK` (0x1). */
+  /** Glyph flags, a combination of {@link GlyphFlag} values. */
   fl: number;
 }
 
@@ -99,6 +99,13 @@ const STATIC_ARRAY_SIZE = 128;
 const HB_MEMORY_MODE_WRITABLE = 2;
 const HB_SET_VALUE_INVALID = -1;
 const HB_OT_NAME_ID_INVALID = 0xFFFF;
+
+export enum GlyphFlag {
+  UNSAFE_TO_BREAK = 0x00000001,
+  UNSAFE_TO_CONCAT = 0x00000002,
+  SAFE_TO_INSERT_TATWEEL = 0x00000004,
+  DEFINED = 0x00000007,
+}
 
 export enum BufferContentType {
   INVALID = 0,
