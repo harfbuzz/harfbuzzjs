@@ -769,10 +769,14 @@ export class Font {
    */
   glyphToJson(glyphId: number): SvgPathCommand[] {
     const path = this.glyphToPath(glyphId);
-    return path.replace(/([MLQCZ])/g, '|$1 ').split('|').filter(x => x.length).map(x => {
-      const row = x.split(/[ ,]/g);
-      return { type: row[0], values: row.slice(1).filter(x => x.length).map(x => +x) };
-    });
+    return path
+      .replace(/([MLQCZ])/g, '|$1 ')
+      .split('|')
+      .filter(x => x.length)
+      .map(x => {
+        const [type, ...values] = x.split(/[ ,]/g).filter(s => s.length);
+        return { type, values: values.map(Number) };
+      });
   }
 
   /**
