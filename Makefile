@@ -22,6 +22,7 @@ HB_CXXFLAGS = \
 HB_LDFLAGS = \
 	--no-entry \
 	-s MODULARIZE \
+	-s EXPORT_ES6 \
 	-s EXPORT_NAME=createHarfBuzz \
 	-s EXPORTED_FUNCTIONS=@hb.symbols \
 	-s EXPORTED_RUNTIME_METHODS=@em.runtime \
@@ -47,16 +48,13 @@ HB_SUBSET_SRCS = harfbuzz/src/harfbuzz-subset.cc
 HB_SUBSET_DEPS = config-override-subset.h hb-subset.symbols
 HB_SUBSET_TARGET = hb-subset.wasm
 
-.PHONY: all clean hb hb-subset test
+.PHONY: all clean hb hb-subset build test typecheck
 
 all: hb hb-subset
 
 hb: $(HB_TARGET)
 
 hb-subset: $(HB_SUBSET_TARGET)
-
-test: all
-	npx mocha test/index.js
 
 $(HB_TARGET): $(HB_SRCS) $(HB_DEPS)
 	echo "  CXX      $@"
@@ -65,6 +63,19 @@ $(HB_TARGET): $(HB_SRCS) $(HB_DEPS)
 $(HB_SUBSET_TARGET): $(HB_SUBSET_SRCS) $(HB_SUBSET_DEPS)
 	echo "  CXX      $@"
 	$(CXX) $(HB_SUBSET_CXXFLAGS) $(HB_SUBSET_LDFLAGS) -o $@ $(HB_SUBSET_SRCS)
+
+node_modules: package.json
+	npm install
+	touch $@
+
+build: node_modules
+	npx tsdown
+
+typecheck: node_modules
+	npx tsc --noEmit
+
+test: build typecheck
+	npx mocha test/index.js
 
 clean:
 	rm -f $(HB_TARGET) $(HB_SUBSET_TARGET) hb.wasm
