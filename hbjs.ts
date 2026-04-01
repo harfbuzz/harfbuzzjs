@@ -135,6 +135,14 @@ export enum BufferFlag {
   PRODUCE_SAFE_TO_INSERT_TATWEEL = 0x00000080,
 }
 
+export enum Direction {
+  INVALID = 0,
+  LTR = 4,
+  RTL = 5,
+  TTB = 6,
+  BTT = 7,
+}
+
 export enum BufferSerializeFormat {
   TEXT = "TEXT",
   JSON = "JSON",
@@ -1139,12 +1147,10 @@ export class Buffer {
 
   /**
    * Set buffer direction explicitly.
-   * @param dir One of "ltr", "rtl", "ttb" or "btt"
+   * @param dir A {@link Direction} value.
    */
-  setDirection(dir: string): void {
-    exports.hb_buffer_set_direction(this.ptr, ({
-      ltr: 4, rtl: 5, ttb: 6, btt: 7
-    } as Record<string, number>)[dir] || 0);
+  setDirection(dir: Direction): void {
+    exports.hb_buffer_set_direction(this.ptr, dir);
   }
 
   /**

@@ -550,7 +550,7 @@ describe('Buffer', function () {
     font = new hb.Font(face);
     buffer = new hb.Buffer();
     buffer.addText('rtl');
-    buffer.setDirection('rtl');
+    buffer.setDirection(hb.Direction.RTL);
     hb.shape(font, buffer)
     const glyphs = buffer.json();
     expect(glyphs[0].g).to.equal(79); // l
