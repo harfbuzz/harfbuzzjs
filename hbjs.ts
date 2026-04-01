@@ -13,14 +13,20 @@ export interface GlyphExtents {
 }
 
 export interface GlyphInfo {
+  /** Either a Unicode code point (before shaping) or a glyph index (after shaping). */
   codepoint: number;
+  /** The cluster index of the glyph. */
   cluster: number;
 }
 
 export interface GlyphPosition {
+  /** The x advance of the glyph. */
   x_advance: number;
+  /** The y advance of the glyph. */
   y_advance: number;
+  /** The x offset of the glyph. */
   x_offset: number;
+  /** The y offset of the glyph. */
   y_offset: number;
 }
 
@@ -1218,12 +1224,7 @@ export class Buffer {
 
   /**
    * Get the glyph information from the buffer.
-   * @returns The glyph information.
-   *
-   * The glyph information is returned as an array of objects with the
-   * following properties:
-   * @param codepoint either a Unicode code point (before shaping) or a glyph index (after shaping).
-   * @param cluster The cluster index of the glyph.
+   * @returns An array of {@link GlyphInfo} objects.
    */
   getGlyphInfos(): GlyphInfo[] {
     var infosPtr32 = exports.hb_buffer_get_glyph_infos(this.ptr, 0) / 4;
@@ -1240,14 +1241,7 @@ export class Buffer {
 
   /**
    * Get the glyph positions from the buffer.
-   * @returns The glyph positions.
-   *
-   * The glyph positions are returned as an array of objects with the
-   * following properties:
-   * @param x_advance The x advance of the glyph.
-   * @param y_advance The y advance of the glyph.
-   * @param x_offset The x offset of the glyph.
-   * @param y_offset The y offset of the glyph.
+   * @returns An array of {@link GlyphPosition} objects.
    */
   getGlyphPositions(): GlyphPosition[] {
     var positionsPtr32 = exports.hb_buffer_get_glyph_positions(this.ptr, 0) / 4;
