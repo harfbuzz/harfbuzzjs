@@ -792,9 +792,9 @@ export class Font {
   setVariations(variations: Record<string, number>): void {
     const entries = Object.entries(variations);
     const vars = exports.malloc(8 * entries.length);
-    entries.forEach((entry, i) => {
-      Module.HEAPU32[vars / 4 + i * 2 + 0] = _hb_tag(entry[0]);
-      Module.HEAPF32[vars / 4 + i * 2 + 1] = entry[1];
+    entries.forEach(([tag, value], i) => {
+      Module.HEAPU32[vars / 4 + i * 2 + 0] = _hb_tag(tag);
+      Module.HEAPF32[vars / 4 + i * 2 + 1] = value;
     });
     exports.hb_font_set_variations(this.ptr, vars, entries.length);
     exports.free(vars);
