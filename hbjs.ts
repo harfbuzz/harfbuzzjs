@@ -100,6 +100,14 @@ const HB_MEMORY_MODE_WRITABLE = 2;
 const HB_SET_VALUE_INVALID = -1;
 const HB_OT_NAME_ID_INVALID = 0xFFFF;
 
+export enum GlyphClass {
+  UNCLASSIFIED = 0,
+  BASE_GLYPH = 1,
+  LIGATURE = 2,
+  MARK = 3,
+  COMPONENT = 4,
+}
+
 export enum GlyphFlag {
   UNSAFE_TO_BREAK = 0x00000001,
   UNSAFE_TO_CONCAT = 0x00000002,
@@ -464,18 +472,10 @@ export class Face {
   /**
    * Get the GDEF class of the requested glyph.
    * @param glyph The glyph to get the class of.
-   * @returns The class of the glyph. Which can be either
-   *   UNCLASSIFIED, BASE_GLYPH, LIGATURE, MARK, or COMPONENT.
+   * @returns The {@link GlyphClass} of the glyph.
    */
-  getGlyphClass(glyph: number): string | undefined {
-    const gclass = exports.hb_ot_layout_get_glyph_class(this.ptr, glyph);
-    switch (gclass) {
-      case 0: return 'UNCLASSIFIED';
-      case 1: return 'BASE_GLYPH';
-      case 2: return 'LIGATURE';
-      case 3: return 'MARK';
-      case 4: return 'COMPONENT';
-    }
+  getGlyphClass(glyph: number): GlyphClass {
+    return exports.hb_ot_layout_get_glyph_class(this.ptr, glyph) as GlyphClass;
   }
 
   /**
