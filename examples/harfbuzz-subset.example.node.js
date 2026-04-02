@@ -9,7 +9,7 @@ const __dirname = import.meta.dirname;
 
 const SUBSET_TEXT = 'abc';
 
-const { instance: { exports } } = await WebAssembly.instantiate(await readFile(join(__dirname, '../hb-subset.wasm')));
+const { instance: { exports } } = await WebAssembly.instantiate(await readFile(join(__dirname, '../harfbuzz-subset.wasm')));
 const fileName = 'NotoSans-Regular.ttf';
 const fontBlob = await readFile(join(__dirname, '../test/fonts/noto', fileName));
 

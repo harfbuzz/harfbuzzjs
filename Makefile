@@ -24,7 +24,7 @@ HB_LDFLAGS = \
 	-s MODULARIZE \
 	-s EXPORT_ES6 \
 	-s EXPORT_NAME=createHarfBuzz \
-	-s EXPORTED_FUNCTIONS=@hb.symbols \
+	-s EXPORTED_FUNCTIONS=@harfbuzz.symbols \
 	-s EXPORTED_RUNTIME_METHODS=@em.runtime \
 	-s INITIAL_MEMORY=256KB \
 	-s ALLOW_MEMORY_GROWTH \
@@ -32,8 +32,8 @@ HB_LDFLAGS = \
 	-lexports.js
 
 HB_SRCS = harfbuzz/src/harfbuzz.cc
-HB_DEPS = config-override.h hb.symbols em.runtime
-HB_TARGET = hb.js
+HB_DEPS = config-override.h harfbuzz.symbols em.runtime
+HB_TARGET = harfbuzz.js
 
 HB_SUBSET_CXXFLAGS = \
 	$(COMMON_CXXFLAGS) \
@@ -41,12 +41,12 @@ HB_SUBSET_CXXFLAGS = \
 
 HB_SUBSET_LDFLAGS = \
 	--no-entry \
-	-s EXPORTED_FUNCTIONS=@hb-subset.symbols \
+	-s EXPORTED_FUNCTIONS=@harfbuzz-subset.symbols \
 	-s INITIAL_MEMORY=65MB
 
 HB_SUBSET_SRCS = harfbuzz/src/harfbuzz-subset.cc
-HB_SUBSET_DEPS = config-override-subset.h hb-subset.symbols
-HB_SUBSET_TARGET = hb-subset.wasm
+HB_SUBSET_DEPS = config-override-subset.h harfbuzz-subset.symbols
+HB_SUBSET_TARGET = harfbuzz-subset.wasm
 
 .PHONY: all clean hb hb-subset test typecheck doc
 
@@ -74,11 +74,11 @@ typecheck: all
 
 test: all typecheck
 	npx mocha test/index.js
-	node examples/hbjs.example.node.js
-	node examples/hb-subset.example.node.js
+	node examples/harfbuzz.example.node.js
+	node examples/harfbuzz-subset.example.node.js
 
 doc: node_modules
-	npx typedoc hbjs.ts --out docs
+	npx typedoc src/index.ts --out docs
 
 clean:
-	rm -f $(HB_TARGET) $(HB_SUBSET_TARGET) hb.wasm
+	rm -f $(HB_TARGET) $(HB_SUBSET_TARGET) harfbuzz.wasm

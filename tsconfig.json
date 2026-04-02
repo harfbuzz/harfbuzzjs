@@ -6,10 +6,11 @@
     "strict": true,
     "esModuleInterop": true,
     "declaration": true,
+    "rootDir": "src",
     "outDir": "dist",
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node", "emscripten"]
   },
-  "include": ["hb.d.ts", "hbjs.ts", "index.ts"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist", "test", "examples", "harfbuzz"]
 }
