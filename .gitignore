@@ -6,3 +6,4 @@ docs/
 .vscode/
 node_modules/
 package-lock.json
+examples/NotoSans-Regular.subset.ttf
