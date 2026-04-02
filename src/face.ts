@@ -2,7 +2,6 @@ import {
   Module,
   exports,
   STATIC_ARRAY_SIZE,
-  HB_OT_NAME_ID_INVALID,
   hb_tag,
   hb_untag,
   utf16_ptr_to_string,
@@ -12,6 +11,8 @@ import {
 } from "./helpers";
 import type { AxisInfo, NameEntry, FeatureNameIds } from "./types";
 import type { Blob } from "./blob";
+
+const HB_OT_NAME_ID_INVALID = 0xffff;
 
 export enum GlyphClass {
   UNCLASSIFIED = 0,

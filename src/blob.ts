@@ -1,9 +1,4 @@
-import {
-  Module,
-  exports,
-  freeFuncPtr,
-  HB_MEMORY_MODE_WRITABLE,
-} from "./helpers";
+import { Module, exports, freeFuncPtr } from "./helpers";
 
 /**
  * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-blob.html | HarfBuzz blob}.
@@ -21,7 +16,7 @@ export class Blob {
     this.ptr = exports.hb_blob_create(
       blobPtr,
       data.byteLength,
-      HB_MEMORY_MODE_WRITABLE,
+      2 /* HB_MEMORY_MODE_WRITABLE */,
       blobPtr,
       freeFuncPtr,
     );
