@@ -66,7 +66,7 @@ $(HB_SUBSET_TARGET): $(HB_SUBSET_SRCS) $(HB_SUBSET_DEPS)
 	$(CXX) $(HB_SUBSET_CXXFLAGS) $(HB_SUBSET_LDFLAGS) -o $@ $(HB_SUBSET_SRCS)
 
 node_modules: package.json
-	npm install
+	npm install --ignore-scripts
 	touch $@
 
 typecheck: all

@@ -28,11 +28,8 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Install dependencies
-        run: npm install
-
       - name: Generate docs
-        run: npm run docs
+        run: make doc
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
