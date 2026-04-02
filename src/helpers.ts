@@ -16,10 +16,6 @@ const utf8Encoder = new TextEncoder();
 
 export const STATIC_ARRAY_SIZE = 128;
 
-export const HB_MEMORY_MODE_WRITABLE = 2;
-export const HB_SET_VALUE_INVALID = -1;
-export const HB_OT_NAME_ID_INVALID = 0xffff;
-
 /**
  * Initialize the HarfBuzz module. Must be called (and awaited) before
  * using any other functions or classes.
@@ -130,7 +126,12 @@ export function typed_array_from_set(setPtr: number): Uint32Array {
   const setCount = exports.hb_set_get_population(setPtr);
   const arrayPtr = exports.malloc(setCount << 2);
   const arrayOffset = arrayPtr >> 2;
-  exports.hb_set_next_many(setPtr, HB_SET_VALUE_INVALID, arrayPtr, setCount);
+  exports.hb_set_next_many(
+    setPtr,
+    -1 /* HB_SET_VALUE_INVALID */,
+    arrayPtr,
+    setCount,
+  );
   const array = Module.HEAPU32.subarray(arrayOffset, arrayOffset + setCount);
   return array;
 }
