@@ -73,7 +73,7 @@ typecheck: all
 	npx tsc --noEmit
 
 test: all typecheck
-	npx mocha test/index.js
+	npx vitest run --dir test
 	node examples/harfbuzz.example.node.js
 	node examples/harfbuzz-subset.example.node.js
 
