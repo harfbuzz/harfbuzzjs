@@ -52,9 +52,9 @@ jobs:
         with:
           name: wasm
           path: |
-            hb.js
-            hb.wasm
-            hb-subset.wasm
+            harfbuzz.js
+            harfbuzz.wasm
+            harfbuzz-subset.wasm
           if-no-files-found: error
 
   release:
@@ -88,4 +88,4 @@ jobs:
           fi
       - name: Populate release
         run: |
-          gh release upload ${{ github.ref_name }} hb.js hb.wasm hb-subset.wasm --clobber
+          gh release upload ${{ github.ref_name }} harfbuzz.js harfbuzz.wasm harfbuzz-subset.wasm --clobber
