@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { expect } from "chai";
+import { expect, describe, it, beforeAll, afterEach } from "vitest";
 import harfbuzz from "../dist/index.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 let hb;
 let blob, face, font, buffer, fontFuncs;
 
-before(async function () {
+beforeAll(async function () {
   hb = await harfbuzz;
 });
 

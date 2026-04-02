@@ -45,8 +45,7 @@
 	"devDependencies": {
 		"@types/emscripten": "^1.41.5",
 		"@types/node": "^25.5.0",
-		"chai": "^4.3.7",
-		"mocha": "^10.2.0",
+		"vitest": "^4.1.2",
 		"tsdown": "^0.21.7",
 		"typedoc": "^0.28.18",
 		"typescript": "^6.0.2"
