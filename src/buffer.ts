@@ -300,7 +300,7 @@ export class Buffer {
 
     const out: (GlyphInfo & Partial<GlyphPosition>)[] = [];
     for (let i = 0; i < infosArray.length; i += 5) {
-      const info: any = {
+      const info: GlyphInfo & Partial<GlyphPosition> = {
         codepoint: infosArray[i],
         cluster: infosArray[i + 2],
       };
