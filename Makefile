@@ -78,7 +78,7 @@ test: all typecheck
 	node examples/harfbuzz-subset.example.node.js
 
 doc: node_modules
-	npx typedoc src/index.ts --out docs
+	npx typedoc src/index.ts --headings.readme false --out docs
 
 clean:
 	rm -f $(HB_TARGET) $(HB_SUBSET_TARGET) harfbuzz.wasm
