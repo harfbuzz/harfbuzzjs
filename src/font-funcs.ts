@@ -1,4 +1,4 @@
-import { Module, exports, utf8_ptr_to_string } from "./helpers";
+import { Module, exports, registry, utf8_ptr_to_string } from "./helpers";
 import type { FontExtents, GlyphExtents } from "./types";
 import { Font } from "./font";
 
@@ -13,6 +13,8 @@ export class FontFuncs {
 
   constructor() {
     this.ptr = exports.hb_font_funcs_create();
+    const ptr = this.ptr;
+    registry.register(this, () => { exports.hb_font_funcs_destroy(ptr); }, this);
   }
 
   /**
@@ -33,7 +35,6 @@ export class FontFuncs {
       ) => {
         const font = new Font(fontPtr);
         const extents = func(font, glyph);
-        font.destroy();
         if (extents) {
           Module.HEAP32[extentsPtr / 4] = extents.xBearing;
           Module.HEAP32[extentsPtr / 4 + 1] = extents.yBearing;
@@ -68,7 +69,6 @@ export class FontFuncs {
         const font = new Font(fontPtr);
         const name = utf8_ptr_to_string(namePtr, len);
         const glyph = func(font, name);
-        font.destroy();
         if (glyph) {
           Module.HEAPU32[glyphPtr / 4] = glyph;
           return 1;
@@ -95,7 +95,6 @@ export class FontFuncs {
       ) => {
         const font = new Font(fontPtr);
         const advance = func(font, glyph);
-        font.destroy();
         return advance;
       },
       "ippip",
@@ -118,7 +117,6 @@ export class FontFuncs {
       ) => {
         const font = new Font(fontPtr);
         const advance = func(font, glyph);
-        font.destroy();
         return advance;
       },
       "ippip",
@@ -145,7 +143,6 @@ export class FontFuncs {
       ) => {
         const font = new Font(fontPtr);
         const origin = func(font, glyph);
-        font.destroy();
         if (origin) {
           Module.HEAP32[xPtr / 4] = origin[0];
           Module.HEAP32[yPtr / 4] = origin[1];
@@ -177,7 +174,6 @@ export class FontFuncs {
       ) => {
         const font = new Font(fontPtr);
         const origin = func(font, glyph);
-        font.destroy();
         if (origin) {
           Module.HEAP32[xPtr / 4] = origin[0];
           Module.HEAP32[yPtr / 4] = origin[1];
@@ -208,7 +204,6 @@ export class FontFuncs {
       ) => {
         const font = new Font(fontPtr);
         const kerning = func(font, firstGlyph, secondGlyph);
-        font.destroy();
         return kerning;
       },
       "ippiip",
@@ -234,7 +229,6 @@ export class FontFuncs {
       ) => {
         const font = new Font(fontPtr);
         const name = func(font, glyph);
-        font.destroy();
         if (name) {
           utf8Encoder.encodeInto(
             name,
@@ -267,7 +261,6 @@ export class FontFuncs {
       ) => {
         const font = new Font(fontPtr);
         const glyph = func(font, unicode);
-        font.destroy();
         if (glyph) {
           Module.HEAPU32[glyphPtr / 4] = glyph;
           return 1;
@@ -302,7 +295,6 @@ export class FontFuncs {
       ) => {
         const font = new Font(fontPtr);
         const glyph = func(font, unicode, variationSelector);
-        font.destroy();
         if (glyph) {
           Module.HEAPU32[glyphPtr / 4] = glyph;
           return 1;
@@ -329,7 +321,6 @@ export class FontFuncs {
       ) => {
         const font = new Font(fontPtr);
         const extents = func(font);
-        font.destroy();
         if (extents) {
           Module.HEAP32[extentsPtr / 4] = extents.ascender;
           Module.HEAP32[extentsPtr / 4 + 1] = extents.descender;
@@ -358,7 +349,6 @@ export class FontFuncs {
       ) => {
         const font = new Font(fontPtr);
         const extents = func(font);
-        font.destroy();
         if (extents) {
           Module.HEAP32[extentsPtr / 4] = extents.ascender;
           Module.HEAP32[extentsPtr / 4 + 1] = extents.descender;
@@ -370,10 +360,5 @@ export class FontFuncs {
       "ipppp",
     );
     exports.hb_font_funcs_set_font_v_extents_func(this.ptr, funcPtr, 0, 0);
-  }
-
-  /** Free the object. */
-  destroy(): void {
-    exports.hb_font_funcs_destroy(this.ptr);
   }
 }
