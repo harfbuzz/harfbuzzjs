@@ -58,12 +58,6 @@ for (var glyph of output) {
     xCursor += xAdvance;
     yCursor += yAdvance;
 }
-
-// Release memory
-buffer.destroy();
-font.destroy();
-face.destroy();
-blob.destroy();
 ```
 
 More examples:

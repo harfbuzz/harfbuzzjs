@@ -1,4 +1,4 @@
-import { Module, exports, freeFuncPtr } from "./helpers";
+import { Module, exports, freeFuncPtr, registry } from "./helpers";
 
 /**
  * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-blob.html | HarfBuzz blob}.
@@ -20,10 +20,7 @@ export class Blob {
       blobPtr,
       freeFuncPtr,
     );
-  }
-
-  /** Free the object. */
-  destroy() {
-    exports.hb_blob_destroy(this.ptr);
+    const ptr = this.ptr;
+    registry.register(this, () => { exports.hb_blob_destroy(ptr); }, this);
   }
 }
