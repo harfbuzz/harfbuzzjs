@@ -1,6 +1,7 @@
 import {
   Module,
   exports,
+  registry,
   hb_tag,
   utf8_ptr_to_string,
   string_to_ascii_ptr,
@@ -67,6 +68,8 @@ export class Buffer {
     } else {
       this.ptr = exports.hb_buffer_create();
     }
+    const ptr = this.ptr;
+    registry.register(this, () => { exports.hb_buffer_destroy(ptr); }, this);
   }
 
   /**
@@ -213,8 +216,6 @@ export class Buffer {
       const buffer = new Buffer(bufferPtr);
       const font = new Font(fontPtr);
       const result = func(buffer, font, message);
-      buffer.destroy();
-      font.destroy();
       return result ? 1 : 0;
     };
     const traceFuncPtr = Module.addFunction(traceFunc, "iiiii");
@@ -292,10 +293,7 @@ export class Buffer {
     const positionsPtr32 =
       exports.hb_buffer_get_glyph_positions(this.ptr, 0) / 4;
     const positionsArray = positionsPtr32
-      ? Module.HEAP32.subarray(
-          positionsPtr32,
-          positionsPtr32 + this.getLength() * 5,
-        )
+      ? Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + this.getLength() * 5)
       : null;
 
     const out: (GlyphInfo & Partial<GlyphPosition>)[] = [];
@@ -418,10 +416,5 @@ export class Buffer {
       BufferSerializeFlag.NO_GLYPH_NAMES | BufferSerializeFlag.GLYPH_FLAGS,
     );
     return JSON.parse(buf);
-  }
-
-  /** Free the object. */
-  destroy(): void {
-    exports.hb_buffer_destroy(this.ptr);
   }
 }

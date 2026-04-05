@@ -1,6 +1,7 @@
 import {
   Module,
   exports,
+  registry,
   STATIC_ARRAY_SIZE,
   hb_tag,
   hb_untag,
@@ -39,6 +40,8 @@ export class Face {
   constructor(blob: Blob, index: number = 0) {
     this.ptr = exports.hb_face_create(blob.ptr, index);
     this.upem = exports.hb_face_get_upem(this.ptr);
+    const ptr = this.ptr;
+    registry.register(this, () => { exports.hb_face_destroy(ptr); }, this);
   }
 
   /**
@@ -355,8 +358,4 @@ export class Face {
     return names;
   }
 
-  /** Free the object. */
-  destroy() {
-    exports.hb_face_destroy(this.ptr);
-  }
 }

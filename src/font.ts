@@ -1,6 +1,7 @@
 import {
   Module,
   exports,
+  registry,
   hb_tag,
   utf8_ptr_to_string,
   string_to_utf8_ptr,
@@ -8,6 +9,16 @@ import {
 import type { FontExtents, GlyphExtents, SvgPathCommand } from "./types";
 import type { Face } from "./face";
 import type { FontFuncs } from "./font-funcs";
+
+interface DrawPtrs {
+  drawFuncsPtr: number | null;
+  moveToPtr: number | null;
+  lineToPtr: number | null;
+  cubicToPtr: number | null;
+  quadToPtr: number | null;
+  closePathPtr: number | null;
+  pathBuffer: string;
+}
 
 /**
  * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-font.html | HarfBuzz font}.
@@ -17,13 +28,15 @@ import type { FontFuncs } from "./font-funcs";
  */
 export class Font {
   readonly ptr: number;
-  private drawFuncsPtr: number | null = null;
-  private moveToPtr: number | null = null;
-  private lineToPtr: number | null = null;
-  private cubicToPtr: number | null = null;
-  private quadToPtr: number | null = null;
-  private closePathPtr: number | null = null;
-  private pathBuffer = "";
+  private drawPtrs: DrawPtrs = {
+    drawFuncsPtr: null,
+    moveToPtr: null,
+    lineToPtr: null,
+    cubicToPtr: null,
+    quadToPtr: null,
+    closePathPtr: null,
+    pathBuffer: "",
+  };
 
   /**
    * @param face A Face to create the font from.
@@ -37,6 +50,19 @@ export class Font {
     } else {
       this.ptr = exports.hb_font_create(arg.ptr);
     }
+    const ptr = this.ptr;
+    const drawState = this.drawPtrs;
+    registry.register(this, () => {
+      exports.hb_font_destroy(ptr);
+      if (drawState.drawFuncsPtr) {
+        exports.hb_draw_funcs_destroy(drawState.drawFuncsPtr);
+        Module.removeFunction(drawState.moveToPtr!);
+        Module.removeFunction(drawState.lineToPtr!);
+        Module.removeFunction(drawState.cubicToPtr!);
+        Module.removeFunction(drawState.quadToPtr!);
+        Module.removeFunction(drawState.closePathPtr!);
+      }
+    }, this);
   }
 
   /**
@@ -102,7 +128,8 @@ export class Font {
    * @returns SVG path data string.
    */
   glyphToPath(glyphId: number): string {
-    if (!this.drawFuncsPtr) {
+    const ds = this.drawPtrs;
+    if (!ds.drawFuncsPtr) {
       const moveTo = (
         dfuncs: number,
         draw_data: number,
@@ -111,7 +138,7 @@ export class Font {
         to_y: number,
         user_data: number,
       ) => {
-        this.pathBuffer += `M${to_x},${to_y}`;
+        ds.pathBuffer += `M${to_x},${to_y}`;
       };
       const lineTo = (
         dfuncs: number,
@@ -121,7 +148,7 @@ export class Font {
         to_y: number,
         user_data: number,
       ) => {
-        this.pathBuffer += `L${to_x},${to_y}`;
+        ds.pathBuffer += `L${to_x},${to_y}`;
       };
       const cubicTo = (
         dfuncs: number,
@@ -135,7 +162,7 @@ export class Font {
         to_y: number,
         user_data: number,
       ) => {
-        this.pathBuffer += `C${c1_x},${c1_y} ${c2_x},${c2_y} ${to_x},${to_y}`;
+        ds.pathBuffer += `C${c1_x},${c1_y} ${c2_x},${c2_y} ${to_x},${to_y}`;
       };
       const quadTo = (
         dfuncs: number,
@@ -147,7 +174,7 @@ export class Font {
         to_y: number,
         user_data: number,
       ) => {
-        this.pathBuffer += `Q${c_x},${c_y} ${to_x},${to_y}`;
+        ds.pathBuffer += `Q${c_x},${c_y} ${to_x},${to_y}`;
       };
       const closePath = (
         dfuncs: number,
@@ -155,50 +182,50 @@ export class Font {
         draw_state: number,
         user_data: number,
       ) => {
-        this.pathBuffer += "Z";
+        ds.pathBuffer += "Z";
       };
 
-      this.moveToPtr = Module.addFunction(moveTo, "viiiffi");
-      this.lineToPtr = Module.addFunction(lineTo, "viiiffi");
-      this.cubicToPtr = Module.addFunction(cubicTo, "viiiffffffi");
-      this.quadToPtr = Module.addFunction(quadTo, "viiiffffi");
-      this.closePathPtr = Module.addFunction(closePath, "viiii");
-      this.drawFuncsPtr = exports.hb_draw_funcs_create();
+      ds.moveToPtr = Module.addFunction(moveTo, "viiiffi");
+      ds.lineToPtr = Module.addFunction(lineTo, "viiiffi");
+      ds.cubicToPtr = Module.addFunction(cubicTo, "viiiffffffi");
+      ds.quadToPtr = Module.addFunction(quadTo, "viiiffffi");
+      ds.closePathPtr = Module.addFunction(closePath, "viiii");
+      ds.drawFuncsPtr = exports.hb_draw_funcs_create();
       exports.hb_draw_funcs_set_move_to_func(
-        this.drawFuncsPtr,
-        this.moveToPtr,
+        ds.drawFuncsPtr,
+        ds.moveToPtr,
         0,
         0,
       );
       exports.hb_draw_funcs_set_line_to_func(
-        this.drawFuncsPtr,
-        this.lineToPtr,
+        ds.drawFuncsPtr,
+        ds.lineToPtr,
         0,
         0,
       );
       exports.hb_draw_funcs_set_cubic_to_func(
-        this.drawFuncsPtr,
-        this.cubicToPtr,
+        ds.drawFuncsPtr,
+        ds.cubicToPtr,
         0,
         0,
       );
       exports.hb_draw_funcs_set_quadratic_to_func(
-        this.drawFuncsPtr,
-        this.quadToPtr,
+        ds.drawFuncsPtr,
+        ds.quadToPtr,
         0,
         0,
       );
       exports.hb_draw_funcs_set_close_path_func(
-        this.drawFuncsPtr,
-        this.closePathPtr,
+        ds.drawFuncsPtr,
+        ds.closePathPtr,
         0,
         0,
       );
     }
 
-    this.pathBuffer = "";
-    exports.hb_font_draw_glyph(this.ptr, glyphId, this.drawFuncsPtr, 0);
-    return this.pathBuffer;
+    ds.pathBuffer = "";
+    exports.hb_font_draw_glyph(this.ptr, glyphId, ds.drawFuncsPtr, 0);
+    return ds.pathBuffer;
   }
 
   /**
@@ -347,17 +374,4 @@ export class Font {
     exports.hb_font_set_funcs(this.ptr, fontFuncs.ptr);
   }
 
-  /** Free the object. */
-  destroy(): void {
-    exports.hb_font_destroy(this.ptr);
-    if (this.drawFuncsPtr) {
-      exports.hb_draw_funcs_destroy(this.drawFuncsPtr);
-      this.drawFuncsPtr = null;
-      Module.removeFunction(this.moveToPtr!);
-      Module.removeFunction(this.lineToPtr!);
-      Module.removeFunction(this.cubicToPtr!);
-      Module.removeFunction(this.quadToPtr!);
-      Module.removeFunction(this.closePathPtr!);
-    }
-  }
 }

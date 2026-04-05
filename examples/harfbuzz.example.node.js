@@ -17,10 +17,6 @@ function example(fontPath, text) {
   hb.shape(font, buffer);
   var result = buffer.json(font);
 
-  buffer.destroy();
-  font.destroy();
-  face.destroy();
-  blob.destroy();
   return result;
 }
 
