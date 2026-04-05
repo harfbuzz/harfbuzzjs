@@ -16,6 +16,10 @@ const utf8Encoder = new TextEncoder();
 
 export const STATIC_ARRAY_SIZE = 128;
 
+export const registry = new FinalizationRegistry<() => void>((cleanup) => {
+  cleanup();
+});
+
 /**
  * Initialize the HarfBuzz module. Must be called (and awaited) before
  * using any other functions or classes.

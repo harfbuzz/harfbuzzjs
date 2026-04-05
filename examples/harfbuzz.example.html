@@ -27,10 +27,5 @@ fetch('../test/fonts/noto/NotoSans-Regular.ttf')
 
     document.body.innerText = JSON.stringify({ shape: result, glyphs: glyphs }, undefined, 2);
     document.body.style.whiteSpace = 'pre';
-
-    buffer.destroy();
-    font.destroy();
-    face.destroy();
-    blob.destroy();
   });
 </script>

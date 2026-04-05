@@ -58,11 +58,6 @@ require("harfbuzzjs").then(function (hb) {
         yCursor += yAdvance;
     }
 
-    // Release memory
-    buffer.destroy();
-    font.destroy();
-    face.destroy();
-    blob.destroy();
   })
 })
 ```
