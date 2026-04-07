@@ -1,20 +1,24 @@
 name: Docs
 
 on:
-  push:
+  workflow_run:
+    workflows: [ "Build" ]
     branches: [ "main" ]
+    types: [ completed ]
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  docs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -23,6 +27,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -30,6 +41,14 @@ jobs:
 
       - name: Generate docs
         run: make doc
+
+      - name: Build demo
+        run: |
+          npx tsdown
+          mkdir -p docs/demo
+          cp demo/index.html docs/demo/
+          cp dist/index.mjs dist/harfbuzz.js dist/harfbuzz.wasm docs/demo/
+          cp test/fonts/noto/NotoSans-Regular.ttf docs/demo/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
