@@ -47,6 +47,8 @@ jobs:
         run: make
       - name: Run tests
         run: make test
+      - name: Check docs
+        run: make doc
       - name: Archive artifacts
         uses: actions/upload-artifact@v6
         with:
