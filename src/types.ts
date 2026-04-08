@@ -21,13 +21,13 @@ export interface GlyphInfo {
 
 export interface GlyphPosition {
   /** The x advance of the glyph. */
-  x_advance: number;
+  xAdvance: number;
   /** The y advance of the glyph. */
-  y_advance: number;
+  yAdvance: number;
   /** The x offset of the glyph. */
-  x_offset: number;
+  xOffset: number;
   /** The y offset of the glyph. */
-  y_offset: number;
+  yOffset: number;
 }
 
 export interface JsonGlyph {
