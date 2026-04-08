@@ -49,7 +49,7 @@ export class Face {
    * @param table Table name
    * @returns A Uint8Array of the table data, or undefined if the table is not found.
    */
-  reference_table(table: string): Uint8Array | undefined {
+  referenceTable(table: string): Uint8Array | undefined {
     const blob = exports.hb_face_reference_table(this.ptr, hb_tag(table));
     const length = exports.hb_blob_get_length(blob);
     if (!length) {
