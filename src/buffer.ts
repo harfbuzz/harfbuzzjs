@@ -267,10 +267,10 @@ export class Buffer {
     const positions: GlyphPosition[] = [];
     for (let i = 0; i < positionsArray.length; i += 5) {
       positions.push({
-        x_advance: positionsArray[i],
-        y_advance: positionsArray[i + 1],
-        x_offset: positionsArray[i + 2],
-        y_offset: positionsArray[i + 3],
+        xAdvance: positionsArray[i],
+        yAdvance: positionsArray[i + 1],
+        xOffset: positionsArray[i + 2],
+        yOffset: positionsArray[i + 3],
       });
     }
     return positions;
@@ -313,10 +313,10 @@ export class Buffer {
         });
       }
       if (positionsArray) {
-        info.x_advance = positionsArray[i];
-        info.y_advance = positionsArray[i + 1];
-        info.x_offset = positionsArray[i + 2];
-        info.y_offset = positionsArray[i + 3];
+        info.xAdvance = positionsArray[i];
+        info.yAdvance = positionsArray[i + 1];
+        info.xOffset = positionsArray[i + 2];
+        info.yOffset = positionsArray[i + 3];
         Object.defineProperty(info, "var", {
           value: positionsArray[i + 4],
           enumerable: false,
@@ -343,10 +343,10 @@ export class Buffer {
       positionsPtr32 + len * 5,
     );
     for (let i = 0; i < len; i++) {
-      positionsArray[i * 5] = positions[i].x_advance;
-      positionsArray[i * 5 + 1] = positions[i].y_advance;
-      positionsArray[i * 5 + 2] = positions[i].x_offset;
-      positionsArray[i * 5 + 3] = positions[i].y_offset;
+      positionsArray[i * 5] = positions[i].xAdvance;
+      positionsArray[i * 5 + 1] = positions[i].yAdvance;
+      positionsArray[i * 5 + 2] = positions[i].xOffset;
+      positionsArray[i * 5 + 3] = positions[i].yOffset;
     }
   }
 

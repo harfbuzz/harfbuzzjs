@@ -950,10 +950,10 @@ describe("Buffer", function () {
       { codepoint: 105, cluster: 3 },
     ]);
     expect(positions).to.deep.equal([
-      { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 },
-      { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 },
-      { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 },
-      { x_advance: 0, y_advance: 0, x_offset: 0, y_offset: 0 },
+      { xAdvance: 0, yAdvance: 0, xOffset: 0, yOffset: 0 },
+      { xAdvance: 0, yAdvance: 0, xOffset: 0, yOffset: 0 },
+      { xAdvance: 0, yAdvance: 0, xOffset: 0, yOffset: 0 },
+      { xAdvance: 0, yAdvance: 0, xOffset: 0, yOffset: 0 },
     ]);
 
     for (let i = 0; i < infosAndPositions.length; i++) {
@@ -975,9 +975,9 @@ describe("Buffer", function () {
       { codepoint: 1652, cluster: 2 },
     ]);
     expect(positions).to.deep.equal([
-      { x_advance: 529, y_advance: 0, x_offset: 0, y_offset: 0 },
-      { x_advance: 0, y_advance: 0, x_offset: 97, y_offset: 0 },
-      { x_advance: 602, y_advance: 0, x_offset: 0, y_offset: 0 },
+      { xAdvance: 529, yAdvance: 0, xOffset: 0, yOffset: 0 },
+      { xAdvance: 0, yAdvance: 0, xOffset: 97, yOffset: 0 },
+      { xAdvance: 602, yAdvance: 0, xOffset: 0, yOffset: 0 },
     ]);
     for (let i = 0; i < infosAndPositions.length; i++) {
       expect(infosAndPositions[i]).to.deep.equal({
@@ -1003,10 +1003,10 @@ describe("Buffer", function () {
     expect(Object.keys(infosAndPositions[0])).to.deep.equal([
       "codepoint",
       "cluster",
-      "x_advance",
-      "y_advance",
-      "x_offset",
-      "y_offset",
+      "xAdvance",
+      "yAdvance",
+      "xOffset",
+      "yOffset",
     ]);
     expect(infosAndPositions[0].mask).to.not.be.undefined;
     expect(infosAndPositions[0].var1).to.not.be.undefined;
@@ -1054,8 +1054,8 @@ describe("Buffer", function () {
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
     var positions = buffer.getGlyphPositions();
-    expect(positions[1].y_offset).to.equal(0);
-    expect(positions[2].y_offset).to.equal(229);
+    expect(positions[1].yOffset).to.equal(0);
+    expect(positions[2].yOffset).to.equal(229);
 
     // with updateGlyphPositions inside buffer message callback
     buffer.clearContents();
@@ -1066,15 +1066,15 @@ describe("Buffer", function () {
       if (message.startsWith("start table GSUB")) currentPhase = "GSUB";
       else if (message.startsWith("start table GPOS")) currentPhase = "GPOS";
 
-      // modify the 2nd glyph y_offset after the last mark lookup and before mkmk lookups
+      // modify the 2nd glyph yOffset after the last mark lookup and before mkmk lookups
       if (
         currentPhase === "GPOS" &&
         message.startsWith("end lookup 4 feature 'mark'")
       ) {
         var positions = buffer.getGlyphPositions();
-        expect(positions[1].y_offset).to.equal(0);
-        expect(positions[2].y_offset).to.equal(0);
-        positions[1].y_offset += 10;
+        expect(positions[1].yOffset).to.equal(0);
+        expect(positions[2].yOffset).to.equal(0);
+        positions[1].yOffset += 10;
         buffer.updateGlyphPositions(positions);
       }
 
@@ -1085,8 +1085,8 @@ describe("Buffer", function () {
     var positions = buffer.getGlyphPositions();
 
     // both mark glyphs now be offset vertically by 10, since the second mark attaches to the first mark
-    expect(positions[1].y_offset).to.equal(10);
-    expect(positions[2].y_offset).to.equal(239);
+    expect(positions[1].yOffset).to.equal(10);
+    expect(positions[2].yOffset).to.equal(239);
   });
 });
 
