@@ -139,7 +139,7 @@ export function version(): { major: number; minor: number; micro: number } {
  * Return the HarfBuzz version as a string.
  * @returns A version string in the form "major.minor.micro".
  */
-export function version_string(): string {
+export function versionString(): string {
   const versionPtr = exports.hb_version_string();
   return utf8_ptr_to_string(versionPtr);
 }

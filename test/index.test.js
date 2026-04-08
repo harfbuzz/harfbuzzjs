@@ -1349,8 +1349,8 @@ describe("misc", function () {
   });
 
   it("get version string", function () {
-    const version_string = hb.version_string();
-    expect(version_string).to.match(/^\d+\.\d+\.\d+$/);
+    const versionString = hb.versionString();
+    expect(versionString).to.match(/^\d+\.\d+\.\d+$/);
   });
 
   it("convert OpenType tag to script", function () {
