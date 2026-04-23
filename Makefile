@@ -14,12 +14,12 @@ COMMON_CXXFLAGS = \
 	-DHB_USE_INTERNAL_QSORT \
 	-DHB_EXPERIMENTAL_API
 
-HB_CXXFLAGS = \
+HARFBUZZ_CXXFLAGS = \
 	$(COMMON_CXXFLAGS) \
 	-flto \
 	-DHB_CONFIG_OVERRIDE_H=\"config-override.h\"
 
-HB_LDFLAGS = \
+HARFBUZZ_LDFLAGS = \
 	--no-entry \
 	-s MODULARIZE \
 	-s EXPORT_ES6 \
@@ -31,39 +31,39 @@ HB_LDFLAGS = \
 	-s ALLOW_TABLE_GROWTH \
 	-lexports.js
 
-HB_SRCS = harfbuzz/src/harfbuzz.cc
-HB_DEPS = config-override.h harfbuzz.symbols em.runtime
-HB_TARGET = harfbuzz.js
+HARFBUZZ_SRCS = harfbuzz/src/harfbuzz.cc
+HARFBUZZ_DEPS = config-override.h harfbuzz.symbols em.runtime
+HARFBUZZ_TARGET = harfbuzz.js
 
-HB_SUBSET_CXXFLAGS = \
+HARFBUZZ_SUBSET_CXXFLAGS = \
 	$(COMMON_CXXFLAGS) \
 	-DHB_CONFIG_OVERRIDE_LAST_H=\"config-override-subset.h\"
 
-HB_SUBSET_LDFLAGS = \
+HARFBUZZ_SUBSET_LDFLAGS = \
 	--no-entry \
 	-s EXPORTED_FUNCTIONS=@harfbuzz-subset.symbols \
 	-s INITIAL_MEMORY=65MB
 
-HB_SUBSET_SRCS = harfbuzz/src/harfbuzz-subset.cc
-HB_SUBSET_DEPS = config-override-subset.h harfbuzz-subset.symbols
-HB_SUBSET_TARGET = harfbuzz-subset.wasm
+HARFBUZZ_SUBSET_SRCS = harfbuzz/src/harfbuzz-subset.cc
+HARFBUZZ_SUBSET_DEPS = config-override-subset.h harfbuzz-subset.symbols
+HARFBUZZ_SUBSET_TARGET = harfbuzz-subset.wasm
 
-.PHONY: all clean hb hb-subset test typecheck doc
+.PHONY: all clean harfbuzz harfbuzz-subset test typecheck doc
 
-all: hb hb-subset node_modules
+all: harfbuzz harfbuzz-subset node_modules
 	npx tsdown
 
-hb: $(HB_TARGET)
+harfbuzz: $(HARFBUZZ_TARGET)
 
-hb-subset: $(HB_SUBSET_TARGET)
+harfbuzz-subset: $(HARFBUZZ_SUBSET_TARGET)
 
-$(HB_TARGET): $(HB_SRCS) $(HB_DEPS)
+$(HARFBUZZ_TARGET): $(HARFBUZZ_SRCS) $(HARFBUZZ_DEPS)
 	echo "  CXX      $@"
-	$(CXX) $(HB_CXXFLAGS) $(HB_LDFLAGS) -o $@ $(HB_SRCS)
+	$(CXX) $(HARFBUZZ_CXXFLAGS) $(HARFBUZZ_LDFLAGS) -o $@ $(HARFBUZZ_SRCS)
 
-$(HB_SUBSET_TARGET): $(HB_SUBSET_SRCS) $(HB_SUBSET_DEPS)
+$(HARFBUZZ_SUBSET_TARGET): $(HARFBUZZ_SUBSET_SRCS) $(HARFBUZZ_SUBSET_DEPS)
 	echo "  CXX      $@"
-	$(CXX) $(HB_SUBSET_CXXFLAGS) $(HB_SUBSET_LDFLAGS) -o $@ $(HB_SUBSET_SRCS)
+	$(CXX) $(HARFBUZZ_SUBSET_CXXFLAGS) $(HARFBUZZ_SUBSET_LDFLAGS) -o $@ $(HARFBUZZ_SUBSET_SRCS)
 
 node_modules: package.json
 	npm install --ignore-scripts
@@ -81,4 +81,4 @@ doc: node_modules
 	npx typedoc src/index.ts --headings.readme false --treatWarningsAsErrors --out docs
 
 clean:
-	rm -f $(HB_TARGET) $(HB_SUBSET_TARGET) harfbuzz.wasm
+	rm -f $(HARFBUZZ_TARGET) $(HARFBUZZ_SUBSET_TARGET) harfbuzz.wasm
