@@ -33,7 +33,7 @@ HARFBUZZ_LDFLAGS = \
 
 HARFBUZZ_SRCS = harfbuzz/src/harfbuzz.cc
 HARFBUZZ_DEPS = config-override.h harfbuzz.symbols em.runtime
-HARFBUZZ_TARGET = harfbuzz.js
+HARFBUZZ_TARGET = dist/harfbuzz.js
 
 HARFBUZZ_SUBSET_CXXFLAGS = \
 	$(COMMON_CXXFLAGS) \
@@ -46,7 +46,7 @@ HARFBUZZ_SUBSET_LDFLAGS = \
 
 HARFBUZZ_SUBSET_SRCS = harfbuzz/src/harfbuzz-subset.cc
 HARFBUZZ_SUBSET_DEPS = config-override-subset.h harfbuzz-subset.symbols
-HARFBUZZ_SUBSET_TARGET = harfbuzz-subset.wasm
+HARFBUZZ_SUBSET_TARGET = dist/harfbuzz-subset.wasm
 
 .PHONY: all clean harfbuzz harfbuzz-subset test typecheck doc
 
@@ -57,13 +57,16 @@ harfbuzz: $(HARFBUZZ_TARGET)
 
 harfbuzz-subset: $(HARFBUZZ_SUBSET_TARGET)
 
-$(HARFBUZZ_TARGET): $(HARFBUZZ_SRCS) $(HARFBUZZ_DEPS)
+$(HARFBUZZ_TARGET): $(HARFBUZZ_SRCS) $(HARFBUZZ_DEPS) | dist
 	echo "  CXX      $@"
 	$(CXX) $(HARFBUZZ_CXXFLAGS) $(HARFBUZZ_LDFLAGS) -o $@ $(HARFBUZZ_SRCS)
 
-$(HARFBUZZ_SUBSET_TARGET): $(HARFBUZZ_SUBSET_SRCS) $(HARFBUZZ_SUBSET_DEPS)
+$(HARFBUZZ_SUBSET_TARGET): $(HARFBUZZ_SUBSET_SRCS) $(HARFBUZZ_SUBSET_DEPS) | dist
 	echo "  CXX      $@"
 	$(CXX) $(HARFBUZZ_SUBSET_CXXFLAGS) $(HARFBUZZ_SUBSET_LDFLAGS) -o $@ $(HARFBUZZ_SUBSET_SRCS)
+
+dist:
+	mkdir -p $@
 
 node_modules: package.json
 	npm install --ignore-scripts
@@ -81,4 +84,4 @@ doc: node_modules
 	npx typedoc src/index.ts --headings.readme false --treatWarningsAsErrors --out docs
 
 clean:
-	rm -f $(HARFBUZZ_TARGET) $(HARFBUZZ_SUBSET_TARGET) harfbuzz.wasm
+	rm -rf dist
