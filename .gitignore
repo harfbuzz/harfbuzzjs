@@ -1,5 +1,3 @@
-*.wasm
-harfbuzz.js
 dist/
 docs/
 .DS_Store
