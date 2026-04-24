@@ -28,8 +28,7 @@ Download from the [releases tab](https://github.com/harfbuzz/harfbuzzjs/releases
 ### TL;DR
 
 ```javascript
-import harfbuzz from "harfbuzzjs";
-const hb = await harfbuzz;
+import * as hb from "harfbuzzjs";
 
 const fontdata = await fetch('myfont.ttf').then(r => r.arrayBuffer());
 const blob = new hb.Blob(fontdata);      // Load the font data into Harfbuzz blob

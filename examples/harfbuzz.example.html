@@ -1,6 +1,5 @@
 <script type="module">
-import harfbuzz from '../dist/index.mjs';
-const hb = await harfbuzz;
+import * as hb from '../dist/index.mjs';
 
 fetch('../test/fonts/noto/NotoSans-Regular.ttf')
   .then(x => x.arrayBuffer())

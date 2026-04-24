@@ -10,7 +10,4 @@ export * from "./font-funcs";
 export * from "./buffer";
 export * from "./shape";
 
-export default createHarfBuzz().then(async (module) => {
-  init(module);
-  return await import("./index");
-});
+init(await createHarfBuzz());
