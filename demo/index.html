@@ -4,8 +4,7 @@
 <p><a id="svgResult" href="#" title="Click to download"></a></p>
 <p>Result:<div id="shapeResult"></div></p>
 <script type="module">
-import harfbuzz from './index.mjs';
-const hb = await harfbuzz;
+import * as hb from './index.mjs';
 
 var fontBlob;
 function updateResult() {

@@ -21,9 +21,9 @@ export const registry = new FinalizationRegistry<() => void>((cleanup) => {
 });
 
 /**
- * Initialize the HarfBuzz module. Must be called (and awaited) before
- * using any other functions or classes.
- * @param module The Emscripten module instance.
+ * Initialize the HarfBuzz module.
+ * @param module The Emscripten module instance created with {@link
+ * createHarfBuzz}.
  */
 export function init(module: EmscriptenModule) {
   Module = module as HarfBuzzModule;

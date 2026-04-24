@@ -1,20 +1,19 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import harfbuzz from '../dist/index.mjs';
+import { Blob, Face, Font, Buffer, shape } from '../dist/index.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const hb = await harfbuzz;
 
 function example(fontPath, text) {
-  var blob = new hb.Blob(fs.readFileSync(fontPath));
-  var face = new hb.Face(blob, 0);
-  var font = new hb.Font(face);
+  var blob = new Blob(fs.readFileSync(fontPath));
+  var face = new Face(blob, 0);
+  var font = new Font(face);
 
-  var buffer = new hb.Buffer();
+  var buffer = new Buffer();
   buffer.addText(text || 'abc');
   buffer.guessSegmentProperties();
-  hb.shape(font, buffer);
+  shape(font, buffer);
   var result = buffer.json(font);
 
   return result;

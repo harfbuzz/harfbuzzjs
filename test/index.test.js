@@ -1,16 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { expect, describe, it, beforeAll } from "vitest";
-import harfbuzz from "../dist/index.mjs";
+import { expect, describe, it } from "vitest";
+import * as hb from "../dist/index.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-let hb;
-
-beforeAll(async function () {
-  hb = await harfbuzz;
-});
 
 describe("Face", function () {
   it("collectUnicodes reflects codepoints supported by the font", function () {
