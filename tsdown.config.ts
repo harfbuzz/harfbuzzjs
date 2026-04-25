@@ -7,4 +7,5 @@ export default defineConfig({
   clean: false,
   outDir: "dist",
   deps: { neverBundle: ["./harfbuzz.js"] },
+  copy: ["src/harfbuzz.d.ts"],
 });

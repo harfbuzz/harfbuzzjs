@@ -25,8 +25,8 @@ export const registry = new FinalizationRegistry<() => void>((cleanup) => {
  * @param module The Emscripten module instance created with {@link
  * createHarfBuzz}.
  */
-export function init(module: EmscriptenModule) {
-  Module = module as HarfBuzzModule;
+export function init(module: HarfBuzzModule) {
+  Module = module;
   exports = Module.wasmExports;
   freeFuncPtr = Module.addFunction((ptr: number) => {
     exports.free(ptr);
