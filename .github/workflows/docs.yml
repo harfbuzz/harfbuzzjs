@@ -2,9 +2,9 @@ name: Docs
 
 on:
   workflow_run:
-    workflows: [ "Build" ]
-    branches: [ "main" ]
-    types: [ completed ]
+    workflows: ["Build"]
+    branches: ["main"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
 
       - name: Generate docs
         run: make doc

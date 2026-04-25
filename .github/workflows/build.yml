@@ -2,10 +2,10 @@ name: Build
 
 on:
   push:
-    branches: [ "main" ]
-    tags: [ "*" ]
+    branches: ["main"]
+    tags: ["*"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   id-token: write
@@ -13,11 +13,10 @@ permissions:
 
 env:
   EM_VERSION: 4.0.13
-  EM_CACHE_FOLDER: 'emsdk-cache'
+  EM_CACHE_FOLDER: "emsdk-cache"
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -41,8 +40,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
       - name: Build
         run: make
       - name: Run tests
@@ -79,7 +78,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '24.x'
+          node-version: "24.x"
       - name: Publish on NPM
         run: npm publish --provenance --access public
 
