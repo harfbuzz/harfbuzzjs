@@ -21,18 +21,18 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           submodules: true
 
       - name: Setup cache
         id: cache-system-libraries
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: ${{env.EM_CACHE_FOLDER}}
           key: ${{env.EM_VERSION}}-${{runner.os}}
       - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v14
+        uses: mymindstorm/setup-emsdk@v16
         with:
           version: ${{env.EM_VERSION}}
           actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
@@ -49,7 +49,7 @@ jobs:
       - name: Check docs
         run: make doc
       - name: Archive artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: wasm
           path: |
@@ -70,7 +70,7 @@ jobs:
         with:
           submodules: true
       - name: Download artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: wasm
           path: dist
