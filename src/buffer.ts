@@ -1,7 +1,7 @@
 import {
   Module,
   exports,
-  registry,
+  track,
   hb_tag,
   utf8_ptr_to_string,
   string_to_ascii_ptr,
@@ -68,8 +68,7 @@ export class Buffer {
     } else {
       this.ptr = exports.hb_buffer_create();
     }
-    const ptr = this.ptr;
-    registry.register(this, () => { exports.hb_buffer_destroy(ptr); }, this);
+    track(this, exports.hb_buffer_destroy);
   }
 
   /**

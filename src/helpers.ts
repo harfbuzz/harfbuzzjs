@@ -20,6 +20,14 @@ export const registry = new FinalizationRegistry<() => void>((cleanup) => {
   cleanup();
 });
 
+export function track(
+  obj: { ptr: number },
+  destroy: (ptr: number) => void,
+): void {
+  const ptr = obj.ptr;
+  registry.register(obj, () => destroy(ptr));
+}
+
 /**
  * Initialize the HarfBuzz module.
  * @param module The Emscripten module instance created with {@link
