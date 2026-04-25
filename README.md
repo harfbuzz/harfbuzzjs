@@ -23,6 +23,9 @@ See the demo [here](https://harfbuzz.github.io/harfbuzzjs/demo/).
 ## Download
 Download from the [releases tab](https://github.com/harfbuzz/harfbuzzjs/releases).
 
+## Migrating from v0.x
+The v1 release introduced several API-breaking changes. See [MIGRATING](MIGRATING.md) for migrating from v0.x.
+
 ## Usage
 
 ### TL;DR
@@ -45,10 +48,10 @@ var xCursor = 0;
 var yCursor = 0;
 for (var glyph of output) {
     var glyphId = glyph.codepoint;
-    var xAdvance = glyph.x_advance;
-    var yAdvance = glyph.y_advance;
-    var xDisplacement = glyph.x_offset;
-    var yDisplacement = glyph.y_offset;
+    var xAdvance = glyph.xAdvance;
+    var yAdvance = glyph.yAdvance;
+    var xDisplacement = glyph.xOffset;
+    var yDisplacement = glyph.yOffset;
 
     var svgPath = font.glyphToPath(glyphId);
     // You need to supply this bit
