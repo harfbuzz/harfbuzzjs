@@ -31,6 +31,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: wasm
+          path: dist
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
 
@@ -47,7 +48,7 @@ jobs:
           npx tsdown
           mkdir -p docs/demo
           cp demo/index.html docs/demo/
-          cp dist/index.mjs dist/harfbuzz.js dist/harfbuzz.wasm docs/demo/
+          cp dist/* docs/demo/
           cp test/fonts/noto/NotoSans-Regular.ttf docs/demo/
 
       - name: Setup Pages
