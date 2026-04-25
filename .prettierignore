@@ -1,0 +1,6 @@
+*.md
+dist
+docs
+emsdk-cache
+harfbuzz
+node_modules
