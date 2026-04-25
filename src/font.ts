@@ -62,7 +62,7 @@ export class Font {
         Module.removeFunction(drawState.quadToPtr!);
         Module.removeFunction(drawState.closePathPtr!);
       }
-    }, this);
+    });
   }
 
   /**
@@ -373,5 +373,4 @@ export class Font {
   setFuncs(fontFuncs: FontFuncs): void {
     exports.hb_font_set_funcs(this.ptr, fontFuncs.ptr);
   }
-
 }

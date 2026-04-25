@@ -1,4 +1,4 @@
-import { Module, exports, registry, utf8_ptr_to_string } from "./helpers";
+import { Module, exports, track, utf8_ptr_to_string } from "./helpers";
 import type { FontExtents, GlyphExtents } from "./types";
 import { Font } from "./font";
 
@@ -13,8 +13,7 @@ export class FontFuncs {
 
   constructor() {
     this.ptr = exports.hb_font_funcs_create();
-    const ptr = this.ptr;
-    registry.register(this, () => { exports.hb_font_funcs_destroy(ptr); }, this);
+    track(this, exports.hb_font_funcs_destroy);
   }
 
   /**
