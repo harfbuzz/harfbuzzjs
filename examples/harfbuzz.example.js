@@ -7,7 +7,7 @@ function example(hb, fontBlob, text) {
   font.setScale(1000, 1000); // Optional, if not given will be in font upem
 
   var buffer = new hb.Buffer();
-  buffer.addText(text || 'abc');
+  buffer.addText(text || "abc");
   buffer.guessSegmentProperties();
   // buffer.setDirection(hb.Direction.LTR); // optional as can be set by guessSegmentProperties also
   hb.shape(font, buffer); // features are not supported yet
@@ -20,14 +20,16 @@ function example(hb, fontBlob, text) {
     glyphs[x.g] = {
       name: font.glyphName(x.g),
       path: font.glyphToPath(x.g),
-      json: font.glyphToJson(x.g)
+      json: font.glyphToJson(x.g),
     };
   });
 
-  var unicodes = face.collectUnicodes()
+  var unicodes = face.collectUnicodes();
 
   return { shape: result, glyphs: glyphs, unicodes: unicodes };
 }
 
 // Should be replaced with something more reliable
-try { module.exports = example; } catch (e) { }
+try {
+  module.exports = example;
+} catch (e) {}

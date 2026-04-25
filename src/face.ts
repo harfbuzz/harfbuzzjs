@@ -356,5 +356,4 @@ export class Face {
     Module.stackRestore(sp);
     return names;
   }
-
 }

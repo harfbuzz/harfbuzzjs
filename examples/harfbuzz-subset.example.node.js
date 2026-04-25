@@ -1,17 +1,23 @@
 // Based on https://github.com/harfbuzz/harfbuzzjs/issues/9#issuecomment-507874962
 // Which was based on https://github.com/harfbuzz/harfbuzzjs/issues/9#issuecomment-507622485
-import { readFile, writeFile } from 'node:fs/promises';
-import { join, extname, basename } from 'node:path';
-import { performance } from 'node:perf_hooks';
-import { fileURLToPath } from 'node:url';
+import { readFile, writeFile } from "node:fs/promises";
+import { join, extname, basename } from "node:path";
+import { performance } from "node:perf_hooks";
+import { fileURLToPath } from "node:url";
 
 const __dirname = import.meta.dirname;
 
-const SUBSET_TEXT = 'abc';
+const SUBSET_TEXT = "abc";
 
-const { instance: { exports } } = await WebAssembly.instantiate(await readFile(join(__dirname, '../dist/harfbuzz-subset.wasm')));
-const fileName = 'NotoSans-Regular.ttf';
-const fontBlob = await readFile(join(__dirname, '../test/fonts/noto', fileName));
+const {
+  instance: { exports },
+} = await WebAssembly.instantiate(
+  await readFile(join(__dirname, "../dist/harfbuzz-subset.wasm")),
+);
+const fileName = "NotoSans-Regular.ttf";
+const fontBlob = await readFile(
+  join(__dirname, "../test/fonts/noto", fileName),
+);
 
 const t = performance.now();
 const heapu8 = new Uint8Array(exports.memory.buffer);
@@ -19,7 +25,13 @@ const fontBuffer = exports.malloc(fontBlob.byteLength);
 heapu8.set(new Uint8Array(fontBlob), fontBuffer);
 
 /* Creating a face */
-const blob = exports.hb_blob_create(fontBuffer, fontBlob.byteLength, 2/*HB_MEMORY_MODE_WRITABLE*/, 0, 0);
+const blob = exports.hb_blob_create(
+  fontBuffer,
+  fontBlob.byteLength,
+  2 /*HB_MEMORY_MODE_WRITABLE*/,
+  0,
+  0,
+);
 const face = exports.hb_face_create(blob, 0);
 exports.hb_blob_destroy(blob);
 
@@ -47,17 +59,23 @@ if (subsetByteLength === 0) {
   exports.hb_face_destroy(face);
   exports.free(fontBuffer);
   throw new Error(
-    'Failed to create subset font, maybe the input file is corrupted?'
+    "Failed to create subset font, maybe the input file is corrupted?",
   );
 }
 
 // Output font data(Uint8Array)
-const subsetFontBlob = heapu8.subarray(offset, offset + exports.hb_blob_get_length(resultBlob));
-console.info('✨ Subset done in', performance.now() - t, 'ms');
+const subsetFontBlob = heapu8.subarray(
+  offset,
+  offset + exports.hb_blob_get_length(resultBlob),
+);
+console.info("✨ Subset done in", performance.now() - t, "ms");
 
 const extName = extname(fileName).toLowerCase();
 const fontName = basename(fileName, extName);
-await writeFile(join(__dirname, '/', `${fontName}.subset${extName}`), subsetFontBlob);
+await writeFile(
+  join(__dirname, "/", `${fontName}.subset${extName}`),
+  subsetFontBlob,
+);
 console.info(`Wrote subset to: ${__dirname}/${fontName}.subset${extName}`);
 
 /* Clean up */

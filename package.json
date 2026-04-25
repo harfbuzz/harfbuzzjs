@@ -1,53 +1,53 @@
 {
-	"name": "harfbuzzjs",
-	"version": "0.10.3",
-	"description": "Minimal version of HarfBuzz for JavaScript use",
-	"type": "module",
-	"main": "dist/index.mjs",
-	"types": "dist/index.d.mts",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.mts",
-			"default": "./dist/index.mjs"
-		}
-	},
-	"files": [
-		"dist"
-	],
-	"scripts": {
-		"prepublishOnly": "make",
-		"test": "make test"
-	},
-	"keywords": [
-		"harfbuzz",
-		"opentype",
-		"truetype",
-		"ttf",
-		"otf",
-		"graphics",
-		"complex scripts",
-		"typography",
-		"font rendering",
-		"font",
-		"fonts",
-		"emoji"
-	],
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/harfbuzz/harfbuzzjs.git"
-	},
-	"author": "Ebrahim Byagowi <ebrahim@gnu.org>",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/harfbuzz/harfbuzzjs/issues"
-	},
-	"homepage": "https://github.com/harfbuzz/harfbuzzjs#readme",
-	"devDependencies": {
-		"@types/emscripten": "^1.41.5",
-		"@types/node": "^25.5.0",
-		"vitest": "^4.1.2",
-		"tsdown": "^0.21.7",
-		"typedoc": "^0.28.18",
-		"typescript": "^6.0.2"
-	}
+  "name": "harfbuzzjs",
+  "version": "0.10.3",
+  "description": "Minimal version of HarfBuzz for JavaScript use",
+  "type": "module",
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepublishOnly": "make",
+    "test": "make test"
+  },
+  "keywords": [
+    "harfbuzz",
+    "opentype",
+    "truetype",
+    "ttf",
+    "otf",
+    "graphics",
+    "complex scripts",
+    "typography",
+    "font rendering",
+    "font",
+    "fonts",
+    "emoji"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harfbuzz/harfbuzzjs.git"
+  },
+  "author": "Ebrahim Byagowi <ebrahim@gnu.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/harfbuzz/harfbuzzjs/issues"
+  },
+  "homepage": "https://github.com/harfbuzz/harfbuzzjs#readme",
+  "devDependencies": {
+    "@types/emscripten": "^1.41.5",
+    "@types/node": "^25.5.0",
+    "vitest": "^4.1.2",
+    "tsdown": "^0.21.7",
+    "typedoc": "^0.28.18",
+    "typescript": "^6.0.2"
+  }
 }
