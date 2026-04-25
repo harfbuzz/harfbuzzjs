@@ -44,6 +44,8 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: Build
         run: make
+      - name: Check formatting
+        run: npx prettier --check .
       - name: Run tests
         run: make test
       - name: Check docs

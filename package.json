@@ -48,6 +48,7 @@
     "vitest": "^4.1.2",
     "tsdown": "^0.21.7",
     "typedoc": "^0.28.18",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "prettier": "^3.8.3"
   }
 }
