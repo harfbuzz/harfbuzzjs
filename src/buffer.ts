@@ -292,7 +292,10 @@ export class Buffer {
     const positionsPtr32 =
       exports.hb_buffer_get_glyph_positions(this.ptr, 0) / 4;
     const positionsArray = positionsPtr32
-      ? Module.HEAP32.subarray(positionsPtr32, positionsPtr32 + this.getLength() * 5)
+      ? Module.HEAP32.subarray(
+          positionsPtr32,
+          positionsPtr32 + this.getLength() * 5,
+        )
       : null;
 
     const out: (GlyphInfo & Partial<GlyphPosition>)[] = [];
