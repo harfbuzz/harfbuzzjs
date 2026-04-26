@@ -37,10 +37,8 @@
     "url": "git+https://github.com/harfbuzz/harfbuzzjs.git"
   },
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/harfbuzz/harfbuzzjs/issues"
-  },
-  "homepage": "https://github.com/harfbuzz/harfbuzzjs#readme",
+  "bugs": "https://github.com/harfbuzz/harfbuzzjs/issues",
+  "homepage": "https://harfbuzz.github.io/harfbuzzjs",
   "devDependencies": {
     "@types/emscripten": "^1.41.5",
     "@types/node": "^25.5.0",
