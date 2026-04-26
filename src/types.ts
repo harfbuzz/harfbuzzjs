@@ -86,9 +86,10 @@ export interface HarfBuzzModule extends EmscriptenModule {
   stackRestore(ptr: number): void;
 }
 
-export enum GlyphFlag {
-  UNSAFE_TO_BREAK = 0x00000001,
-  UNSAFE_TO_CONCAT = 0x00000002,
-  SAFE_TO_INSERT_TATWEEL = 0x00000004,
-  DEFINED = 0x00000007,
-}
+export const GlyphFlag = {
+  UNSAFE_TO_BREAK: 0x00000001,
+  UNSAFE_TO_CONCAT: 0x00000002,
+  SAFE_TO_INSERT_TATWEEL: 0x00000004,
+  DEFINED: 0x00000007,
+} as const;
+export type GlyphFlag = (typeof GlyphFlag)[keyof typeof GlyphFlag];

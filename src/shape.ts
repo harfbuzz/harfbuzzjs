@@ -16,11 +16,12 @@ import {
   BufferSerializeFlag,
 } from "./buffer";
 
-export enum TracePhase {
-  DONT_STOP = 0,
-  GSUB = 1,
-  GPOS = 2,
-}
+export const TracePhase = {
+  DONT_STOP: 0,
+  GSUB: 1,
+  GPOS: 2,
+} as const;
+export type TracePhase = (typeof TracePhase)[keyof typeof TracePhase];
 
 /**
  * Shape a buffer with a given font.
@@ -78,7 +79,7 @@ export function shapeWithTrace(
   stop_phase: TracePhase,
 ): TraceEntry[] {
   const trace: TraceEntry[] = [];
-  let currentPhase = TracePhase.DONT_STOP;
+  let currentPhase: TracePhase = TracePhase.DONT_STOP;
   let stopping = false;
 
   buffer.setMessageFunc((buffer, font, message) => {

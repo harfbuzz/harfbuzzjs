@@ -15,13 +15,14 @@ import type { Blob } from "./blob";
 
 const HB_OT_NAME_ID_INVALID = 0xffff;
 
-export enum GlyphClass {
-  UNCLASSIFIED = 0,
-  BASE_GLYPH = 1,
-  LIGATURE = 2,
-  MARK = 3,
-  COMPONENT = 4,
-}
+export const GlyphClass = {
+  UNCLASSIFIED: 0,
+  BASE_GLYPH: 1,
+  LIGATURE: 2,
+  MARK: 3,
+  COMPONENT: 4,
+} as const;
+export type GlyphClass = (typeof GlyphClass)[keyof typeof GlyphClass];
 
 /**
  * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-face.html | HarfBuzz face}.
