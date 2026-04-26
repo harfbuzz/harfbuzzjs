@@ -10,46 +10,57 @@ import {
 import type { GlyphInfo, GlyphPosition, JsonGlyph } from "./types";
 import { Font } from "./font";
 
-export enum BufferContentType {
-  INVALID = 0,
-  UNICODE = 1,
-  GLYPHS = 2,
-}
+export const BufferContentType = {
+  INVALID: 0,
+  UNICODE: 1,
+  GLYPHS: 2,
+} as const;
+export type BufferContentType =
+  (typeof BufferContentType)[keyof typeof BufferContentType];
 
-export enum BufferSerializeFlag {
-  DEFAULT = 0x00000000,
-  NO_CLUSTERS = 0x00000001,
-  NO_POSITIONS = 0x00000002,
-  NO_GLYPH_NAMES = 0x00000004,
-  GLYPH_EXTENTS = 0x00000008,
-  GLYPH_FLAGS = 0x00000010,
-  NO_ADVANCES = 0x00000020,
-}
+export const BufferSerializeFlag = {
+  DEFAULT: 0x00000000,
+  NO_CLUSTERS: 0x00000001,
+  NO_POSITIONS: 0x00000002,
+  NO_GLYPH_NAMES: 0x00000004,
+  GLYPH_EXTENTS: 0x00000008,
+  GLYPH_FLAGS: 0x00000010,
+  NO_ADVANCES: 0x00000020,
+  DEFINED: 0x0000003f,
+} as const;
+export type BufferSerializeFlag =
+  (typeof BufferSerializeFlag)[keyof typeof BufferSerializeFlag];
 
-export enum BufferFlag {
-  DEFAULT = 0x00000000,
-  BOT = 0x00000001,
-  EOT = 0x00000002,
-  PRESERVE_DEFAULT_IGNORABLES = 0x00000004,
-  REMOVE_DEFAULT_IGNORABLES = 0x00000008,
-  DO_NOT_INSERT_DOTTED_CIRCLE = 0x00000010,
-  VERIFY = 0x00000020,
-  PRODUCE_UNSAFE_TO_CONCAT = 0x00000040,
-  PRODUCE_SAFE_TO_INSERT_TATWEEL = 0x00000080,
-}
+export const BufferFlag = {
+  DEFAULT: 0x00000000,
+  BOT: 0x00000001,
+  EOT: 0x00000002,
+  PRESERVE_DEFAULT_IGNORABLES: 0x00000004,
+  REMOVE_DEFAULT_IGNORABLES: 0x00000008,
+  DO_NOT_INSERT_DOTTED_CIRCLE: 0x00000010,
+  VERIFY: 0x00000020,
+  PRODUCE_UNSAFE_TO_CONCAT: 0x00000040,
+  PRODUCE_SAFE_TO_INSERT_TATWEEL: 0x00000080,
+  DEFINED: 0x000000ff,
+} as const;
+export type BufferFlag = (typeof BufferFlag)[keyof typeof BufferFlag];
 
-export enum Direction {
-  INVALID = 0,
-  LTR = 4,
-  RTL = 5,
-  TTB = 6,
-  BTT = 7,
-}
+export const Direction = {
+  INVALID: 0,
+  LTR: 4,
+  RTL: 5,
+  TTB: 6,
+  BTT: 7,
+} as const;
+export type Direction = (typeof Direction)[keyof typeof Direction];
 
-export enum BufferSerializeFormat {
-  TEXT = "TEXT",
-  JSON = "JSON",
-}
+export const BufferSerializeFormat = {
+  INVALID: 0,
+  TEXT: hb_tag("TEXT"),
+  JSON: hb_tag("JSON"),
+} as const;
+export type BufferSerializeFormat =
+  (typeof BufferSerializeFormat)[keyof typeof BufferSerializeFormat];
 
 /**
  * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-buffer.html | HarfBuzz buffer}.
@@ -384,7 +395,7 @@ export class Buffer {
         bufLen,
         bufConsumedPtr,
         font ? font.ptr : 0,
-        hb_tag(format),
+        format,
         flags,
       );
       const bufConsumed = Module.HEAPU32[bufConsumedPtr / 4];
