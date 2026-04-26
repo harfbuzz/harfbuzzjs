@@ -1,7 +1,4 @@
-Apache license for Zephyr libc implementations (zephyr-string.c),
-emmalloc.cpp (from emscripten project) and MIT for rest of the project
-
-Copyright (c) 2019 Ebrahim Byagowi
+Copyright (c) 2019-2026 The harfbuzzjs project authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
