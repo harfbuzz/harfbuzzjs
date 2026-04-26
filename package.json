@@ -36,7 +36,6 @@
     "type": "git",
     "url": "git+https://github.com/harfbuzz/harfbuzzjs.git"
   },
-  "author": "Ebrahim Byagowi <ebrahim@gnu.org>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/harfbuzz/harfbuzzjs/issues"
