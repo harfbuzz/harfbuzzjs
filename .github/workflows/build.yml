@@ -81,14 +81,27 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24.x"
+
+      - name: Detect prerelease
+        id: prerelease
+        run: |
+          if [[ "${{ github.ref_name }}" == *-* ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+            echo "npm_tag=next" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "npm_tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish on NPM
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --tag ${{ steps.prerelease.outputs.npm_tag }}
 
       - name: Check for release
         id: create_release
         run: |
           if ! gh release view ${{ github.ref_name }}; then
-            gh release create ${{ github.ref_name }} --title ${{ github.ref_name }} --generate-notes
+            gh release create ${{ github.ref_name }} --title ${{ github.ref_name }} --generate-notes \
+              ${{ steps.prerelease.outputs.is_prerelease == 'true' && '--prerelease' || '' }}
           fi
       - name: Populate release
         run: |
