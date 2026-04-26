@@ -1,7 +1,6 @@
 import createHarfBuzz from "./harfbuzz.js";
 import { init } from "./helpers";
 
-export { createHarfBuzz, init };
 export * from "./types";
 export * from "./blob";
 export * from "./face";
