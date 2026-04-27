@@ -81,7 +81,7 @@ test: all typecheck
 	node examples/harfbuzz-subset.example.node.js
 
 doc: node_modules
-	npx typedoc src/index.ts --projectDocuments MIGRATING.md --headings.readme false --treatWarningsAsErrors --out docs
+	npx typedoc
 
 clean:
 	rm -rf dist

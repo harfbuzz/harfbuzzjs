@@ -1,5 +1,12 @@
 {
+  "entryPoints": ["src/index.ts"],
+  "projectDocuments": ["MIGRATING.md"],
+  "headings": {
+    "readme": false
+  },
   "navigationLinks": {
     "GitHub": "https://github.com/harfbuzz/harfbuzzjs"
-  }
+  },
+  "treatWarningsAsErrors": true,
+  "out": "docs"
 }
