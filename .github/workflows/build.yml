@@ -101,7 +101,7 @@ jobs:
         run: |
           # GH checkout action doesn't preserve tag annotations, we must fetch them
           # https://github.com/actions/checkout/issues/290
-          git fetch --tags --force
+          git fetch --no-recurse-submodules --tags --force
           # Dump tag message body to temporary .md file
           echo "$(git tag -l --format='%(contents:body)' ${{ github.ref_name }})" > "${{ runner.temp }}/release_body.md"
 
