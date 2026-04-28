@@ -14,9 +14,8 @@ function example(fontPath, text) {
   buffer.addText(text || "abc");
   buffer.guessSegmentProperties();
   shape(font, buffer);
-  var result = buffer.json(font);
 
-  return result;
+  return buffer.getGlyphInfosAndPositions();
 }
 
 console.log(

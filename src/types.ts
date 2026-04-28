@@ -34,23 +34,6 @@ export interface GlyphPosition {
   yOffset: number;
 }
 
-export interface JsonGlyph {
-  /** The glyph ID. */
-  g: number;
-  /** The cluster ID. */
-  cl: number;
-  /** Advance width (width to advance after this glyph is painted). */
-  ax: number;
-  /** Advance height (height to advance after this glyph is painted). */
-  ay: number;
-  /** X displacement (adjustment in X dimension when painting this glyph). */
-  dx: number;
-  /** Y displacement (adjustment in Y dimension when painting this glyph). */
-  dy: number;
-  /** Glyph flags, a combination of {@link GlyphFlag} values. */
-  fl: number;
-}
-
 export interface SvgPathCommand {
   type: string;
   values: number[];

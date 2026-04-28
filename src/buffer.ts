@@ -8,7 +8,7 @@ import {
   string_to_utf16_ptr,
   type ValueOf,
 } from "./helpers";
-import type { GlyphInfo, GlyphPosition, JsonGlyph } from "./types";
+import type { GlyphInfo, GlyphPosition } from "./types";
 import { Font } from "./font";
 
 export const BufferContentType = {
@@ -414,18 +414,5 @@ export class Buffer {
    */
   getContentType(): BufferContentType {
     return exports.hb_buffer_get_content_type(this.ptr) as BufferContentType;
-  }
-
-  /**
-   * Return the buffer contents as a JSON object.
-   * @returns An array of {@link JsonGlyph} objects.
-   */
-  json(): JsonGlyph[] {
-    const buf = this.serialize({
-      format: BufferSerializeFormat.JSON,
-      flags:
-        BufferSerializeFlag.NO_GLYPH_NAMES | BufferSerializeFlag.GLYPH_FLAGS,
-    });
-    return JSON.parse(buf);
   }
 }
