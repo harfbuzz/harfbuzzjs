@@ -1,3 +1,5 @@
+import type { ValueOf } from "./helpers";
+
 // Data shape types
 export interface FontExtents {
   ascender: number;
@@ -92,4 +94,4 @@ export const GlyphFlag = {
   SAFE_TO_INSERT_TATWEEL: 0x00000004,
   DEFINED: 0x00000007,
 } as const;
-export type GlyphFlag = (typeof GlyphFlag)[keyof typeof GlyphFlag];
+export type GlyphFlag = ValueOf<typeof GlyphFlag>;

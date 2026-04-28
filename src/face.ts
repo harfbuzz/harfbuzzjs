@@ -9,6 +9,7 @@ import {
   language_to_string,
   language_from_string,
   typed_array_from_set,
+  type ValueOf,
 } from "./helpers";
 import type { AxisInfo, NameEntry, FeatureNameIds } from "./types";
 import type { Blob } from "./blob";
@@ -22,7 +23,7 @@ export const GlyphClass = {
   MARK: 3,
   COMPONENT: 4,
 } as const;
-export type GlyphClass = (typeof GlyphClass)[keyof typeof GlyphClass];
+export type GlyphClass = ValueOf<typeof GlyphClass>;
 
 /**
  * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-face.html | HarfBuzz face}.
