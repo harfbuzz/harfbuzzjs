@@ -427,8 +427,8 @@ describe("Font", function () {
     buffer.guessSegmentProperties();
     font.setScale(1000 * 2, 1000 * 2);
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
-    expect(glyphs[0].ax).to.equal(561 * 2);
+    const positions = buffer.getGlyphPositions();
+    expect(positions[0].xAdvance).to.equal(561 * 2);
   });
 
   it("glyphExtents returns extents for glyph ids", function () {
@@ -504,8 +504,8 @@ describe("Font", function () {
     buffer.addText("آلو");
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
-    expect(glyphs[0].ax).to.equal(526);
+    const positions = buffer.getGlyphPositions();
+    expect(positions[0].xAdvance).to.equal(526);
   });
 
   it("glyphToPath converts quadratic glyph to path", function () {
@@ -690,9 +690,9 @@ describe("FontFuncs", function () {
     buffer.addText("12");
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
-    expect(glyphs[0].g).to.equal(21);
-    expect(glyphs[1].g).to.equal(22);
+    const infos = buffer.getGlyphInfos();
+    expect(infos[0].codepoint).to.equal(21);
+    expect(infos[1].codepoint).to.equal(22);
   });
 
   it("setVariationGlyphFunc", function () {
@@ -717,10 +717,10 @@ describe("FontFuncs", function () {
     buffer.addText("11\uFE002\uFE00");
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
-    expect(glyphs[0].g).to.equal(21);
-    expect(glyphs[1].g).to.equal(23);
-    expect(glyphs[2].g).to.equal(22);
+    const infos = buffer.getGlyphInfos();
+    expect(infos[0].codepoint).to.equal(21);
+    expect(infos[1].codepoint).to.equal(23);
+    expect(infos[2].codepoint).to.equal(22);
   });
 
   it("setFontHExtentsFunc", function () {
@@ -781,10 +781,10 @@ describe("Buffer", function () {
     buffer.addText("rtl");
     buffer.setDirection(hb.Direction.RTL);
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
-    expect(glyphs[0].g).to.equal(79); // l
-    expect(glyphs[1].g).to.equal(87); // t
-    expect(glyphs[2].g).to.equal(85); // r
+    const infos = buffer.getGlyphInfos();
+    expect(infos[0].codepoint).to.equal(79); // l
+    expect(infos[1].codepoint).to.equal(87); // t
+    expect(infos[2].codepoint).to.equal(85); // r
   });
 
   it("setClusterLevel affects cluster merging", function () {
@@ -798,9 +798,9 @@ describe("Buffer", function () {
     buffer.addText("x́");
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
-    expect(glyphs[0].cl).to.equal(0);
-    expect(glyphs[1].cl).to.equal(1);
+    const infos = buffer.getGlyphInfos();
+    expect(infos[0].cluster).to.equal(0);
+    expect(infos[1].cluster).to.equal(1);
   });
 
   it("setFlags with PRESERVE_DEFAULT_IGNORABLES affects glyph ids", function () {
@@ -814,8 +814,8 @@ describe("Buffer", function () {
     buffer.setFlags(hb.BufferFlag.PRESERVE_DEFAULT_IGNORABLES);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
-    expect(glyphs[0].g).not.to.equal(3 /* space */);
+    const infos = buffer.getGlyphInfos();
+    expect(infos[0].codepoint).not.to.equal(3); // space
   });
 
   it("setFlags ignores invalid flags", function () {
@@ -829,8 +829,8 @@ describe("Buffer", function () {
     buffer.setFlags(0);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
-    expect(glyphs[0].g).to.equal(68 /* a */);
+    const infos = buffer.getGlyphInfos();
+    expect(infos[0].codepoint).to.equal(68); // a
   });
 
   it("setFlags with PRODUCE_SAFE_TO_INSERT_TATWEEL affects glyph flags", function () {
@@ -846,16 +846,16 @@ describe("Buffer", function () {
     buffer.setFlags(hb.BufferFlag.PRODUCE_SAFE_TO_INSERT_TATWEEL);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const flags = Array.from(buffer.json().map((g) => g.fl));
-    expect(flags).to.deep.equal([5, undefined]);
+    const flags = buffer.getGlyphInfos().map((g) => g.flags);
+    expect(flags).to.deep.equal([5, 0]);
 
     buffer.clearContents();
     buffer.addText("بلا");
     buffer.setFlags(0);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const flags2 = Array.from(buffer.json().map((g) => g.fl));
-    expect(flags2).to.deep.equal([1, undefined]);
+    const flags2 = buffer.getGlyphInfos().map((g) => g.flags);
+    expect(flags2).to.deep.equal([1, 0]);
   });
 
   it("serialize ignores invalid flags", function () {
@@ -1091,7 +1091,15 @@ describe("shape", function () {
     buffer.addText("abc");
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
+    const glyphs = JSON.parse(
+      buffer.serialize({
+        font,
+        format: hb.BufferSerializeFormat.JSON,
+        flags:
+          hb.BufferSerializeFlag.NO_GLYPH_NAMES |
+          hb.BufferSerializeFlag.GLYPH_FLAGS,
+      }),
+    );
     expect(glyphs[0]).to.deep.equal(
       { cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0 } /* a */,
     );
@@ -1113,7 +1121,15 @@ describe("shape", function () {
     buffer.addCodePoints([..."abc"].map((c) => c.codePointAt(0)));
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
+    const glyphs = JSON.parse(
+      buffer.serialize({
+        font,
+        format: hb.BufferSerializeFormat.JSON,
+        flags:
+          hb.BufferSerializeFlag.NO_GLYPH_NAMES |
+          hb.BufferSerializeFlag.GLYPH_FLAGS,
+      }),
+    );
     expect(glyphs[0]).to.deep.equal(
       { cl: 0, g: 68, ax: 561, ay: 0, dx: 0, dy: 0 } /* a */,
     );
@@ -1137,7 +1153,15 @@ describe("shape", function () {
     buffer.addText("أبجد");
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
+    const glyphs = JSON.parse(
+      buffer.serialize({
+        font,
+        format: hb.BufferSerializeFormat.JSON,
+        flags:
+          hb.BufferSerializeFlag.NO_GLYPH_NAMES |
+          hb.BufferSerializeFlag.GLYPH_FLAGS,
+      }),
+    );
     expect(glyphs[0]).to.deep.equal(
       { cl: 3, g: 213, ax: 532, ay: 0, dx: 0, dy: 0, fl: 1 } /* د */,
     );
@@ -1164,7 +1188,15 @@ describe("shape", function () {
     buffer.addText("أبجد", 1, 2);
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
+    const glyphs = JSON.parse(
+      buffer.serialize({
+        font,
+        format: hb.BufferSerializeFormat.JSON,
+        flags:
+          hb.BufferSerializeFlag.NO_GLYPH_NAMES |
+          hb.BufferSerializeFlag.GLYPH_FLAGS,
+      }),
+    );
     expect(glyphs[0]).to.deep.equal(
       { cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, fl: 1 } /* ج */,
     );
@@ -1189,7 +1221,15 @@ describe("shape", function () {
     );
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.json();
+    const glyphs = JSON.parse(
+      buffer.serialize({
+        font,
+        format: hb.BufferSerializeFormat.JSON,
+        flags:
+          hb.BufferSerializeFlag.NO_GLYPH_NAMES |
+          hb.BufferSerializeFlag.GLYPH_FLAGS,
+      }),
+    );
     expect(glyphs[0]).to.deep.equal(
       { cl: 2, g: 529, ax: 637, ay: 0, dx: 0, dy: 0, fl: 1 } /* ج */,
     );
@@ -1288,18 +1328,18 @@ describe("shape", function () {
     buffer.addText("५ल");
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    var glyphs = buffer.json();
-    expect(glyphs).to.have.lengthOf(2);
-    expect(glyphs[0].g).to.equal(118);
+    var infos = buffer.getGlyphInfos();
+    expect(infos).to.have.lengthOf(2);
+    expect(infos[0].codepoint).to.equal(118);
 
     buffer.clearContents();
     buffer.addText("५ल");
     buffer.setLanguage("dty");
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    var glyphs = buffer.json();
-    expect(glyphs).to.have.lengthOf(2);
-    expect(glyphs[0].g).to.equal(123);
+    var infos = buffer.getGlyphInfos();
+    expect(infos).to.have.lengthOf(2);
+    expect(infos[0].codepoint).to.equal(123);
   });
 
   it("shape with OpenType language tag", function () {
@@ -1314,18 +1354,18 @@ describe("shape", function () {
     buffer.addText("५ल");
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    var glyphs = buffer.json();
-    expect(glyphs).to.have.lengthOf(2);
-    expect(glyphs[0].g).to.equal(118);
+    var infos = buffer.getGlyphInfos();
+    expect(infos).to.have.lengthOf(2);
+    expect(infos[0].codepoint).to.equal(118);
 
     buffer.clearContents();
     buffer.addText("५ल");
     buffer.setLanguage("x-hbot-4e455020"); // 'NEP '
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    var glyphs = buffer.json();
-    expect(glyphs).to.have.lengthOf(2);
-    expect(glyphs[0].g).to.equal(123);
+    var infos = buffer.getGlyphInfos();
+    expect(infos).to.have.lengthOf(2);
+    expect(infos[0].codepoint).to.equal(123);
   });
 });
 

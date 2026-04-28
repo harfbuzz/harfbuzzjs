@@ -11,16 +11,16 @@ function example(hb, fontBlob, text) {
   buffer.guessSegmentProperties();
   // buffer.setDirection(hb.Direction.LTR); // optional as can be set by guessSegmentProperties also
   hb.shape(font, buffer); // features are not supported yet
-  var result = buffer.json(font);
+  var result = buffer.getGlyphInfosAndPositions();
 
   // returns glyphs paths, totally optional
   var glyphs = {};
   result.forEach(function (x) {
-    if (glyphs[x.g]) return;
-    glyphs[x.g] = {
-      name: font.glyphName(x.g),
-      path: font.glyphToPath(x.g),
-      json: font.glyphToJson(x.g),
+    if (glyphs[x.codepoint]) return;
+    glyphs[x.codepoint] = {
+      name: font.glyphName(x.codepoint),
+      path: font.glyphToPath(x.codepoint),
+      json: font.glyphToJson(x.codepoint),
     };
   });
 

@@ -51,14 +51,15 @@ values exported from the package.
 | `GlyphPosition.x_offset`        | `GlyphPosition.xOffset`        |
 | `GlyphPosition.y_offset`        | `GlyphPosition.yOffset`        |
 
-### `Buffer.json()`
+### `Buffer.json()` removed
 
-The deprecated `flags` field has been removed. Use `fl` instead, which is also `undefined` (not `0`) when no flags are set.
+The `Buffer.json()` shortcut has been removed. Use the typed accessors instead:
 
-| v0.x                            | v1.x                                         |
-| ------------------------------- | -------------------------------------------- |
-| `buffer.json()[0].flags` → `0`  | `buffer.json()[0].fl` → `undefined`          |
-| `buffer.json()[0].flags` → bits | `buffer.json()[0].fl` → bits (`GlyphFlag`)   |
+- `Buffer.getGlyphInfos()` for glyph IDs, clusters, and flags.
+- `Buffer.getGlyphPositions()` for advances and offsets.
+- `Buffer.getGlyphInfosAndPositions()` for both combined.
+
+When you need the raw HarfBuzz JSON output (e.g. to capture all fields including glyph names), call `Buffer.serialize()` with `BufferSerializeFormat.JSON` and `JSON.parse()` the result yourself.
 
 ## `null` replaced with `undefined`
 

@@ -13,14 +13,14 @@
       buffer.guessSegmentProperties();
       hb.shape(font, buffer);
 
-      var result = buffer.json(font);
+      var result = buffer.getGlyphInfosAndPositions();
       var glyphs = {};
       result.forEach(function (x) {
-        if (glyphs[x.g]) return;
-        glyphs[x.g] = {
-          name: font.glyphName(x.g),
-          path: font.glyphToPath(x.g),
-          json: font.glyphToJson(x.g),
+        if (glyphs[x.codepoint]) return;
+        glyphs[x.codepoint] = {
+          name: font.glyphName(x.codepoint),
+          path: font.glyphToPath(x.codepoint),
+          json: font.glyphToJson(x.codepoint),
         };
       });
 
