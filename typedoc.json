@@ -7,6 +7,7 @@
   "navigationLinks": {
     "GitHub": "https://github.com/harfbuzz/harfbuzzjs"
   },
+  "intentionallyNotExported": ["ValueOf"],
   "treatWarningsAsErrors": true,
   "out": "docs"
 }

@@ -4,6 +4,8 @@ interface StringPtr {
   free: () => void;
 }
 
+export type ValueOf<T> = T[keyof T];
+
 import type { HarfBuzzModule } from "./types";
 
 // Module-level WASM state (set once by init)

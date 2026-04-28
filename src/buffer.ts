@@ -6,6 +6,7 @@ import {
   utf8_ptr_to_string,
   string_to_ascii_ptr,
   string_to_utf16_ptr,
+  type ValueOf,
 } from "./helpers";
 import type { GlyphInfo, GlyphPosition, JsonGlyph } from "./types";
 import { Font } from "./font";
@@ -15,8 +16,7 @@ export const BufferContentType = {
   UNICODE: 1,
   GLYPHS: 2,
 } as const;
-export type BufferContentType =
-  (typeof BufferContentType)[keyof typeof BufferContentType];
+export type BufferContentType = ValueOf<typeof BufferContentType>;
 
 export const BufferSerializeFlag = {
   DEFAULT: 0x00000000,
@@ -28,8 +28,7 @@ export const BufferSerializeFlag = {
   NO_ADVANCES: 0x00000020,
   DEFINED: 0x0000003f,
 } as const;
-export type BufferSerializeFlag =
-  (typeof BufferSerializeFlag)[keyof typeof BufferSerializeFlag];
+export type BufferSerializeFlag = ValueOf<typeof BufferSerializeFlag>;
 
 export const BufferFlag = {
   DEFAULT: 0x00000000,
@@ -43,7 +42,7 @@ export const BufferFlag = {
   PRODUCE_SAFE_TO_INSERT_TATWEEL: 0x00000080,
   DEFINED: 0x000000ff,
 } as const;
-export type BufferFlag = (typeof BufferFlag)[keyof typeof BufferFlag];
+export type BufferFlag = ValueOf<typeof BufferFlag>;
 
 export const Direction = {
   INVALID: 0,
@@ -52,15 +51,14 @@ export const Direction = {
   TTB: 6,
   BTT: 7,
 } as const;
-export type Direction = (typeof Direction)[keyof typeof Direction];
+export type Direction = ValueOf<typeof Direction>;
 
 export const BufferSerializeFormat = {
   INVALID: 0,
   TEXT: hb_tag("TEXT"),
   JSON: hb_tag("JSON"),
 } as const;
-export type BufferSerializeFormat =
-  (typeof BufferSerializeFormat)[keyof typeof BufferSerializeFormat];
+export type BufferSerializeFormat = ValueOf<typeof BufferSerializeFormat>;
 
 /**
  * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-buffer.html | HarfBuzz buffer}.

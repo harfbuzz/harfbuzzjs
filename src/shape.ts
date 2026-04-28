@@ -6,6 +6,7 @@ import {
   utf8_ptr_to_string,
   string_to_ascii_ptr,
   language_to_string,
+  type ValueOf,
 } from "./helpers";
 import type { TraceEntry } from "./types";
 import type { Font } from "./font";
@@ -21,7 +22,7 @@ export const TracePhase = {
   GSUB: 1,
   GPOS: 2,
 } as const;
-export type TracePhase = (typeof TracePhase)[keyof typeof TracePhase];
+export type TracePhase = ValueOf<typeof TracePhase>;
 
 /**
  * Shape a buffer with a given font.
