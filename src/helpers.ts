@@ -63,7 +63,7 @@ export function hb_untag(tag: number): string {
 
 export function utf8_ptr_to_string(ptr: number, length?: number): string {
   let end: number;
-  if (length === undefined) end = Module.HEAPU8.indexOf(0, ptr);
+  if (length == undefined) end = Module.HEAPU8.indexOf(0, ptr);
   else end = ptr + length;
   return utf8Decoder.decode(Module.HEAPU8.subarray(ptr, end));
 }
