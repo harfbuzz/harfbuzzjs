@@ -102,7 +102,7 @@ export function shapeWithTrace(
     const traceBuf = buffer.serialize(
       font,
       0,
-      null,
+      undefined,
       BufferSerializeFormat.JSON,
       BufferSerializeFlag.NO_GLYPH_NAMES,
     );

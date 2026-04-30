@@ -59,3 +59,16 @@ The deprecated `flags` field has been removed. Use `fl` instead, which is also `
 | ------------------------------- | -------------------------------------------- |
 | `buffer.json()[0].flags` → `0`  | `buffer.json()[0].fl` → `undefined`          |
 | `buffer.json()[0].flags` → bits | `buffer.json()[0].fl` → bits (`GlyphFlag`)   |
+
+## `null` replaced with `undefined`
+
+`null` is no longer used anywhere in the API. Anything that previously returned, accepted, or held `null` now uses `undefined` instead.
+
+Affected APIs:
+
+- `Buffer.serialize(font, start, end, …)`: `font` and `end` accept `undefined` (or omission), instead of `null`.
+- `Buffer.addText` / `Buffer.addCodePoints`: `itemLength` accepts `undefined` (or omission), instead of `null`.
+- `Face.getFeatureNameIds`: returns `undefined` on failure, instead of `null`.
+- `Font.glyphHOrigin` / `glyphVOrigin` / `glyphExtents` / `glyphFromName`: return `undefined` on failure, instead of `null`.
+- `FontFuncs.set*Func` callbacks: return `undefined` on failure, instead of `null`.
+- `FeatureNameIds` fields `uiLabelNameId`, `uiTooltipTextNameId`, `sampleTextNameId`: are now optional
