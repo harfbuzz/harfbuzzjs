@@ -48,7 +48,7 @@ HARFBUZZ_SUBSET_SRCS = harfbuzz/src/harfbuzz-subset.cc
 HARFBUZZ_SUBSET_DEPS = config-override-subset.h harfbuzz-subset.symbols
 HARFBUZZ_SUBSET_TARGET = dist/harfbuzz-subset.wasm
 
-.PHONY: all clean harfbuzz harfbuzz-subset test typecheck doc
+.PHONY: all clean harfbuzz harfbuzz-subset test typecheck format doc
 
 all: harfbuzz harfbuzz-subset node_modules
 	npx tsdown
@@ -75,7 +75,10 @@ node_modules: package.json
 typecheck: all
 	npx tsc --noEmit
 
-test: all typecheck
+format: node_modules
+	npx prettier --check .
+
+test: all typecheck format
 	npx vitest run --dir test
 	node examples/harfbuzz.example.node.js
 	node examples/harfbuzz-subset.example.node.js
