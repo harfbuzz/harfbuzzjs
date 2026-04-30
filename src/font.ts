@@ -11,12 +11,12 @@ import type { Face } from "./face";
 import type { FontFuncs } from "./font-funcs";
 
 interface DrawPtrs {
-  drawFuncsPtr: number | null;
-  moveToPtr: number | null;
-  lineToPtr: number | null;
-  cubicToPtr: number | null;
-  quadToPtr: number | null;
-  closePathPtr: number | null;
+  drawFuncsPtr?: number;
+  moveToPtr?: number;
+  lineToPtr?: number;
+  cubicToPtr?: number;
+  quadToPtr?: number;
+  closePathPtr?: number;
   pathBuffer: string;
 }
 
@@ -29,12 +29,6 @@ interface DrawPtrs {
 export class Font {
   readonly ptr: number;
   private drawPtrs: DrawPtrs = {
-    drawFuncsPtr: null,
-    moveToPtr: null,
-    lineToPtr: null,
-    cubicToPtr: null,
-    quadToPtr: null,
-    closePathPtr: null,
     pathBuffer: "",
   };
 
@@ -249,13 +243,13 @@ export class Font {
   /**
    * Return glyph horizontal origin.
    * @param glyphId ID of the requested glyph in the font.
-   * @returns [x, y] origin coordinates, or null if not available.
+   * @returns [x, y] origin coordinates, or undefined if not available.
    */
-  glyphHOrigin(glyphId: number): [number, number] | null {
+  glyphHOrigin(glyphId: number): [number, number] | undefined {
     const sp = Module.stackSave();
     const xPtr = Module.stackAlloc(4);
     const yPtr = Module.stackAlloc(4);
-    let origin: [number, number] | null = null;
+    let origin: [number, number] | undefined;
     if (exports.hb_font_get_glyph_h_origin(this.ptr, glyphId, xPtr, yPtr)) {
       origin = [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
     }
@@ -266,13 +260,13 @@ export class Font {
   /**
    * Return glyph vertical origin.
    * @param glyphId ID of the requested glyph in the font.
-   * @returns [x, y] origin coordinates, or null if not available.
+   * @returns [x, y] origin coordinates, or undefined if not available.
    */
-  glyphVOrigin(glyphId: number): [number, number] | null {
+  glyphVOrigin(glyphId: number): [number, number] | undefined {
     const sp = Module.stackSave();
     const xPtr = Module.stackAlloc(4);
     const yPtr = Module.stackAlloc(4);
-    let origin: [number, number] | null = null;
+    let origin: [number, number] | undefined;
     if (exports.hb_font_get_glyph_v_origin(this.ptr, glyphId, xPtr, yPtr)) {
       origin = [Module.HEAP32[xPtr / 4], Module.HEAP32[yPtr / 4]];
     }
@@ -283,12 +277,12 @@ export class Font {
   /**
    * Return glyph extents.
    * @param glyphId ID of the requested glyph in the font.
-   * @returns An object with xBearing, yBearing, width, and height, or null.
+   * @returns An object with xBearing, yBearing, width, and height, or undefined.
    */
-  glyphExtents(glyphId: number): GlyphExtents | null {
+  glyphExtents(glyphId: number): GlyphExtents | undefined {
     const sp = Module.stackSave();
     const extentsPtr = Module.stackAlloc(16);
-    let extents: GlyphExtents | null = null;
+    let extents: GlyphExtents | undefined;
     if (exports.hb_font_get_glyph_extents(this.ptr, glyphId, extentsPtr)) {
       extents = {
         xBearing: Module.HEAP32[extentsPtr / 4],
@@ -304,13 +298,13 @@ export class Font {
   /**
    * Return glyph ID from name.
    * @param name Name of the requested glyph in the font.
-   * @returns The glyph ID, or null if not found.
+   * @returns The glyph ID, or undefined if not found.
    */
-  glyphFromName(name: string): number | null {
+  glyphFromName(name: string): number | undefined {
     const sp = Module.stackSave();
     const glyphIdPtr = Module.stackAlloc(4);
     const namePtr = string_to_utf8_ptr(name);
-    let glyphId: number | null = null;
+    let glyphId: number | undefined;
     if (
       exports.hb_font_get_glyph_from_name(
         this.ptr,

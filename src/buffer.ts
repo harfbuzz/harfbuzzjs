@@ -68,11 +68,11 @@ export type BufferSerializeFormat = ValueOf<typeof BufferSerializeFormat>;
 export class Buffer {
   readonly ptr: number;
 
-  constructor();
-  /** @internal Wrap an existing buffer pointer. */
-  constructor(existingPtr: number);
+  /**
+   * @param existingPtr @internal Wrap an existing buffer pointer.
+   */
   constructor(existingPtr?: number) {
-    if (existingPtr !== undefined) {
+    if (existingPtr != undefined) {
       this.ptr = exports.hb_buffer_reference(existingPtr);
     } else {
       this.ptr = exports.hb_buffer_create();
@@ -84,21 +84,16 @@ export class Buffer {
    * Add text to the buffer.
    * @param text Text to be added to the buffer.
    * @param itemOffset The offset of the first character to add to the buffer.
-   * @param itemLength The number of characters to add to the buffer, or null for the end of text.
+   * @param itemLength The number of characters to add to the buffer, or omit for the end of text.
    */
-  addText(
-    text: string,
-    itemOffset: number = 0,
-    itemLength: number | null = null,
-  ): void {
+  addText(text: string, itemOffset: number = 0, itemLength?: number): void {
     const str = string_to_utf16_ptr(text);
-    if (itemLength == null) itemLength = str.length;
     exports.hb_buffer_add_utf16(
       this.ptr,
       str.ptr,
       str.length,
       itemOffset,
-      itemLength,
+      itemLength ?? str.length,
     );
     str.free();
   }
@@ -107,12 +102,12 @@ export class Buffer {
    * Add code points to the buffer.
    * @param codePoints Array of code points to be added to the buffer.
    * @param itemOffset The offset of the first code point to add to the buffer.
-   * @param itemLength The number of code points to add to the buffer, or null for the end of the array.
+   * @param itemLength The number of code points to add to the buffer, or omit for the end of the array.
    */
   addCodePoints(
     codePoints: number[],
     itemOffset: number = 0,
-    itemLength: number | null = null,
+    itemLength?: number,
   ): void {
     const codePointsPtr = exports.malloc(codePoints.length * 4);
     const codePointsArray = Module.HEAPU32.subarray(
@@ -120,13 +115,12 @@ export class Buffer {
       codePointsPtr / 4 + codePoints.length,
     );
     codePointsArray.set(codePoints);
-    if (itemLength == null) itemLength = codePoints.length;
     exports.hb_buffer_add_codepoints(
       this.ptr,
       codePointsPtr,
       codePoints.length,
       itemOffset,
-      itemLength,
+      itemLength ?? codePoints.length,
     );
     exports.free(codePointsPtr);
   }
@@ -305,7 +299,7 @@ export class Buffer {
           positionsPtr32,
           positionsPtr32 + this.getLength() * 5,
         )
-      : null;
+      : undefined;
 
     const out: (GlyphInfo & Partial<GlyphPosition>)[] = [];
     for (let i = 0; i < infosArray.length; i += 5) {
@@ -372,9 +366,9 @@ export class Buffer {
    * @returns The serialized buffer contents.
    */
   serialize(
-    font?: Font | null,
+    font?: Font,
     start: number = 0,
-    end?: number | null,
+    end?: number,
     format: BufferSerializeFormat = BufferSerializeFormat.TEXT,
     flags: number = 0,
   ): string {
@@ -420,9 +414,9 @@ export class Buffer {
    */
   json(): JsonGlyph[] {
     const buf = this.serialize(
-      null,
+      undefined,
       0,
-      null,
+      undefined,
       BufferSerializeFormat.JSON,
       BufferSerializeFlag.NO_GLYPH_NAMES | BufferSerializeFlag.GLYPH_FLAGS,
     );

@@ -306,12 +306,12 @@ export class Face {
    * Get the name IDs of the specified feature.
    * @param table The table to query, either "GSUB" or "GPOS".
    * @param featureIndex The index of the feature to query.
-   * @returns An object with name IDs, or null if not found.
+   * @returns An object with name IDs, or undefined if not found.
    */
   getFeatureNameIds(
     table: string,
     featureIndex: number,
-  ): FeatureNameIds | null {
+  ): FeatureNameIds | undefined {
     const sp = Module.stackSave();
     const tableTag = hb_tag(table);
     const labelIdPtr = Module.stackAlloc(4);
@@ -331,7 +331,7 @@ export class Face {
       firstParameterIdPtr,
     );
 
-    let names: FeatureNameIds | null = null;
+    let names: FeatureNameIds | undefined;
     if (found) {
       const uiLabelNameId = Module.HEAPU32[labelIdPtr / 4];
       const uiTooltipTextNameId = Module.HEAPU32[tooltipIdPtr / 4];
@@ -342,17 +342,13 @@ export class Face {
         { length: numNamedParameters },
         (_: number, i: number) => firstParameterId + i,
       );
-      names = {
-        uiLabelNameId:
-          uiLabelNameId == HB_OT_NAME_ID_INVALID ? null : uiLabelNameId,
-        uiTooltipTextNameId:
-          uiTooltipTextNameId == HB_OT_NAME_ID_INVALID
-            ? null
-            : uiTooltipTextNameId,
-        sampleTextNameId:
-          sampleTextNameId == HB_OT_NAME_ID_INVALID ? null : sampleTextNameId,
-        paramUiLabelNameIds: paramUiLabelNameIds,
-      };
+      names = { paramUiLabelNameIds: paramUiLabelNameIds };
+      if (uiLabelNameId != HB_OT_NAME_ID_INVALID)
+        names.uiLabelNameId = uiLabelNameId;
+      if (uiTooltipTextNameId != HB_OT_NAME_ID_INVALID)
+        names.uiTooltipTextNameId = uiTooltipTextNameId;
+      if (sampleTextNameId != HB_OT_NAME_ID_INVALID)
+        names.sampleTextNameId = sampleTextNameId;
     }
 
     Module.stackRestore(sp);

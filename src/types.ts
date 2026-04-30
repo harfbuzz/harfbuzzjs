@@ -66,9 +66,9 @@ export interface NameEntry {
 }
 
 export interface FeatureNameIds {
-  uiLabelNameId: number | null;
-  uiTooltipTextNameId: number | null;
-  sampleTextNameId: number | null;
+  uiLabelNameId?: number;
+  uiTooltipTextNameId?: number;
+  sampleTextNameId?: number;
   paramUiLabelNameIds: number[];
 }
 

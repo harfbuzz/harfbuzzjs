@@ -19,10 +19,10 @@ export class FontFuncs {
   /**
    * Set the font's glyph extents function.
    * @param func The callback receives a Font and glyph ID. It should return
-   * an object with xBearing, yBearing, width, and height, or null on failure.
+   * an object with xBearing, yBearing, width, and height, or undefined on failure.
    */
   setGlyphExtentsFunc(
-    func: (font: Font, glyph: number) => GlyphExtents | null,
+    func: (font: Font, glyph: number) => GlyphExtents | undefined,
   ): void {
     const funcPtr = Module.addFunction(
       (
@@ -51,10 +51,10 @@ export class FontFuncs {
   /**
    * Set the font's glyph from name function.
    * @param func The callback receives a Font and glyph name. It should return
-   * the glyph ID, or null on failure.
+   * the glyph ID, or undefined on failure.
    */
   setGlyphFromNameFunc(
-    func: (font: Font, name: string) => number | null,
+    func: (font: Font, name: string) => number | undefined,
   ): void {
     const funcPtr = Module.addFunction(
       (
@@ -126,10 +126,10 @@ export class FontFuncs {
   /**
    * Set the font's glyph horizontal origin function.
    * @param func The callback receives a Font and glyph ID. It should return
-   * the [x, y] horizontal origin of the glyph, or null on failure.
+   * the [x, y] horizontal origin of the glyph, or undefined on failure.
    */
   setGlyphHOriginFunc(
-    func: (font: Font, glyph: number) => [number, number] | null,
+    func: (font: Font, glyph: number) => [number, number] | undefined,
   ): void {
     const funcPtr = Module.addFunction(
       (
@@ -157,10 +157,10 @@ export class FontFuncs {
   /**
    * Set the font's glyph vertical origin function.
    * @param func The callback receives a Font and glyph ID. It should return
-   * the [x, y] vertical origin of the glyph, or null on failure.
+   * the [x, y] vertical origin of the glyph, or undefined on failure.
    */
   setGlyphVOriginFunc(
-    func: (font: Font, glyph: number) => [number, number] | null,
+    func: (font: Font, glyph: number) => [number, number] | undefined,
   ): void {
     const funcPtr = Module.addFunction(
       (
@@ -213,9 +213,11 @@ export class FontFuncs {
   /**
    * Set the font's glyph name function.
    * @param func The callback receives a Font and glyph ID. It should return
-   * the name of the glyph, or null on failure.
+   * the name of the glyph, or undefined on failure.
    */
-  setGlyphNameFunc(func: (font: Font, glyph: number) => string | null): void {
+  setGlyphNameFunc(
+    func: (font: Font, glyph: number) => string | undefined,
+  ): void {
     const utf8Encoder = new TextEncoder();
     const funcPtr = Module.addFunction(
       (
@@ -245,10 +247,10 @@ export class FontFuncs {
   /**
    * Set the font's nominal glyph function.
    * @param func The callback receives a Font and unicode code point. It should
-   * return the nominal glyph of the unicode, or null on failure.
+   * return the nominal glyph of the unicode, or undefined on failure.
    */
   setNominalGlyphFunc(
-    func: (font: Font, unicode: number) => number | null,
+    func: (font: Font, unicode: number) => number | undefined,
   ): void {
     const funcPtr = Module.addFunction(
       (
@@ -274,14 +276,14 @@ export class FontFuncs {
   /**
    * Set the font's variation glyph function.
    * @param func The callback receives a Font, unicode code point, and variation
-   * selector. It should return the variation glyph, or null on failure.
+   * selector. It should return the variation glyph, or undefined on failure.
    */
   setVariationGlyphFunc(
     func: (
       font: Font,
       unicode: number,
       variationSelector: number,
-    ) => number | null,
+    ) => number | undefined,
   ): void {
     const funcPtr = Module.addFunction(
       (
@@ -308,9 +310,9 @@ export class FontFuncs {
   /**
    * Set the font's horizontal extents function.
    * @param func The callback receives a Font. It should return an object with
-   * ascender, descender, and lineGap, or null on failure.
+   * ascender, descender, and lineGap, or undefined on failure.
    */
-  setFontHExtentsFunc(func: (font: Font) => FontExtents | null): void {
+  setFontHExtentsFunc(func: (font: Font) => FontExtents | undefined): void {
     const funcPtr = Module.addFunction(
       (
         fontPtr: number,
@@ -336,9 +338,9 @@ export class FontFuncs {
   /**
    * Set the font's vertical extents function.
    * @param func The callback receives a Font. It should return an object with
-   * ascender, descender, and lineGap, or null on failure.
+   * ascender, descender, and lineGap, or undefined on failure.
    */
-  setFontVExtentsFunc(func: (font: Font) => FontExtents | null): void {
+  setFontVExtentsFunc(func: (font: Font) => FontExtents | undefined): void {
     const funcPtr = Module.addFunction(
       (
         fontPtr: number,

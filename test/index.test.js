@@ -296,8 +296,6 @@ describe("Face", function () {
       ),
     ).to.deep.equal({
       uiLabelNameId: 256,
-      uiTooltipTextNameId: null,
-      sampleTextNameId: null,
       paramUiLabelNameIds: [],
     });
   });
@@ -328,7 +326,7 @@ describe("Face", function () {
         "GSUB",
         face.getTableFeatureTags("GSUB").indexOf("salt"),
       ),
-    ).to.equal(null);
+    ).to.equal(undefined);
   });
 
   it("getFeatureNameIds returns valid name Ids for cvNN features", function () {
@@ -375,7 +373,7 @@ describe("Font", function () {
     let fontFuncs = new hb.FontFuncs();
     fontFuncs.setGlyphNameFunc(function (font_, glyph) {
       expect(font_.ptr).to.equal(subFont.ptr);
-      return null;
+      return undefined;
     });
     subFont.setFuncs(fontFuncs);
 
@@ -480,7 +478,7 @@ describe("Font", function () {
     );
     let face = new hb.Face(blob);
     let font = new hb.Font(face);
-    expect(font.glyphVOrigin(20)).to.equal(null);
+    expect(font.glyphVOrigin(20)).to.equal(undefined);
   });
 
   it("glyphFromName returns ids for glyph names", function () {
@@ -490,7 +488,7 @@ describe("Font", function () {
     let face = new hb.Face(blob);
     let font = new hb.Font(face);
     expect(font.glyphFromName("one")).to.equal(20);
-    expect(font.glyphFromName("NonExistentGlyph")).to.equal(null);
+    expect(font.glyphFromName("NonExistentGlyph")).to.equal(undefined);
   });
 
   it("setVariations affects advances", function () {
@@ -589,11 +587,11 @@ describe("FontFuncs", function () {
     let fontFuncs = new hb.FontFuncs();
     fontFuncs.setGlyphFromNameFunc(function (font_, name) {
       expect(font_.ptr).to.equal(font.ptr);
-      return name == "one" ? 20 : null;
+      return name == "one" ? 20 : undefined;
     });
     font.setFuncs(fontFuncs);
     expect(font.glyphFromName("one")).to.equal(20);
-    expect(font.glyphFromName("two")).to.equal(null);
+    expect(font.glyphFromName("two")).to.equal(undefined);
   });
 
   it("setGlyphHAdvanceFunc", function () {
@@ -669,7 +667,7 @@ describe("FontFuncs", function () {
     let fontFuncs = new hb.FontFuncs();
     fontFuncs.setGlyphNameFunc(function (font_, glyph) {
       expect(font_.ptr).to.equal(font.ptr);
-      return glyph == 20 ? "one" : null;
+      return glyph == 20 ? "one" : undefined;
     });
     font.setFuncs(fontFuncs);
     expect(font.glyphName(20)).to.equal("one");
@@ -711,7 +709,7 @@ describe("FontFuncs", function () {
     fontFuncs.setVariationGlyphFunc(
       function (font_, unicode, variationSelector) {
         expect(font_.ptr).to.equal(font.ptr);
-        return unicode == 49 ? 23 : null;
+        return unicode == 49 ? 23 : undefined;
       },
     );
     font.setFuncs(fontFuncs);
@@ -873,7 +871,7 @@ describe("Buffer", function () {
     const glyphs = buffer.serialize(
       font,
       0,
-      null,
+      undefined,
       hb.BufferSerializeFormat.TEXT,
       0,
     );
@@ -1369,23 +1367,23 @@ describe("misc", function () {
     let face = new hb.Face(blob);
     let font = new hb.Font(face);
     for (let i = 0; i < 10000; i++) {
-      expect(face.listNames()).to.not.be.null;
-      expect(face.getName(0, "en")).to.not.be.null;
-      expect(font.hExtents()).to.not.be.null;
-      expect(font.vExtents()).to.not.be.null;
-      expect(font.glyphHOrigin(0)).to.not.be.null;
-      expect(font.glyphVOrigin(0)).to.be.null;
-      expect(font.glyphExtents(0)).to.not.be.null;
-      expect(font.glyphFromName("a")).to.not.be.null;
+      expect(face.listNames()).to.not.be.undefined;
+      expect(face.getName(0, "en")).to.not.be.undefined;
+      expect(font.hExtents()).to.not.be.undefined;
+      expect(font.vExtents()).to.not.be.undefined;
+      expect(font.glyphHOrigin(0)).to.not.be.undefined;
+      expect(font.glyphVOrigin(0)).to.be.undefined;
+      expect(font.glyphExtents(0)).to.not.be.undefined;
+      expect(font.glyphFromName("a")).to.not.be.undefined;
       for (let tableTag of ["GSUB", "GPOS"]) {
-        expect(face.getTableFeatureTags(tableTag)).to.not.be.null;
-        expect(face.getTableScriptTags(tableTag)).to.not.be.null;
-        expect(face.getScriptLanguageTags(tableTag, 0)).to.not.be.null;
-        expect(face.getLanguageFeatureTags(tableTag, 0, 0)).to.not.be.null;
+        expect(face.getTableFeatureTags(tableTag)).to.not.be.undefined;
+        expect(face.getTableScriptTags(tableTag)).to.not.be.undefined;
+        expect(face.getScriptLanguageTags(tableTag, 0)).to.not.be.undefined;
+        expect(face.getLanguageFeatureTags(tableTag, 0, 0)).to.not.be.undefined;
         if (tableTag === "GSUB") {
-          expect(face.getFeatureNameIds(tableTag, 50)).to.not.be.null;
+          expect(face.getFeatureNameIds(tableTag, 50)).to.not.be.undefined;
         } else {
-          expect(face.getFeatureNameIds(tableTag, 50)).to.be.null;
+          expect(face.getFeatureNameIds(tableTag, 50)).to.be.undefined;
         }
       }
     }
