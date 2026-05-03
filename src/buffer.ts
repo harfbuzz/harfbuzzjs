@@ -237,16 +237,17 @@ export class Buffer {
    * @returns An array of {@link GlyphInfo} objects.
    */
   getGlyphInfos(): GlyphInfo[] {
-    const infosPtr32 = exports.hb_buffer_get_glyph_infos(this.ptr, 0) / 4;
+    const infosPtr = exports.hb_buffer_get_glyph_infos(this.ptr, 0);
     const infosArray = Module.HEAPU32.subarray(
-      infosPtr32,
-      infosPtr32 + this.getLength() * 5,
+      infosPtr / 4,
+      infosPtr / 4 + this.getLength() * 5,
     );
     const infos: GlyphInfo[] = [];
     for (let i = 0; i < infosArray.length; i += 5) {
       infos.push({
         codepoint: infosArray[i],
         cluster: infosArray[i + 2],
+        flags: exports.hb_glyph_info_get_glyph_flags(infosPtr + i * 4),
       });
     }
     return infos;
@@ -286,10 +287,10 @@ export class Buffer {
    * properties from getGlyphInfos and getGlyphPositions combined.
    */
   getGlyphInfosAndPositions(): (GlyphInfo & Partial<GlyphPosition>)[] {
-    const infosPtr32 = exports.hb_buffer_get_glyph_infos(this.ptr, 0) / 4;
+    const infosPtr = exports.hb_buffer_get_glyph_infos(this.ptr, 0);
     const infosArray = Module.HEAPU32.subarray(
-      infosPtr32,
-      infosPtr32 + this.getLength() * 5,
+      infosPtr / 4,
+      infosPtr / 4 + this.getLength() * 5,
     );
 
     const positionsPtr32 =
@@ -306,6 +307,7 @@ export class Buffer {
       const info: GlyphInfo & Partial<GlyphPosition> = {
         codepoint: infosArray[i],
         cluster: infosArray[i + 2],
+        flags: exports.hb_glyph_info_get_glyph_flags(infosPtr + i * 4),
       };
       for (const [name, idx] of [
         ["mask", 1],
