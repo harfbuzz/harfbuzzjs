@@ -936,10 +936,10 @@ describe("Buffer", function () {
     let infosAndPositions = buffer.getGlyphInfosAndPositions();
 
     expect(infos).to.deep.equal([
-      { codepoint: 120, cluster: 0 },
-      { codepoint: 768, cluster: 1 },
-      { codepoint: 102, cluster: 2 },
-      { codepoint: 105, cluster: 3 },
+      { codepoint: 120, cluster: 0, flags: 0 },
+      { codepoint: 768, cluster: 1, flags: 0 },
+      { codepoint: 102, cluster: 2, flags: 0 },
+      { codepoint: 105, cluster: 3, flags: 0 },
     ]);
     expect(positions).to.deep.equal([
       { xAdvance: 0, yAdvance: 0, xOffset: 0, yOffset: 0 },
@@ -962,9 +962,9 @@ describe("Buffer", function () {
     infosAndPositions = buffer.getGlyphInfosAndPositions();
 
     expect(infos).to.deep.equal([
-      { codepoint: 91, cluster: 0 },
-      { codepoint: 2662, cluster: 0 },
-      { codepoint: 1652, cluster: 2 },
+      { codepoint: 91, cluster: 0, flags: 0 },
+      { codepoint: 2662, cluster: 0, flags: 0 },
+      { codepoint: 1652, cluster: 2, flags: 0 },
     ]);
     expect(positions).to.deep.equal([
       { xAdvance: 529, yAdvance: 0, xOffset: 0, yOffset: 0 },
@@ -995,6 +995,7 @@ describe("Buffer", function () {
     expect(Object.keys(infosAndPositions[0])).to.deep.equal([
       "codepoint",
       "cluster",
+      "flags",
       "xAdvance",
       "yAdvance",
       "xOffset",

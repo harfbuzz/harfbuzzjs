@@ -19,6 +19,8 @@ export interface GlyphInfo {
   codepoint: number;
   /** The cluster index of the glyph. */
   cluster: number;
+  /** Glyph flags, a combination of {@link GlyphFlag} values. */
+  flags: number;
 }
 
 export interface GlyphPosition {
