@@ -868,13 +868,10 @@ describe("Buffer", function () {
     buffer.addText("abc");
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
-    const glyphs = buffer.serialize(
+    const glyphs = buffer.serialize({
       font,
-      0,
-      undefined,
-      hb.BufferSerializeFormat.TEXT,
-      0,
-    );
+      format: hb.BufferSerializeFormat.TEXT,
+    });
     expect(glyphs).to.deep.equal("[a=0+561|b=1+615|c=2+480]");
   });
 

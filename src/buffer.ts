@@ -359,21 +359,27 @@ export class Buffer {
 
   /**
    * Serialize the buffer contents to a string.
-   * @param font The font to use for serialization.
-   * @param start The starting index of the glyphs to serialize.
-   * @param end The ending index of the glyphs to serialize.
-   * @param format The {@link BufferSerializeFormat} to serialize the buffer contents to.
-   * @param flags A combination of {@link BufferSerializeFlag} values (OR them together).
-   *
+   * @param options Serialization options:
+   *  - `font`: the font to use for serialization;
+   *  - `start`: the starting index of the glyphs (default `0`);
+   *  - `end`: the ending index of the glyphs (default end of buffer);
+   *  - `format`: a {@link BufferSerializeFormat} value (default `TEXT`);
+   *  - `flags`: a combination of {@link BufferSerializeFlag} values (default `0`).
    * @returns The serialized buffer contents.
    */
   serialize(
-    font?: Font,
-    start: number = 0,
-    end?: number,
-    format: BufferSerializeFormat = BufferSerializeFormat.TEXT,
-    flags: number = 0,
+    options: {
+      font?: Font;
+      start?: number;
+      end?: number;
+      format?: BufferSerializeFormat;
+      flags?: number;
+    } = {},
   ): string {
+    let { font, start, end, format, flags } = options;
+    start ??= 0;
+    format ??= BufferSerializeFormat.TEXT;
+    flags ??= 0;
     const sp = Module.stackSave();
     const endPos = end ?? this.getLength();
     const bufLen = 32 * 1024;
@@ -415,13 +421,11 @@ export class Buffer {
    * @returns An array of {@link JsonGlyph} objects.
    */
   json(): JsonGlyph[] {
-    const buf = this.serialize(
-      undefined,
-      0,
-      undefined,
-      BufferSerializeFormat.JSON,
-      BufferSerializeFlag.NO_GLYPH_NAMES | BufferSerializeFlag.GLYPH_FLAGS,
-    );
+    const buf = this.serialize({
+      format: BufferSerializeFormat.JSON,
+      flags:
+        BufferSerializeFlag.NO_GLYPH_NAMES | BufferSerializeFlag.GLYPH_FLAGS,
+    });
     return JSON.parse(buf);
   }
 }

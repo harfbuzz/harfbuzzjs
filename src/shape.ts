@@ -99,13 +99,11 @@ export function shapeWithTrace(
 
     if (stopping) return false;
 
-    const traceBuf = buffer.serialize(
+    const traceBuf = buffer.serialize({
       font,
-      0,
-      undefined,
-      BufferSerializeFormat.JSON,
-      BufferSerializeFlag.NO_GLYPH_NAMES,
-    );
+      format: BufferSerializeFormat.JSON,
+      flags: BufferSerializeFlag.NO_GLYPH_NAMES,
+    });
 
     trace.push({
       m: message,
