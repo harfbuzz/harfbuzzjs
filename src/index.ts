@@ -10,6 +10,7 @@ export * from "./buffer";
 export * from "./feature";
 export * from "./variation";
 export * from "./language";
+export * from "./script";
 export * from "./shape";
 
 init(await createHarfBuzz());

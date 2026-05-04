@@ -1082,6 +1082,20 @@ describe("Buffer", function () {
   });
 });
 
+describe("Script", function () {
+  it("toString returns the ISO 15924 tag", function () {
+    expect(hb.Script.LATIN.toString()).to.equal("Latn");
+    expect(hb.Script.ARABIC.toString()).to.equal("Arab");
+  });
+
+  it("normalizes script variants to their canonical script", function () {
+    // ISO 15924 variants alias to a canonical script (see hb_script_from_iso15924_tag).
+    expect(new hb.Script("Aran")).to.deep.equal(hb.Script.ARABIC);
+    expect(new hb.Script("Hans")).to.deep.equal(hb.Script.HAN);
+    expect(new hb.Script("Hant")).to.deep.equal(hb.Script.HAN);
+  });
+});
+
 describe("Language", function () {
   it("toString returns the BCP 47 tag", function () {
     expect(new hb.Language("en").toString()).to.equal("en");
@@ -1471,11 +1485,11 @@ describe("misc", function () {
   });
 
   it("convert OpenType tag to script", function () {
-    expect(hb.otTagToScript("arab")).to.equal("Arab");
-    expect(hb.otTagToScript("latn")).to.equal("Latn");
-    expect(hb.otTagToScript("dev2")).to.equal("Deva");
-    expect(hb.otTagToScript("nko ")).to.equal("Nkoo");
-    expect(hb.otTagToScript("DFLT")).to.equal("\0\0\0\0");
+    expect(hb.otTagToScript("arab").toString()).to.equal("Arab");
+    expect(hb.otTagToScript("latn").toString()).to.equal("Latn");
+    expect(hb.otTagToScript("dev2").toString()).to.equal("Deva");
+    expect(hb.otTagToScript("nko ").toString()).to.equal("Nkoo");
+    expect(hb.otTagToScript("DFLT").toString()).to.equal("\0\0\0\0");
   });
 
   it("convert OpenType tag to language", function () {

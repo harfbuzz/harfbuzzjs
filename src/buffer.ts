@@ -4,13 +4,13 @@ import {
   track,
   hb_tag,
   utf8_ptr_to_string,
-  string_to_ascii_ptr,
   string_to_utf16_ptr,
   type ValueOf,
 } from "./helpers";
 import type { GlyphInfo, GlyphPosition } from "./types";
 import { Font } from "./font";
 import type { Language } from "./language";
+import type { Script } from "./script";
 
 export const BufferContentType = {
   INVALID: 0,
@@ -186,15 +186,10 @@ export class Buffer {
 
   /**
    * Set buffer script explicitly.
-   * @param script The buffer script
+   * @param script The buffer script.
    */
-  setScript(script: string): void {
-    const str = string_to_ascii_ptr(script);
-    exports.hb_buffer_set_script(
-      this.ptr,
-      exports.hb_script_from_string(str.ptr, -1),
-    );
-    str.free();
+  setScript(script: Script): void {
+    exports.hb_buffer_set_script(this.ptr, script.value);
   }
 
   /**

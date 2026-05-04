@@ -2,7 +2,6 @@ import {
   Module,
   exports,
   hb_tag,
-  hb_untag,
   utf8_ptr_to_string,
   type ValueOf,
 } from "./helpers";
@@ -10,6 +9,7 @@ import type { TraceEntry } from "./types";
 import type { Font } from "./font";
 import type { Feature } from "./feature";
 import { Language } from "./language";
+import { Script } from "./script";
 import {
   Buffer,
   BufferContentType,
@@ -139,10 +139,8 @@ export function versionString(): string {
  * @param tag The tag to convert.
  * @returns The script.
  */
-export function otTagToScript(tag: string): string {
-  const hbTag = hb_tag(tag);
-  const script = exports.hb_ot_tag_to_script(hbTag);
-  return hb_untag(script);
+export function otTagToScript(tag: string): Script {
+  return new Script(exports.hb_ot_tag_to_script(hb_tag(tag)));
 }
 
 /**

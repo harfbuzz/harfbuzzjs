@@ -71,6 +71,7 @@ Affected APIs:
 - `shape` and `shapeWithTrace` now take `Feature[]` instead of a comma-separated string. Use the new `Feature` class (e.g. `new Feature("liga", 0)` or `Feature.fromString("-liga")`).
 - `Font.setVariations` now takes `Variation[]` instead of `Record<string, number>`. Use the new `Variation` class (e.g. `font.setVariations([new Variation("wght", 700)])` or `Variation.fromString("wght=700")`).
 - `Buffer.setLanguage`, `Face.getName`, `Face.listNames`, and `otTagToLanguage` now use the new `Language` class instead of plain BCP 47 strings (e.g. `buffer.setLanguage(new Language("en"))`).
+- `Buffer.setScript` and `otTagToScript` now use the new `Script` class instead of plain ISO 15924 tag strings (e.g. `buffer.setScript(new Script("Latn"))` or, for the predefined ISO 15924 scripts, `buffer.setScript(Script.LATIN)`).
 - `Buffer.addText` / `Buffer.addCodePoints`: `itemLength` accepts `undefined` (or omission), instead of `null`.
 - `Face.getFeatureNameIds`: returns `undefined` on failure, instead of `null`.
 - `Font.glyphHOrigin` / `glyphVOrigin` / `glyphExtents` / `glyphFromName`: return `undefined` on failure, instead of `null`.
