@@ -401,10 +401,13 @@ export class Buffer {
       flags?: number;
     } = {},
   ): string {
-    let { font, start, end, format, flags } = options;
-    start ??= 0;
-    format ??= BufferSerializeFormat.TEXT;
-    flags ??= 0;
+    let {
+      font,
+      start = 0,
+      end,
+      format = BufferSerializeFormat.TEXT,
+      flags = 0,
+    } = options;
     const sp = Module.stackSave();
     const endPos = end ?? this.getLength();
     const bufLen = 32 * 1024;
