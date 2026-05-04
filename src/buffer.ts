@@ -90,6 +90,22 @@ export class Buffer {
   }
 
   /**
+   * Appends a character with the Unicode value of `codePoint` to the buffer,
+   * and gives it the initial cluster value of `cluster`. Clusters can be any
+   * thing the client wants, they are usually used to refer to the index of the
+   * character in the input text stream and are output in the `cluster` field
+   * of {@link GlyphInfo}.
+   *
+   * This function does not check the validity of `codePoint`, it is up to the
+   * caller to ensure it is a valid Unicode code point.
+   * @param codePoint A Unicode code point.
+   * @param cluster The cluster value of `codePoint`.
+   */
+  add(codePoint: number, cluster: number): void {
+    exports.hb_buffer_add(this.ptr, codePoint, cluster);
+  }
+
+  /**
    * Add text to the buffer.
    * @param text Text to be added to the buffer.
    * @param itemOffset The offset of the first character to add to the buffer.

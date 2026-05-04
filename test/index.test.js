@@ -1111,6 +1111,23 @@ describe("shape", function () {
     );
   });
 
+  it("add appends a single code point with cluster", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    let buffer = new hb.Buffer();
+    buffer.add("a".codePointAt(0), 5);
+    buffer.add("b".codePointAt(0), 7);
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer);
+    const infos = buffer.getGlyphInfos();
+    expect(infos).to.have.lengthOf(2);
+    expect(infos[0].cluster).to.equal(5);
+    expect(infos[1].cluster).to.equal(7);
+  });
+
   it("shape Latin string code points", function () {
     let blob = new hb.Blob(
       fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
