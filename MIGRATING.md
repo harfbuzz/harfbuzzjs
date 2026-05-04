@@ -66,7 +66,7 @@ The deprecated `flags` field has been removed. Use `fl` instead, which is also `
 
 Affected APIs:
 
-- `Buffer.serialize(font, start, end, …)`: `font` and `end` accept `undefined` (or omission), instead of `null`.
+- `Buffer.serialize` now takes a single options object: `{ font, start, end, format, flags }` (all optional). The previous positional signature is gone.
 - `Buffer.addText` / `Buffer.addCodePoints`: `itemLength` accepts `undefined` (or omission), instead of `null`.
 - `Face.getFeatureNameIds`: returns `undefined` on failure, instead of `null`.
 - `Font.glyphHOrigin` / `glyphVOrigin` / `glyphExtents` / `glyphFromName`: return `undefined` on failure, instead of `null`.
