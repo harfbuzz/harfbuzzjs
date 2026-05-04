@@ -1082,6 +1082,21 @@ describe("Buffer", function () {
   });
 });
 
+describe("Direction", function () {
+  it("toString returns the lowercase direction name", function () {
+    expect(hb.Direction.LTR.toString()).to.equal("ltr");
+    expect(hb.Direction.RTL.toString()).to.equal("rtl");
+    expect(hb.Direction.TTB.toString()).to.equal("ttb");
+    expect(hb.Direction.BTT.toString()).to.equal("btt");
+    expect(hb.Direction.INVALID.toString()).to.equal("invalid");
+  });
+
+  it("string constructor parses the direction name", function () {
+    expect(new hb.Direction("ltr")).to.deep.equal(hb.Direction.LTR);
+    expect(new hb.Direction("RTL")).to.deep.equal(hb.Direction.RTL);
+  });
+});
+
 describe("Script", function () {
   it("toString returns the ISO 15924 tag", function () {
     expect(hb.Script.LATIN.toString()).to.equal("Latn");

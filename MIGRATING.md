@@ -72,6 +72,7 @@ Affected APIs:
 - `Font.setVariations` now takes `Variation[]` instead of `Record<string, number>`. Use the new `Variation` class (e.g. `font.setVariations([new Variation("wght", 700)])` or `Variation.fromString("wght=700")`).
 - `Buffer.setLanguage`, `Face.getName`, `Face.listNames`, and `otTagToLanguage` now use the new `Language` class instead of plain BCP 47 strings (e.g. `buffer.setLanguage(new Language("en"))`).
 - `Buffer.setScript` and `otTagToScript` now use the new `Script` class instead of plain ISO 15924 tag strings (e.g. `buffer.setScript(new Script("Latn"))` or, for the predefined ISO 15924 scripts, `buffer.setScript(Script.LATIN)`).
+- `Direction` is now a class with `INVALID`/`LTR`/`RTL`/`TTB`/`BTT` static instances and a string constructor. `Buffer.setDirection` takes a `Direction` instance; the call form `buffer.setDirection(Direction.RTL)` shown in the v0 → v1 table above keeps working.
 - `Buffer.addText` / `Buffer.addCodePoints`: `itemLength` accepts `undefined` (or omission), instead of `null`.
 - `Face.getFeatureNameIds`: returns `undefined` on failure, instead of `null`.
 - `Font.glyphHOrigin` / `glyphVOrigin` / `glyphExtents` / `glyphFromName`: return `undefined` on failure, instead of `null`.

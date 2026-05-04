@@ -11,6 +11,7 @@ import type { GlyphInfo, GlyphPosition } from "./types";
 import { Font } from "./font";
 import type { Language } from "./language";
 import type { Script } from "./script";
+import type { Direction } from "./direction";
 
 export const BufferContentType = {
   INVALID: 0,
@@ -44,15 +45,6 @@ export const BufferFlag = {
   DEFINED: 0x000000ff,
 } as const;
 export type BufferFlag = ValueOf<typeof BufferFlag>;
-
-export const Direction = {
-  INVALID: 0,
-  LTR: 4,
-  RTL: 5,
-  TTB: 6,
-  BTT: 7,
-} as const;
-export type Direction = ValueOf<typeof Direction>;
 
 export const ClusterLevel = {
   MONOTONE_GRAPHEMES: 0,
@@ -162,10 +154,10 @@ export class Buffer {
 
   /**
    * Set buffer direction explicitly.
-   * @param dir A {@link Direction} value.
+   * @param dir The buffer direction.
    */
   setDirection(dir: Direction): void {
-    exports.hb_buffer_set_direction(this.ptr, dir);
+    exports.hb_buffer_set_direction(this.ptr, dir.value);
   }
 
   /**
