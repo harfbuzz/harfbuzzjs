@@ -53,6 +53,15 @@ export const Direction = {
 } as const;
 export type Direction = ValueOf<typeof Direction>;
 
+export const ClusterLevel = {
+  MONOTONE_GRAPHEMES: 0,
+  MONOTONE_CHARACTERS: 1,
+  CHARACTERS: 2,
+  GRAPHEMES: 3,
+  DEFAULT: 0,
+} as const;
+export type ClusterLevel = ValueOf<typeof ClusterLevel>;
+
 export const BufferSerializeFormat = {
   INVALID: 0,
   TEXT: hb_tag("TEXT"),
@@ -180,9 +189,9 @@ export class Buffer {
    * Set the HarfBuzz clustering level.
    *
    * Affects the cluster values returned from shaping.
-   * @param level Clustering level. See the HarfBuzz manual chapter on Clusters.
+   * @param level A {@link ClusterLevel} value. See the HarfBuzz manual chapter on Clusters.
    */
-  setClusterLevel(level: number): void {
+  setClusterLevel(level: ClusterLevel): void {
     exports.hb_buffer_set_cluster_level(this.ptr, level);
   }
 

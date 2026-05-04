@@ -794,7 +794,7 @@ describe("Buffer", function () {
     let face = new hb.Face(blob);
     let font = new hb.Font(face);
     let buffer = new hb.Buffer();
-    buffer.setClusterLevel(1);
+    buffer.setClusterLevel(hb.ClusterLevel.MONOTONE_CHARACTERS);
     buffer.addText("x́");
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
