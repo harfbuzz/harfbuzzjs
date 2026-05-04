@@ -70,6 +70,7 @@ Affected APIs:
 - `Buffer.serialize` now takes a single options object: `{ font, start, end, format, flags }` (all optional). The previous positional signature is gone.
 - `shape` and `shapeWithTrace` now take `Feature[]` instead of a comma-separated string. Use the new `Feature` class (e.g. `new Feature("liga", 0)` or `Feature.fromString("-liga")`).
 - `Font.setVariations` now takes `Variation[]` instead of `Record<string, number>`. Use the new `Variation` class (e.g. `font.setVariations([new Variation("wght", 700)])` or `Variation.fromString("wght=700")`).
+- `Buffer.setLanguage`, `Face.getName`, `Face.listNames`, and `otTagToLanguage` now use the new `Language` class instead of plain BCP 47 strings (e.g. `buffer.setLanguage(new Language("en"))`).
 - `Buffer.addText` / `Buffer.addCodePoints`: `itemLength` accepts `undefined` (or omission), instead of `null`.
 - `Face.getFeatureNameIds`: returns `undefined` on failure, instead of `null`.
 - `Font.glyphHOrigin` / `glyphVOrigin` / `glyphExtents` / `glyphFromName`: return `undefined` on failure, instead of `null`.

@@ -10,6 +10,7 @@ import {
 } from "./helpers";
 import type { GlyphInfo, GlyphPosition } from "./types";
 import { Font } from "./font";
+import type { Language } from "./language";
 
 export const BufferContentType = {
   INVALID: 0,
@@ -177,15 +178,10 @@ export class Buffer {
 
   /**
    * Set buffer language explicitly.
-   * @param language The buffer language
+   * @param language The buffer language.
    */
-  setLanguage(language: string): void {
-    const str = string_to_ascii_ptr(language);
-    exports.hb_buffer_set_language(
-      this.ptr,
-      exports.hb_language_from_string(str.ptr, -1),
-    );
-    str.free();
+  setLanguage(language: Language): void {
+    exports.hb_buffer_set_language(this.ptr, language.ptr);
   }
 
   /**

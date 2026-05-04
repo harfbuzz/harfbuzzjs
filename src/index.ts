@@ -9,6 +9,7 @@ export * from "./font-funcs";
 export * from "./buffer";
 export * from "./feature";
 export * from "./variation";
+export * from "./language";
 export * from "./shape";
 
 init(await createHarfBuzz());

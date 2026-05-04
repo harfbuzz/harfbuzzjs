@@ -119,18 +119,6 @@ export function string_to_utf16_ptr(text: string): StringPtr {
   };
 }
 
-export function language_to_string(language: number): string {
-  const ptr = exports.hb_language_to_string(language);
-  return utf8_ptr_to_string(ptr);
-}
-
-export function language_from_string(str: string): number {
-  const languageStr = string_to_ascii_ptr(str);
-  const languagePtr = exports.hb_language_from_string(languageStr.ptr, -1);
-  languageStr.free();
-  return languagePtr;
-}
-
 /**
  * Return the typed array of HarfBuzz set contents.
  * @param setPtr Pointer of set

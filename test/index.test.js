@@ -271,8 +271,10 @@ describe("Face", function () {
     let face = new hb.Face(blob);
     let names = face.listNames();
     expect(names.length).to.equal(38);
-    expect(names[0]).to.deep.equal({ nameId: 0, language: "en" });
-    expect(names[37]).to.deep.equal({ nameId: 278, language: "en" });
+    expect(names[0].nameId).to.equal(0);
+    expect(names[0].language.toString()).to.equal("en");
+    expect(names[37].nameId).to.equal(278);
+    expect(names[37].language.toString()).to.equal("en");
   });
 
   it("getName fetches a name", function () {
@@ -280,8 +282,8 @@ describe("Face", function () {
       fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
     );
     let face = new hb.Face(blob);
-    expect(face.getName(1, "en")).to.equal("Noto Sans");
-    expect(face.getName(256, "en")).to.equal("florin symbol");
+    expect(face.getName(1, new hb.Language("en"))).to.equal("Noto Sans");
+    expect(face.getName(256, new hb.Language("en"))).to.equal("florin symbol");
   });
 
   it("getFeatureNameIds returns valid name Ids for ssNN features", function () {
@@ -311,7 +313,7 @@ describe("Face", function () {
           "GSUB",
           face.getTableFeatureTags("GSUB").indexOf("ss03"),
         ).uiLabelNameId,
-        "en",
+        new hb.Language("en"),
       ),
     ).to.equal("florin symbol");
   });
@@ -1080,6 +1082,18 @@ describe("Buffer", function () {
   });
 });
 
+describe("Language", function () {
+  it("toString returns the BCP 47 tag", function () {
+    expect(new hb.Language("en").toString()).to.equal("en");
+    expect(new hb.Language("fa-IR").toString()).to.equal("fa-ir");
+  });
+
+  it("interns by tag", function () {
+    expect(new hb.Language("en").ptr).to.equal(new hb.Language("en").ptr);
+    expect(new hb.Language("en").ptr).to.not.equal(new hb.Language("fr").ptr);
+  });
+});
+
 describe("Variation", function () {
   it("fromString parses tag=value", function () {
     expect(hb.Variation.fromString("wght=500")).to.deep.equal(
@@ -1407,7 +1421,7 @@ describe("shape", function () {
 
     buffer.clearContents();
     buffer.addText("५ल");
-    buffer.setLanguage("dty");
+    buffer.setLanguage(new hb.Language("dty"));
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
     var infos = buffer.getGlyphInfos();
@@ -1433,7 +1447,7 @@ describe("shape", function () {
 
     buffer.clearContents();
     buffer.addText("५ल");
-    buffer.setLanguage("x-hbot-4e455020"); // 'NEP '
+    buffer.setLanguage(new hb.Language("x-hbot-4e455020")); // 'NEP '
     buffer.guessSegmentProperties();
     hb.shape(font, buffer);
     var infos = buffer.getGlyphInfos();
@@ -1465,10 +1479,10 @@ describe("misc", function () {
   });
 
   it("convert OpenType tag to language", function () {
-    expect(hb.otTagToLanguage("ARA ")).to.equal("ar");
-    expect(hb.otTagToLanguage("ENG ")).to.equal("en");
-    expect(hb.otTagToLanguage("BAD0")).to.equal("bad");
-    expect(hb.otTagToLanguage("SYRE")).to.equal("und-syre");
+    expect(hb.otTagToLanguage("ARA ").toString()).to.equal("ar");
+    expect(hb.otTagToLanguage("ENG ").toString()).to.equal("en");
+    expect(hb.otTagToLanguage("BAD0").toString()).to.equal("bad");
+    expect(hb.otTagToLanguage("SYRE").toString()).to.equal("und-syre");
   });
 
   it("test that calling functions repeatedly doesn't exhaust memory", function () {
@@ -1479,7 +1493,7 @@ describe("misc", function () {
     let font = new hb.Font(face);
     for (let i = 0; i < 10000; i++) {
       expect(face.listNames()).to.not.be.undefined;
-      expect(face.getName(0, "en")).to.not.be.undefined;
+      expect(face.getName(0, new hb.Language("en"))).to.not.be.undefined;
       expect(font.hExtents()).to.not.be.undefined;
       expect(font.vExtents()).to.not.be.undefined;
       expect(font.glyphHOrigin(0)).to.not.be.undefined;

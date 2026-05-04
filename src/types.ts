@@ -1,4 +1,5 @@
 import type { ValueOf } from "./helpers";
+import type { Language } from "./language";
 
 // Data shape types
 export interface FontExtents {
@@ -47,7 +48,7 @@ export interface AxisInfo {
 
 export interface NameEntry {
   nameId: number;
-  language: string;
+  language: Language;
 }
 
 export interface FeatureNameIds {

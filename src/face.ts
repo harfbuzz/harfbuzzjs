@@ -6,13 +6,12 @@ import {
   hb_tag,
   hb_untag,
   utf16_ptr_to_string,
-  language_to_string,
-  language_from_string,
   typed_array_from_set,
   type ValueOf,
 } from "./helpers";
 import type { AxisInfo, NameEntry, FeatureNameIds } from "./types";
 import type { Blob } from "./blob";
+import { Language } from "./language";
 
 const HB_OT_NAME_ID_INVALID = 0xffff;
 
@@ -266,9 +265,7 @@ export class Face {
     for (let i = 0; i < numEntries; i++) {
       entries.push({
         nameId: Module.HEAPU32[entriesPtr / 4 + i * 3],
-        language: language_to_string(
-          Module.HEAPU32[entriesPtr / 4 + i * 3 + 2],
-        ),
+        language: new Language(Module.HEAPU32[entriesPtr / 4 + i * 3 + 2]),
       });
     }
     Module.stackRestore(sp);
@@ -281,18 +278,17 @@ export class Face {
    * @param language The language of the name to get.
    * @returns The name string.
    */
-  getName(nameId: number, language: string): string {
+  getName(nameId: number, language: Language): string {
     const sp = Module.stackSave();
-    const languagePtr = language_from_string(language);
     const nameLen =
-      exports.hb_ot_name_get_utf16(this.ptr, nameId, languagePtr, 0, 0) + 1;
+      exports.hb_ot_name_get_utf16(this.ptr, nameId, language.ptr, 0, 0) + 1;
     const textSizePtr = Module.stackAlloc(4);
     const textPtr = exports.malloc(nameLen * 2);
     Module.HEAPU32[textSizePtr / 4] = nameLen;
     exports.hb_ot_name_get_utf16(
       this.ptr,
       nameId,
-      languagePtr,
+      language.ptr,
       textSizePtr,
       textPtr,
     );

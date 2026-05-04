@@ -4,12 +4,12 @@ import {
   hb_tag,
   hb_untag,
   utf8_ptr_to_string,
-  language_to_string,
   type ValueOf,
 } from "./helpers";
 import type { TraceEntry } from "./types";
 import type { Font } from "./font";
 import type { Feature } from "./feature";
+import { Language } from "./language";
 import {
   Buffer,
   BufferContentType,
@@ -150,8 +150,6 @@ export function otTagToScript(tag: string): string {
  * @param tag The tag to convert.
  * @returns The language.
  */
-export function otTagToLanguage(tag: string): string {
-  const hbTag = hb_tag(tag);
-  const language = exports.hb_ot_tag_to_language(hbTag);
-  return language_to_string(language);
+export function otTagToLanguage(tag: string): Language {
+  return new Language(exports.hb_ot_tag_to_language(hb_tag(tag)));
 }
