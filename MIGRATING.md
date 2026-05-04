@@ -68,6 +68,7 @@ When you need the raw HarfBuzz JSON output (e.g. to capture all fields including
 Affected APIs:
 
 - `Buffer.serialize` now takes a single options object: `{ font, start, end, format, flags }` (all optional). The previous positional signature is gone.
+- `shape` and `shapeWithTrace` now take `Feature[]` instead of a comma-separated string. Use the new `Feature` class (e.g. `new Feature("liga", 0)` or `Feature.fromString("-liga")`).
 - `Buffer.addText` / `Buffer.addCodePoints`: `itemLength` accepts `undefined` (or omission), instead of `null`.
 - `Face.getFeatureNameIds`: returns `undefined` on failure, instead of `null`.
 - `Font.glyphHOrigin` / `glyphVOrigin` / `glyphExtents` / `glyphFromName`: return `undefined` on failure, instead of `null`.

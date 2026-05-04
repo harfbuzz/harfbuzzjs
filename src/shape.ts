@@ -4,12 +4,12 @@ import {
   hb_tag,
   hb_untag,
   utf8_ptr_to_string,
-  string_to_ascii_ptr,
   language_to_string,
   type ValueOf,
 } from "./helpers";
 import type { TraceEntry } from "./types";
 import type { Font } from "./font";
+import type { Feature } from "./feature";
 import {
   Buffer,
   BufferContentType,
@@ -33,30 +33,20 @@ export type TracePhase = ValueOf<typeof TracePhase>;
  * @param font The Font to shape with.
  * @param buffer The Buffer containing text to shape, suitably prepared
  *   (text added, segment properties set).
- * @param features A string of comma-separated OpenType features to apply.
+ * @param features An array of {@link Feature} values to apply.
  */
-export function shape(font: Font, buffer: Buffer, features?: string): void {
+export function shape(font: Font, buffer: Buffer, features?: Feature[]): void {
+  const featuresLen = features?.length ?? 0;
+  const sp = Module.stackSave();
   let featuresPtr = 0;
-  let featuresLen = 0;
-  if (features) {
-    const featureList = features.split(",");
-    featuresPtr = exports.malloc(16 * featureList.length);
-    featureList.forEach((feature) => {
-      const str = string_to_ascii_ptr(feature);
-      if (
-        exports.hb_feature_from_string(
-          str.ptr,
-          -1,
-          featuresPtr + featuresLen * 16,
-        )
-      )
-        featuresLen++;
-      str.free();
+  if (featuresLen) {
+    featuresPtr = Module.stackAlloc(16 * featuresLen);
+    features!.forEach((feature, i) => {
+      feature.writeTo(featuresPtr + i * 16);
     });
   }
-
   exports.hb_shape(font.ptr, buffer.ptr, featuresPtr, featuresLen);
-  if (featuresPtr) exports.free(featuresPtr);
+  Module.stackRestore(sp);
 }
 
 /**
@@ -67,7 +57,7 @@ export function shape(font: Font, buffer: Buffer, features?: string): void {
  *
  * @param font The Font to shape with.
  * @param buffer The Buffer containing text to shape, suitably prepared.
- * @param features A string of comma-separated OpenType features to apply.
+ * @param features An array of {@link Feature} values to apply.
  * @param stop_at A lookup ID at which to terminate shaping.
  * @param stop_phase The {@link TracePhase} at which to stop shaping.
  * @returns An array of trace entries, each with a message, serialized glyphs, and phase info.
@@ -75,7 +65,7 @@ export function shape(font: Font, buffer: Buffer, features?: string): void {
 export function shapeWithTrace(
   font: Font,
   buffer: Buffer,
-  features: string,
+  features: Feature[],
   stop_at: number,
   stop_phase: TracePhase,
 ): TraceEntry[] {

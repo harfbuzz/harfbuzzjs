@@ -10,7 +10,7 @@ function example(hb, fontBlob, text) {
   buffer.addText(text || "abc");
   buffer.guessSegmentProperties();
   // buffer.setDirection(hb.Direction.LTR); // optional as can be set by guessSegmentProperties also
-  hb.shape(font, buffer); // features are not supported yet
+  hb.shape(font, buffer);
   var result = buffer.getGlyphInfosAndPositions();
 
   // returns glyphs paths, totally optional
