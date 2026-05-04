@@ -1080,6 +1080,42 @@ describe("Buffer", function () {
   });
 });
 
+describe("Feature", function () {
+  it("fromString parses simple tags", function () {
+    expect(hb.Feature.fromString("liga")).to.deep.equal(
+      new hb.Feature("liga", 1, 0, 0xffffffff),
+    );
+    expect(hb.Feature.fromString("-kern")).to.deep.equal(
+      new hb.Feature("kern", 0, 0, 0xffffffff),
+    );
+  });
+
+  it("fromString parses values and ranges", function () {
+    expect(hb.Feature.fromString("salt=2")).to.deep.equal(
+      new hb.Feature("salt", 2, 0, 0xffffffff),
+    );
+    expect(hb.Feature.fromString("aalt[3:5]=2")).to.deep.equal(
+      new hb.Feature("aalt", 2, 3, 5),
+    );
+  });
+
+  it("fromString returns undefined for invalid input", function () {
+    expect(hb.Feature.fromString("not a feature")).to.equal(undefined);
+  });
+
+  it("toString round-trips canonical forms", function () {
+    for (const str of ["liga", "-kern", "salt=2", "aalt[3:5]=2"]) {
+      expect(hb.Feature.fromString(str).toString()).to.equal(str);
+    }
+  });
+
+  it("toString uses default range and value", function () {
+    expect(new hb.Feature("liga").toString()).to.equal("liga");
+    expect(new hb.Feature("kern", 0).toString()).to.equal("-kern");
+    expect(new hb.Feature("salt", 2).toString()).to.equal("salt=2");
+  });
+});
+
 describe("shape", function () {
   it("shape Latin string", function () {
     let blob = new hb.Blob(
@@ -1267,7 +1303,7 @@ describe("shape", function () {
     const result = hb.shapeWithTrace(
       font,
       buffer,
-      "",
+      [],
       0,
       hb.TracePhase.DONT_STOP,
     );
@@ -1304,7 +1340,7 @@ describe("shape", function () {
     const result = hb.shapeWithTrace(
       font,
       buffer,
-      "-liga,-kern",
+      [new hb.Feature("liga", 0), new hb.Feature("kern", 0)],
       0,
       hb.TracePhase.DONT_STOP,
     );
