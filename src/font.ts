@@ -2,13 +2,13 @@ import {
   Module,
   exports,
   registry,
-  hb_tag,
   utf8_ptr_to_string,
   string_to_utf8_ptr,
 } from "./helpers";
 import type { FontExtents, GlyphExtents, SvgPathCommand } from "./types";
 import type { Face } from "./face";
 import type { FontFuncs } from "./font-funcs";
+import type { Variation } from "./variation";
 
 interface DrawPtrs {
   drawFuncsPtr?: number;
@@ -349,18 +349,22 @@ export class Font {
   }
 
   /**
-   * Set the font's variations.
-   * @param variations Dictionary of variations to set.
+   * Applies a list of font-variation settings to a font.
+   *
+   * Note that this overrides all existing variations set on the font.
+   * Axes not included in `variations` will be effectively set to their
+   * default values.
+   *
+   * @param variations Array of variation settings to apply.
    */
-  setVariations(variations: Record<string, number>): void {
-    const entries = Object.entries(variations);
-    const vars = exports.malloc(8 * entries.length);
-    entries.forEach(([tag, value], i) => {
-      Module.HEAPU32[vars / 4 + i * 2 + 0] = hb_tag(tag);
-      Module.HEAPF32[vars / 4 + i * 2 + 1] = value;
+  setVariations(variations: Variation[]): void {
+    const sp = Module.stackSave();
+    const vars = Module.stackAlloc(8 * variations.length);
+    variations.forEach((variation, i) => {
+      variation.writeTo(vars + i * 8);
     });
-    exports.hb_font_set_variations(this.ptr, vars, entries.length);
-    exports.free(vars);
+    exports.hb_font_set_variations(this.ptr, vars, variations.length);
+    Module.stackRestore(sp);
   }
 
   /** Set the font's font functions. */

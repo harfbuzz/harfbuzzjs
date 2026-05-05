@@ -85,6 +85,8 @@ _hb_ot_var_get_axis_infos
 _hb_script_from_string
 _hb_feature_from_string
 _hb_feature_to_string
+_hb_variation_from_string
+_hb_variation_to_string
 _hb_language_from_string
 _hb_language_to_string
 _hb_set_create

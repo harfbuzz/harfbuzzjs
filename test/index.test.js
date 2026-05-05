@@ -499,7 +499,7 @@ describe("Font", function () {
     );
     let face = new hb.Face(blob);
     let font = new hb.Font(face);
-    font.setVariations({ wght: 789 });
+    font.setVariations([new hb.Variation("wght", 789)]);
     let buffer = new hb.Buffer();
     buffer.addText("آلو");
     buffer.guessSegmentProperties();
@@ -1077,6 +1077,26 @@ describe("Buffer", function () {
     // both mark glyphs now be offset vertically by 10, since the second mark attaches to the first mark
     expect(positions[1].yOffset).to.equal(10);
     expect(positions[2].yOffset).to.equal(239);
+  });
+});
+
+describe("Variation", function () {
+  it("fromString parses tag=value", function () {
+    expect(hb.Variation.fromString("wght=500")).to.deep.equal(
+      new hb.Variation("wght", 500),
+    );
+    expect(hb.Variation.fromString("slnt=-7.5")).to.deep.equal(
+      new hb.Variation("slnt", -7.5),
+    );
+  });
+
+  it("fromString returns undefined for invalid input", function () {
+    expect(hb.Variation.fromString("not a variation")).to.equal(undefined);
+  });
+
+  it("toString round-trips", function () {
+    expect(new hb.Variation("wght", 500).toString()).to.equal("wght=500");
+    expect(new hb.Variation("slnt", -7.5).toString()).to.equal("slnt=-7.5");
   });
 });
 
