@@ -38,7 +38,10 @@ _hb_font_set_variations
 _hb_font_get_h_extents
 _hb_font_get_v_extents
 _hb_font_get_glyph_extents
+_hb_font_get_glyph
 _hb_font_get_glyph_from_name
+_hb_font_get_nominal_glyph
+_hb_font_get_variation_glyph
 _hb_font_get_glyph_h_advance
 _hb_font_get_glyph_v_advance
 _hb_font_get_glyph_h_origin

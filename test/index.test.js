@@ -491,6 +491,23 @@ describe("Font", function () {
     expect(font.glyphFromName("NonExistentGlyph")).to.equal(undefined);
   });
 
+  it("glyph/nominalGlyph/variationGlyph return ids for code points", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    const codepoint = "A".codePointAt(0);
+    expect(font.nominalGlyph(codepoint)).to.equal(36);
+    expect(font.nominalGlyph(0x10ffff)).to.equal(undefined);
+    expect(font.variationGlyph(codepoint, 0xfe00)).to.equal(undefined);
+    expect(font.glyph(codepoint)).to.equal(font.nominalGlyph(codepoint));
+    expect(font.glyph(codepoint, 0xfe00)).to.equal(
+      font.variationGlyph(codepoint, 0xfe00),
+    );
+    expect(font.glyph(0x10ffff)).to.equal(font.nominalGlyph(0x10ffff));
+  });
+
   it("setVariations affects advances", function () {
     let blob = new hb.Blob(
       fs.readFileSync(
