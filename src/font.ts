@@ -296,6 +296,88 @@ export class Font {
   }
 
   /**
+   * Fetches the glyph ID for a Unicode code point in the specified
+   * font, with an optional variation selector.
+   *
+   * If `variationSelector` is 0, it is equivalent to
+   * {@link Font.nominalGlyph}; otherwise it is equivalent to
+   * {@link Font.variationGlyph}.
+   *
+   * @param unicode The Unicode code point to query.
+   * @param variationSelector A variation-selector code point.
+   * @returns The glyph ID, or undefined if not found.
+   */
+  glyph(unicode: number, variationSelector: number = 0): number | undefined {
+    const sp = Module.stackSave();
+    const glyphIdPtr = Module.stackAlloc(4);
+    let glyphId: number | undefined;
+    if (
+      exports.hb_font_get_glyph(
+        this.ptr,
+        unicode,
+        variationSelector,
+        glyphIdPtr,
+      )
+    ) {
+      glyphId = Module.HEAPU32[glyphIdPtr / 4];
+    }
+    Module.stackRestore(sp);
+    return glyphId;
+  }
+
+  /**
+   * Fetches the nominal glyph ID for a Unicode code point in the
+   * specified font.
+   *
+   * This version of the function should not be used to fetch glyph IDs
+   * for code points modified by variation selectors. For variation-selector
+   * support, use {@link Font.variationGlyph} or {@link Font.glyph}.
+   *
+   * @param unicode The Unicode code point to query.
+   * @returns The glyph ID, or undefined if not found.
+   */
+  nominalGlyph(unicode: number): number | undefined {
+    const sp = Module.stackSave();
+    const glyphIdPtr = Module.stackAlloc(4);
+    let glyphId: number | undefined;
+    if (exports.hb_font_get_nominal_glyph(this.ptr, unicode, glyphIdPtr)) {
+      glyphId = Module.HEAPU32[glyphIdPtr / 4];
+    }
+    Module.stackRestore(sp);
+    return glyphId;
+  }
+
+  /**
+   * Fetches the glyph ID for a Unicode code point when followed by
+   * by the specified variation-selector code point, in the specified
+   * font.
+   *
+   * @param unicode The Unicode code point to query.
+   * @param variationSelector The variation-selector code point to query.
+   * @returns The glyph ID, or undefined if not found.
+   */
+  variationGlyph(
+    unicode: number,
+    variationSelector: number,
+  ): number | undefined {
+    const sp = Module.stackSave();
+    const glyphIdPtr = Module.stackAlloc(4);
+    let glyphId: number | undefined;
+    if (
+      exports.hb_font_get_variation_glyph(
+        this.ptr,
+        unicode,
+        variationSelector,
+        glyphIdPtr,
+      )
+    ) {
+      glyphId = Module.HEAPU32[glyphIdPtr / 4];
+    }
+    Module.stackRestore(sp);
+    return glyphId;
+  }
+
+  /**
    * Return glyph ID from name.
    * @param name Name of the requested glyph in the font.
    * @returns The glyph ID, or undefined if not found.
