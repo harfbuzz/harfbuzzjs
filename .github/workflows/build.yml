@@ -10,6 +10,7 @@ on:
 permissions:
   id-token: write
   contents: write
+  pages: write
 
 env:
   EM_VERSION: 4.0.13
@@ -67,6 +68,8 @@ jobs:
     if: contains(github.ref, 'refs/tags/')
     env:
       GH_TOKEN: ${{ github.token }}
+    outputs:
+      is_prerelease: ${{ steps.prerelease.outputs.is_prerelease }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -126,3 +129,42 @@ jobs:
       - name: Populate release
         run: |
           gh release upload ${{ github.ref_name }} dist/harfbuzz.js dist/harfbuzz.wasm dist/harfbuzz-subset.wasm --clobber
+
+  docs:
+    name: Deploy documentation
+    needs: release
+    runs-on: ubuntu-latest
+    if: needs.release.outputs.is_prerelease == 'false'
+    concurrency:
+      group: "pages"
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: build
+
+      - name: Build demo
+        run: |
+          mkdir -p docs/demo
+          cp demo/index.html docs/demo/
+          cp dist/* docs/demo/
+          cp test/fonts/noto/NotoSans-Regular.ttf docs/demo/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
