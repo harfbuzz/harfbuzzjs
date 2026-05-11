@@ -51,11 +51,13 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: wasm
+          name: build
           path: |
             dist/harfbuzz.js
             dist/harfbuzz.wasm
             dist/harfbuzz-subset.wasm
+            dist/index.mjs
+            docs
           if-no-files-found: error
 
   release:
@@ -72,8 +74,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v8
         with:
-          name: wasm
-          path: dist
+          name: build
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
