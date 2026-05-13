@@ -520,6 +520,23 @@ describe("Font", function () {
     expect(font.glyph(0x10ffff)).to.equal(font.nominalGlyph(0x10ffff));
   });
 
+  it("getLookupOpticalBound returns some value", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    const kernIndex = face.getTableFeatureTags("GPOS").indexOf("kern");
+    const [lookupIndex] = face.getFeatureLookups("GPOS", kernIndex);
+    const glyph = font.glyphFromName("A");
+    const opticalBound = font.getLookupOpticalBound(
+      lookupIndex,
+      hb.Direction.LTR,
+      glyph,
+    );
+    expect(opticalBound).to.be.a("number");
+  });
+
   it("setVariations affects advances", function () {
     let blob = new hb.Blob(
       fs.readFileSync(

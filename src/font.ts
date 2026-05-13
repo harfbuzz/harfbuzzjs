@@ -6,6 +6,7 @@ import {
   string_to_utf8_ptr,
 } from "./helpers";
 import type { FontExtents, GlyphExtents, SvgPathCommand } from "./types";
+import type { Direction } from "./buffer";
 import type { Face } from "./face";
 import type { FontFuncs } from "./font-funcs";
 import type { Variation } from "./variation";
@@ -452,5 +453,26 @@ export class Font {
   /** Set the font's font functions. */
   setFuncs(fontFuncs: FontFuncs): void {
     exports.hb_font_set_funcs(this.ptr, fontFuncs.ptr);
+  }
+
+  /**
+   * Fetches the optical bound of a glyph positioned at the margin of text.
+   * The direction identifies which edge of the glyph to query.
+   * @param lookupIndex Index of the feature lookup to query.
+   * @param direction Edge of the glyph to query.
+   * @param glyph A glyph id.
+   * @returns Adjustment value. Negative values mean the glyph will stick out of the margin.
+   */
+  getLookupOpticalBound(
+    lookupIndex: number,
+    direction: Direction,
+    glyph: number,
+  ): number {
+    return exports.hb_ot_layout_lookup_get_optical_bound(
+      this.ptr,
+      lookupIndex,
+      direction,
+      glyph,
+    );
   }
 }
