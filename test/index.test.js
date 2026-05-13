@@ -246,6 +246,18 @@ describe("Face", function () {
     });
   });
 
+  it("getFeatureLookups returns the lookups for a feature", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    const ligaIndex = face.getTableFeatureTags("GSUB").indexOf("liga");
+    expect(face.getFeatureLookups("GSUB", ligaIndex)).to.deep.equal([39]);
+    const kernIndex = face.getTableFeatureTags("GPOS").indexOf("kern");
+    expect(face.getFeatureLookups("GPOS", kernIndex)).to.deep.equal([0, 2]);
+    expect(face.getFeatureLookups("GSUB", 9999)).to.deep.equal([]);
+  });
+
   it("getGlyphClass returns the class of a glyph", function () {
     let blob = new hb.Blob(
       fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),

@@ -245,6 +245,43 @@ export class Face {
   }
 
   /**
+   * Fetches a list of all lookups enumerated for the specified feature, in
+   * the specified face's GSUB table or GPOS table.
+   * @param table The table to query, either "GSUB" or "GPOS".
+   * @param featureIndex The index of the requested feature.
+   * @returns An array of lookup indexes.
+   */
+  getFeatureLookups(table: string, featureIndex: number): number[] {
+    const sp = Module.stackSave();
+    const tableTag = hb_tag(table);
+    let startOffset = 0;
+    let lookupCount = STATIC_ARRAY_SIZE;
+    const lookupCountPtr = Module.stackAlloc(4);
+    const lookupIndexesPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+    const lookups: number[] = [];
+    while (lookupCount == STATIC_ARRAY_SIZE) {
+      Module.HEAPU32[lookupCountPtr / 4] = lookupCount;
+      exports.hb_ot_layout_feature_get_lookups(
+        this.ptr,
+        tableTag,
+        featureIndex,
+        startOffset,
+        lookupCountPtr,
+        lookupIndexesPtr,
+      );
+      lookupCount = Module.HEAPU32[lookupCountPtr / 4];
+      const lookupIndexes = Module.HEAPU32.subarray(
+        lookupIndexesPtr / 4,
+        lookupIndexesPtr / 4 + lookupCount,
+      );
+      lookups.push(...Array.from(lookupIndexes as Uint32Array));
+      startOffset += lookupCount;
+    }
+    Module.stackRestore(sp);
+    return lookups;
+  }
+
+  /**
    * Get the GDEF class of the requested glyph.
    * @param glyph The glyph to get the class of.
    * @returns The {@link GlyphClass} of the glyph.
