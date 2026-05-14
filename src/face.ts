@@ -39,8 +39,15 @@ export class Face {
    * @param index The index of the font in the blob. (0 for most files,
    *  or a 0-indexed font number if the `blob` came from a font collection file.)
    */
-  constructor(blob: Blob, index: number = 0) {
-    this.ptr = exports.hb_face_create(blob.ptr, index);
+  constructor(blob: Blob, index?: number);
+  /** @internal Wrap an existing face pointer. */
+  constructor(existingPtr: number);
+  constructor(arg: Blob | number, index: number = 0) {
+    if (typeof arg === "number") {
+      this.ptr = exports.hb_face_reference(arg);
+    } else {
+      this.ptr = exports.hb_face_create(arg.ptr, index);
+    }
     this.upem = exports.hb_face_get_upem(this.ptr);
     track(this, exports.hb_face_destroy);
   }

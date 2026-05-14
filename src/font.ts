@@ -7,7 +7,7 @@ import {
 } from "./helpers";
 import type { FontExtents, GlyphExtents, SvgPathCommand } from "./types";
 import type { Direction } from "./buffer";
-import type { Face } from "./face";
+import { Face } from "./face";
 import type { FontFuncs } from "./font-funcs";
 import type { Variation } from "./variation";
 
@@ -29,6 +29,7 @@ interface DrawPtrs {
  */
 export class Font {
   readonly ptr: number;
+  private _face?: Face;
   private drawPtrs: DrawPtrs = {
     pathBuffer: "",
   };
@@ -44,6 +45,7 @@ export class Font {
       this.ptr = exports.hb_font_reference(arg);
     } else {
       this.ptr = exports.hb_font_create(arg.ptr);
+      this._face = arg;
     }
     const ptr = this.ptr;
     const drawState = this.drawPtrs;
@@ -58,6 +60,14 @@ export class Font {
         Module.removeFunction(drawState.closePathPtr!);
       }
     });
+  }
+
+  /** The {@link Face} associated with this font. */
+  get face(): Face {
+    if (!this._face) {
+      this._face = new Face(exports.hb_font_get_face(this.ptr));
+    }
+    return this._face;
   }
 
   /**

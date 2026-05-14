@@ -363,6 +363,16 @@ describe("Face", function () {
 });
 
 describe("Font", function () {
+  it("exposes its face", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    expect(font.face).to.equal(face);
+    expect(font.subFont().face.ptr).to.equal(face.ptr);
+  });
+
   it("subFont creates a sub font", function () {
     let blob = new hb.Blob(
       fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
