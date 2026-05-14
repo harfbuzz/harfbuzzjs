@@ -27,10 +27,12 @@ _hb_face_create
 _hb_face_collect_unicodes
 _hb_face_destroy
 _hb_face_get_upem
+_hb_face_reference
 _hb_face_reference_table
 _hb_font_create
 _hb_font_destroy
 _hb_font_reference
+_hb_font_get_face
 _hb_font_create_sub_font
 _hb_font_glyph_to_string
 _hb_font_set_scale
