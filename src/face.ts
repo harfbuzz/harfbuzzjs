@@ -100,7 +100,7 @@ export class Face {
    * @param table The table to query, either "GSUB" or "GPOS".
    * @returns An array of 4-character script tag strings.
    */
-  getTableScriptTags(table: string): string[] {
+  getTableScriptTags(table: "GSUB" | "GPOS"): string[] {
     const sp = Module.stackSave();
     const tableTag = hb_tag(table);
     let startOffset = 0;
@@ -135,7 +135,7 @@ export class Face {
    * @param table The table to query, either "GSUB" or "GPOS".
    * @returns An array of 4-character feature tag strings.
    */
-  getTableFeatureTags(table: string): string[] {
+  getTableFeatureTags(table: "GSUB" | "GPOS"): string[] {
     const sp = Module.stackSave();
     const tableTag = hb_tag(table);
     let startOffset = 0;
@@ -171,7 +171,7 @@ export class Face {
    * @param scriptIndex The index of the script to query.
    * @returns An array of 4-character language tag strings.
    */
-  getScriptLanguageTags(table: string, scriptIndex: number): string[] {
+  getScriptLanguageTags(table: "GSUB" | "GPOS", scriptIndex: number): string[] {
     const sp = Module.stackSave();
     const tableTag = hb_tag(table);
     let startOffset = 0;
@@ -210,7 +210,7 @@ export class Face {
    * @returns An array of 4-character feature tag strings.
    */
   getLanguageFeatureTags(
-    table: string,
+    table: "GSUB" | "GPOS",
     scriptIndex: number,
     languageIndex: number,
   ): string[] {
@@ -251,7 +251,7 @@ export class Face {
    * @param featureIndex The index of the requested feature.
    * @returns An array of lookup indexes.
    */
-  getFeatureLookups(table: string, featureIndex: number): number[] {
+  getFeatureLookups(table: "GSUB" | "GPOS", featureIndex: number): number[] {
     const sp = Module.stackSave();
     const tableTag = hb_tag(table);
     let startOffset = 0;
@@ -346,7 +346,7 @@ export class Face {
    * @returns An object with name IDs, or undefined if not found.
    */
   getFeatureNameIds(
-    table: string,
+    table: "GSUB" | "GPOS",
     featureIndex: number,
   ): FeatureNameIds | undefined {
     const sp = Module.stackSave();
