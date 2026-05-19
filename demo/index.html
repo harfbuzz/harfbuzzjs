@@ -34,68 +34,46 @@
     var glyphs = {};
     result.forEach(function (x) {
       if (glyphs[x.g]) return;
-      glyphs[x.g] = font.glyphToJson(x.g);
+      glyphs[x.g] = font.glyphToPath(x.g);
     });
 
-    var xmin = 10000;
-    var xmax = -10000;
-    var ymin = 10000;
-    var ymax = -10000;
     var ax = 0;
     var ay = 0;
-    var path = pathToRelative(
-      result
-        .map(function (x) {
-          var result = glyphs[x.g]
-            .filter(function (command) {
-              return command.type !== "Z";
-            })
-            .map(function (command) {
-              var result = command.values
-                .map(function (p, i) {
-                  // apply ax/ay/dx/dy to coords
-                  return i % 2 ? -(p + ay + x.dy) : p + ax + x.dx;
-                })
-                .map(function (x, i) {
-                  // bbox calc
-                  if (i % 2) {
-                    if (x < ymin) ymin = x;
-                    if (x > ymax) ymax = x;
-                  } else {
-                    if (x < xmin) xmin = x;
-                    if (x > xmax) xmax = x;
-                  }
-                  return x;
-                });
-              return [command.type].concat(result);
-            });
-          ax += x.ax;
-          ay += x.ay;
-          return result;
-        })
-        .reduce((acc, val) => acc.concat(val), []),
-    )
-      .map((x) => x[0] + x.slice(1).join(" "))
-      .join("")
-      .replace(/ -/g, "-");
-    var width = xmax - xmin;
-    var height = ymax - ymin;
-    // pad it a bit
-    var pad = Math.round(Math.min(width / 10, height / 10));
-    xmin -= pad;
-    ymin -= pad;
-    width += pad * 2;
-    height += pad * 2;
-
-    var bbox = xmin + " " + ymin + " " + width + " " + height;
+    var paths = result
+      .map(function (x) {
+        var p =
+          '<path transform="translate(' +
+          (ax + x.dx) +
+          " " +
+          -(ay + x.dy) +
+          ') scale(1 -1)" d="' +
+          glyphs[x.g] +
+          '" />';
+        ax += x.ax;
+        ay += x.ay;
+        return p;
+      })
+      .join("");
 
     svgResult.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" height="128" viewBox="' +
-      bbox +
-      '">' +
-      '<path d="' +
-      path +
-      '" /></svg>';
+      '<svg xmlns="http://www.w3.org/2000/svg" height="128">' +
+      paths +
+      "</svg>";
+    // Tighten viewBox to the rendered path bounds.
+    var svg = svgResult.querySelector("svg");
+    var b = svg.getBBox();
+    var pad = Math.round(Math.min(b.width / 10, b.height / 10));
+    svg.setAttribute(
+      "viewBox",
+      b.x -
+        pad +
+        " " +
+        (b.y - pad) +
+        " " +
+        (b.width + 2 * pad) +
+        " " +
+        (b.height + 2 * pad),
+    );
     svgResult.download = text.value + ".svg";
     // revoke previous URL
     if (svgResult.href) URL.revokeObjectURL(svgResult.href);
@@ -151,27 +129,5 @@
       updateResult();
     });
     reader.readAsArrayBuffer(file);
-  }
-
-  // Totally optional, https://github.com/adobe-webplatform/Snap.svg/blob/7abe4d1/src/path.js#L532
-  function pathToRelative(pathArray) {
-    if (!pathArray.length) return [];
-    var x = pathArray[0][1],
-      y = pathArray[0][2];
-    var prevCmd = "";
-    return [["M", x, y]].concat(
-      pathArray.slice(1).map(function (pa) {
-        var r = [prevCmd === pa[0] ? " " : pa[0].toLowerCase()].concat(
-          pa.slice(1).map(function (z, i) {
-            return z - (i % 2 ? y : x);
-          }),
-        );
-        var lastPoint = r.slice(-2);
-        x += lastPoint[0];
-        y += lastPoint[1];
-        prevCmd = pa[0];
-        return r;
-      }),
-    );
   }
 </script>
