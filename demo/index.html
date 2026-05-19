@@ -41,38 +41,21 @@
     var ay = 0;
     var paths = result
       .map(function (x) {
-        var p =
-          '<path transform="translate(' +
-          (ax + x.dx) +
-          " " +
-          -(ay + x.dy) +
-          ') scale(1 -1)" d="' +
-          glyphs[x.g] +
-          '" />';
+        var p = `<path transform="translate(${ax + x.dx} ${-(ay + x.dy)}) scale(1 -1)" d="${glyphs[x.g]}" />`;
         ax += x.ax;
         ay += x.ay;
         return p;
       })
       .join("");
 
-    svgResult.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" height="128">' +
-      paths +
-      "</svg>";
+    svgResult.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="128">${paths}</svg>`;
     // Tighten viewBox to the rendered path bounds.
     var svg = svgResult.querySelector("svg");
     var b = svg.getBBox();
     var pad = Math.round(Math.min(b.width / 10, b.height / 10));
     svg.setAttribute(
       "viewBox",
-      b.x -
-        pad +
-        " " +
-        (b.y - pad) +
-        " " +
-        (b.width + 2 * pad) +
-        " " +
-        (b.height + 2 * pad),
+      `${b.x - pad} ${b.y - pad} ${b.width + 2 * pad} ${b.height + 2 * pad}`,
     );
     svgResult.download = text.value + ".svg";
     // revoke previous URL
