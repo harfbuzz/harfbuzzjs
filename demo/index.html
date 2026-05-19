@@ -19,10 +19,16 @@
 
     var buffer = new hb.Buffer();
     buffer.addText(text.value);
+    // buffer.setDirection(hb.Direction.LTR); // optional as guessSegmentProperties also handles it
     buffer.guessSegmentProperties();
-    // buffer.setDirection('ltr'); // optional as can be by guessSegmentProperties also
     hb.shape(font, buffer);
-    var result = buffer.json();
+    var result = JSON.parse(
+      buffer.serialize({
+        font: font,
+        format: hb.BufferSerializeFormat.JSON,
+        flags: hb.BufferSerializeFlag.NO_GLYPH_NAMES,
+      }),
+    );
 
     // returns glyphs paths, totally optional
     var glyphs = {};
