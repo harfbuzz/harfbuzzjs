@@ -37,7 +37,7 @@ HARFBUZZ_TARGET = dist/harfbuzz.js
 
 HARFBUZZ_SUBSET_CXXFLAGS = \
 	$(COMMON_CXXFLAGS) \
-	-DHB_CONFIG_OVERRIDE_LAST_H=\"config-override-subset.h\"
+	-DHB_CONFIG_OVERRIDE_H=\"config-override-subset.h\"
 
 HARFBUZZ_SUBSET_LDFLAGS = \
 	--no-entry \
