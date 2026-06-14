@@ -3,14 +3,80 @@ import {
   exports,
   registry,
   STATIC_ARRAY_SIZE,
+  hb_tag,
   utf8_ptr_to_string,
   string_to_utf8_ptr,
+  type ValueOf,
 } from "./helpers";
 import type { FontExtents, GlyphExtents, SvgPathCommand } from "./types";
 import type { Direction } from "./buffer";
 import { Face } from "./face";
 import type { FontFuncs } from "./font-funcs";
 import type { Variation } from "./variation";
+
+/**
+ * Metric tags corresponding to [MVAR Value
+ * Tags](https://docs.microsoft.com/en-us/typography/opentype/spec/mvar#value-tags).
+ */
+export const MetricsTag = {
+  /** horizontal ascender. */
+  HORIZONTAL_ASCENDER: hb_tag("hasc"),
+  /** horizontal descender. */
+  HORIZONTAL_DESCENDER: hb_tag("hdsc"),
+  /** horizontal line gap. */
+  HORIZONTAL_LINE_GAP: hb_tag("hlgp"),
+  /** horizontal clipping ascent. */
+  HORIZONTAL_CLIPPING_ASCENT: hb_tag("hcla"),
+  /** horizontal clipping descent. */
+  HORIZONTAL_CLIPPING_DESCENT: hb_tag("hcld"),
+  /** vertical ascender. */
+  VERTICAL_ASCENDER: hb_tag("vasc"),
+  /** vertical descender. */
+  VERTICAL_DESCENDER: hb_tag("vdsc"),
+  /** vertical line gap. */
+  VERTICAL_LINE_GAP: hb_tag("vlgp"),
+  /** horizontal caret rise. */
+  HORIZONTAL_CARET_RISE: hb_tag("hcrs"),
+  /** horizontal caret run. */
+  HORIZONTAL_CARET_RUN: hb_tag("hcrn"),
+  /** horizontal caret offset. */
+  HORIZONTAL_CARET_OFFSET: hb_tag("hcof"),
+  /** vertical caret rise. */
+  VERTICAL_CARET_RISE: hb_tag("vcrs"),
+  /** vertical caret run. */
+  VERTICAL_CARET_RUN: hb_tag("vcrn"),
+  /** vertical caret offset. */
+  VERTICAL_CARET_OFFSET: hb_tag("vcof"),
+  /** x height. */
+  X_HEIGHT: hb_tag("xhgt"),
+  /** cap height. */
+  CAP_HEIGHT: hb_tag("cpht"),
+  /** subscript em x size. */
+  SUBSCRIPT_EM_X_SIZE: hb_tag("sbxs"),
+  /** subscript em y size. */
+  SUBSCRIPT_EM_Y_SIZE: hb_tag("sbys"),
+  /** subscript em x offset. */
+  SUBSCRIPT_EM_X_OFFSET: hb_tag("sbxo"),
+  /** subscript em y offset. */
+  SUBSCRIPT_EM_Y_OFFSET: hb_tag("sbyo"),
+  /** superscript em x size. */
+  SUPERSCRIPT_EM_X_SIZE: hb_tag("spxs"),
+  /** superscript em y size. */
+  SUPERSCRIPT_EM_Y_SIZE: hb_tag("spys"),
+  /** superscript em x offset. */
+  SUPERSCRIPT_EM_X_OFFSET: hb_tag("spxo"),
+  /** superscript em y offset. */
+  SUPERSCRIPT_EM_Y_OFFSET: hb_tag("spyo"),
+  /** strikeout size. */
+  STRIKEOUT_SIZE: hb_tag("strs"),
+  /** strikeout offset. */
+  STRIKEOUT_OFFSET: hb_tag("stro"),
+  /** underline size. */
+  UNDERLINE_SIZE: hb_tag("unds"),
+  /** underline offset. */
+  UNDERLINE_OFFSET: hb_tag("undo"),
+} as const;
+export type MetricsTag = ValueOf<typeof MetricsTag>;
 
 interface DrawPtrs {
   drawFuncsPtr?: number;
@@ -529,5 +595,75 @@ export class Font {
     }
     Module.stackRestore(sp);
     return carets;
+  }
+
+  /**
+   * Fetches metrics value corresponding to `metricsTag` from the font.
+   *
+   * @param metricsTag {@link MetricsTag} of metrics value you like to fetch.
+   * @returns The metrics value, or undefined if not found in the font.
+   */
+  getMetricPosition(metricsTag: MetricsTag): number | undefined {
+    const sp = Module.stackSave();
+    const positionPtr = Module.stackAlloc(4);
+    let position: number | undefined;
+    if (exports.hb_ot_metrics_get_position(this.ptr, metricsTag, positionPtr)) {
+      position = Module.HEAP32[positionPtr / 4];
+    }
+    Module.stackRestore(sp);
+    return position;
+  }
+
+  /**
+   * Fetches metrics value corresponding to `metricsTag` from the font, and
+   * synthesizes a value if the value is missing in the font.
+   *
+   * @param metricsTag {@link MetricsTag} of metrics value you like to fetch.
+   * @returns The metrics value.
+   */
+  getMetricPositionWithFallback(metricsTag: MetricsTag): number {
+    const sp = Module.stackSave();
+    const positionPtr = Module.stackAlloc(4);
+    exports.hb_ot_metrics_get_position_with_fallback(
+      this.ptr,
+      metricsTag,
+      positionPtr,
+    );
+    const position = Module.HEAP32[positionPtr / 4];
+    Module.stackRestore(sp);
+    return position;
+  }
+
+  /**
+   * Fetches metrics value corresponding to `metricsTag` from the font with the
+   * current font variation settings applied.
+   *
+   * @param metricsTag {@link MetricsTag} of metrics value you like to fetch.
+   * @returns The requested metric value.
+   */
+  getMetricVariation(metricsTag: MetricsTag): number {
+    return exports.hb_ot_metrics_get_variation(this.ptr, metricsTag);
+  }
+
+  /**
+   * Fetches horizontal metrics value corresponding to `metricsTag` from the
+   * font with the current font variation settings applied.
+   *
+   * @param metricsTag {@link MetricsTag} of metrics value you like to fetch.
+   * @returns The requested metric value.
+   */
+  getMetricXVariation(metricsTag: MetricsTag): number {
+    return exports.hb_ot_metrics_get_x_variation(this.ptr, metricsTag);
+  }
+
+  /**
+   * Fetches vertical metrics value corresponding to `metricsTag` from the font
+   * with the current font variation settings applied.
+   *
+   * @param metricsTag {@link MetricsTag} of metrics value you like to fetch.
+   * @returns The requested metric value.
+   */
+  getMetricYVariation(metricsTag: MetricsTag): number {
+    return exports.hb_ot_metrics_get_y_variation(this.ptr, metricsTag);
   }
 }
