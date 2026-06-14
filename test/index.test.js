@@ -547,6 +547,41 @@ describe("Font", function () {
     expect(opticalBound).to.be.a("number");
   });
 
+  it("getLigatureCarets returns the carets for a ligature glyph", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    let gid, carets;
+    gid = font.glyphFromName("fi");
+    carets = font.getLigatureCarets(hb.Direction.LTR, gid);
+    expect(carets).to.deep.equal([301]);
+    gid = font.glyphFromName("f_f_i");
+    carets = font.getLigatureCarets(hb.Direction.LTR, gid);
+    expect(carets).to.deep.equal([315, 631]);
+    gid = font.glyphFromName("A");
+    carets = font.getLigatureCarets(hb.Direction.LTR, gid);
+    expect(carets).to.deep.equal([]);
+  });
+
+  it("getLigatureCarets returns the carets for an RTL ligature glyph", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(
+        path.join(__dirname, "fonts/noto/NotoSansArabic-Variable.ttf"),
+      ),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    let gid, carets;
+    gid = font.glyphFromName("uniFCF7");
+    carets = font.getLigatureCarets(hb.Direction.RTL, gid);
+    expect(carets).to.deep.equal([736]);
+    gid = font.glyphFromName("uniFD75");
+    carets = font.getLigatureCarets(hb.Direction.RTL, gid);
+    expect(carets).to.deep.equal([562, 1199]);
+  });
+
   it("setVariations affects advances", function () {
     let blob = new hb.Blob(
       fs.readFileSync(
