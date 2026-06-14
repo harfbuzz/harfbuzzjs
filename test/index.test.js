@@ -582,6 +582,69 @@ describe("Font", function () {
     expect(carets).to.deep.equal([562, 1199]);
   });
 
+  it("getMetricPosition returns metrics values from the font", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    let metric;
+    metric = font.getMetricPosition(hb.MetricsTag.X_HEIGHT);
+    expect(metric).to.equal(536);
+    metric = font.getMetricPosition(hb.MetricsTag.CAP_HEIGHT);
+    expect(metric).to.equal(714);
+    metric = font.getMetricPosition(hb.MetricsTag.UNDERLINE_OFFSET);
+    expect(metric).to.equal(-100);
+    metric = font.getMetricPosition(hb.MetricsTag.STRIKEOUT_SIZE);
+    expect(metric).to.equal(50);
+    // Vertical metrics are not available in this build.
+    metric = font.getMetricPosition(hb.MetricsTag.VERTICAL_ASCENDER);
+    expect(metric).to.equal(undefined);
+  });
+
+  it("getMetricPositionWithFallback synthesizes missing metrics", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    let metric;
+    // Present in the font: same value as getMetricPosition.
+    metric = font.getMetricPositionWithFallback(hb.MetricsTag.CAP_HEIGHT);
+    expect(metric).to.equal(714);
+    // Missing from the font: a value is synthesized.
+    metric = font.getMetricPosition(hb.MetricsTag.VERTICAL_ASCENDER);
+    expect(metric).to.equal(undefined);
+    metric = font.getMetricPositionWithFallback(
+      hb.MetricsTag.VERTICAL_ASCENDER,
+    );
+    expect(metric).to.equal(500);
+  });
+
+  it("getMetricVariation reflects variation settings", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(
+        path.join(__dirname, "fonts/noto/NotoSansArabic-Variable.ttf"),
+      ),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    let metric;
+    metric = font.getMetricPosition(hb.MetricsTag.CAP_HEIGHT);
+    expect(metric).to.equal(416);
+    metric = font.getMetricVariation(hb.MetricsTag.CAP_HEIGHT);
+    expect(metric).to.equal(0);
+    font.setVariations([new hb.Variation("wght", 900)]);
+    metric = font.getMetricPosition(hb.MetricsTag.CAP_HEIGHT);
+    expect(metric).to.equal(550);
+    metric = font.getMetricVariation(hb.MetricsTag.CAP_HEIGHT);
+    expect(metric).to.equal(134);
+    metric = font.getMetricXVariation(hb.MetricsTag.CAP_HEIGHT);
+    expect(metric).to.equal(134);
+    metric = font.getMetricYVariation(hb.MetricsTag.CAP_HEIGHT);
+    expect(metric).to.equal(134);
+  });
+
   it("setVariations affects advances", function () {
     let blob = new hb.Blob(
       fs.readFileSync(
