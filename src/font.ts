@@ -2,6 +2,7 @@ import {
   Module,
   exports,
   registry,
+  STATIC_ARRAY_SIZE,
   utf8_ptr_to_string,
   string_to_utf8_ptr,
 } from "./helpers";
@@ -484,5 +485,49 @@ export class Font {
       direction,
       glyph,
     );
+  }
+
+  /**
+   * Fetches a list of the caret positions defined for a ligature glyph in the
+   * GDEF table of the font.
+   *
+   * Note that a ligature that is formed from n characters will have n-1
+   * caret positions. The first character is not represented in the array,
+   * since its caret position is the glyph position.
+   *
+   * The positions returned by this function are 'unshaped', and will have to
+   * be fixed up for kerning that may be applied to the ligature glyph.
+   *
+   * @param direction The text direction to use.
+   * @param glyph The glyph to query.
+   * @returns An array of caret positions.
+   */
+  getLigatureCarets(direction: Direction, glyph: number): number[] {
+    const sp = Module.stackSave();
+    let startOffset = 0;
+    let caretCount = STATIC_ARRAY_SIZE;
+    const caretCountPtr = Module.stackAlloc(4);
+    const caretArrayPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+    const carets: number[] = [];
+    while (caretCount == STATIC_ARRAY_SIZE) {
+      Module.HEAPU32[caretCountPtr / 4] = caretCount;
+      exports.hb_ot_layout_get_ligature_carets(
+        this.ptr,
+        direction,
+        glyph,
+        startOffset,
+        caretCountPtr,
+        caretArrayPtr,
+      );
+      caretCount = Module.HEAPU32[caretCountPtr / 4];
+      const caretArray = Module.HEAP32.subarray(
+        caretArrayPtr / 4,
+        caretArrayPtr / 4 + caretCount,
+      );
+      carets.push(...Array.from(caretArray as Int32Array));
+      startOffset += caretCount;
+    }
+    Module.stackRestore(sp);
+    return carets;
   }
 }
