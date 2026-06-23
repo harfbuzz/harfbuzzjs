@@ -700,6 +700,132 @@ describe("Font", function () {
   });
 });
 
+describe("DrawFuncs", function () {
+  function recordGlyph(font, gid) {
+    const ops = [];
+    const funcs = new hb.DrawFuncs();
+    funcs.setMoveToFunc((x, y) => ops.push(["M", x, y]));
+    funcs.setLineToFunc((x, y) => ops.push(["L", x, y]));
+    funcs.setQuadraticToFunc((cx, cy, x, y) => ops.push(["Q", cx, cy, x, y]));
+    funcs.setCubicToFunc((c1x, c1y, c2x, c2y, x, y) =>
+      ops.push(["C", c1x, c1y, c2x, c2y, x, y]),
+    );
+    funcs.setClosePathFunc(() => ops.push(["Z"]));
+    font.drawGlyph(gid, funcs);
+    return ops;
+  }
+
+  it("drawGlyph reports the outline as draw operations", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    expect(recordGlyph(font, font.glyphFromName("A"))).to.deep.equal([
+      ["M", 545, 0],
+      ["L", 459, 221],
+      ["L", 176, 221],
+      ["L", 91, 0],
+      ["L", 0, 0],
+      ["L", 279, 717],
+      ["L", 360, 717],
+      ["L", 638, 0],
+      ["L", 545, 0],
+      ["Z"],
+      ["M", 352, 517],
+      ["Q", 349, 525, 342, 546],
+      ["Q", 335, 567, 328.5, 589.5],
+      ["Q", 322, 612, 318, 624],
+      ["Q", 311, 593, 302, 563.5],
+      ["Q", 293, 534, 287, 517],
+      ["L", 206, 301],
+      ["L", 432, 301],
+      ["L", 352, 517],
+      ["Z"],
+    ]);
+  });
+
+  it("drawGlyph reports cubic curves for a CFF font", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.otf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    const ops = recordGlyph(font, font.glyphFromName("o"));
+    expect(ops.some((op) => op[0] === "C")).to.equal(true);
+  });
+
+  it("drawGlyphOrFail reports whether the glyph has an outline", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    const funcs = new hb.DrawFuncs();
+    funcs.setMoveToFunc(() => {});
+    funcs.setLineToFunc(() => {});
+    funcs.setQuadraticToFunc(() => {});
+    funcs.setCubicToFunc(() => {});
+    funcs.setClosePathFunc(() => {});
+    expect(font.drawGlyphOrFail(font.glyphFromName("A"), funcs)).to.equal(true);
+    expect(font.drawGlyphOrFail(99999, funcs)).to.equal(false);
+  });
+
+  it("drawGlyph forwards drawData to the callbacks", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    const funcs = new hb.DrawFuncs();
+    const seen = new Set();
+    funcs.setMoveToFunc((x, y, data) => seen.add(data));
+    funcs.setLineToFunc((x, y, data) => seen.add(data));
+    funcs.setClosePathFunc((data) => seen.add(data));
+
+    const pen = { name: "pen" };
+    font.drawGlyph(font.glyphFromName("A"), funcs, pen);
+    expect([...seen]).to.deep.equal([pen]);
+
+    seen.clear();
+    font.drawGlyph(font.glyphFromName("A"), funcs);
+    expect([...seen]).to.deep.equal([undefined]);
+  });
+
+  it("set*Func forwards per-callback userData", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    const funcs = new hb.DrawFuncs();
+    const moveUser = { cb: "move" };
+    const lineUser = { cb: "line" };
+    const pen = { pen: 1 };
+    const records = [];
+    funcs.setMoveToFunc(
+      (x, y, drawData, userData) => records.push(["M", drawData, userData]),
+      moveUser,
+    );
+    funcs.setLineToFunc(
+      (x, y, drawData, userData) => records.push(["L", drawData, userData]),
+      lineUser,
+    );
+
+    font.drawGlyph(font.glyphFromName("A"), funcs, pen);
+    const moves = records.filter((r) => r[0] === "M");
+    const lines = records.filter((r) => r[0] === "L");
+    expect(moves.length).to.be.greaterThan(0);
+    expect(lines.length).to.be.greaterThan(0);
+    expect(moves.every((r) => r[1] === pen && r[2] === moveUser)).to.equal(
+      true,
+    );
+    expect(lines.every((r) => r[1] === pen && r[2] === lineUser)).to.equal(
+      true,
+    );
+  });
+});
+
 describe("FontFuncs", function () {
   it("setGlyphExtentsFunc", function () {
     let blob = new hb.Blob(
