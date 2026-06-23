@@ -6,12 +6,15 @@ import {
   hb_tag,
   utf8_ptr_to_string,
   string_to_utf8_ptr,
+  register_callback_data_pointer,
+  remove_callback_data_pointer,
   type ValueOf,
 } from "./helpers";
 import type { FontExtents, GlyphExtents, SvgPathCommand } from "./types";
 import type { Direction } from "./buffer";
 import { Face } from "./face";
 import type { FontFuncs } from "./font-funcs";
+import type { DrawFuncs } from "./draw-funcs";
 import type { Variation } from "./variation";
 
 /**
@@ -192,6 +195,55 @@ export class Font {
     const name = utf8_ptr_to_string(strPtr);
     Module.stackRestore(sp);
     return name;
+  }
+
+  /**
+   * Draws the outline that corresponds to a glyph in the specified font.
+   *
+   * The outline is returned by way of calls to the callbacks of the `drawFuncs`
+   * object, with `drawData` passed to them.
+   * @param glyphId The glyph ID.
+   * @param drawFuncs The {@link DrawFuncs} to draw to.
+   * @param drawData User data to pass to draw callbacks.
+   */
+  drawGlyph(glyphId: number, drawFuncs: DrawFuncs, drawData?: unknown): void {
+    const drawDataPtr = register_callback_data_pointer(drawData);
+    try {
+      exports.hb_font_draw_glyph(this.ptr, glyphId, drawFuncs.ptr, drawDataPtr);
+    } finally {
+      remove_callback_data_pointer(drawDataPtr);
+    }
+  }
+
+  /**
+   * Draws the outline that corresponds to a glyph in the specified font.
+   *
+   * This is a newer name for {@link Font.drawGlyph}, that returns `false` if the
+   * font has no outlines for the glyph.
+   *
+   * The outline is returned by way of calls to the callbacks of the `drawFuncs`
+   * object, with `drawData` passed to them.
+   * @param glyphId The glyph ID.
+   * @param drawFuncs The {@link DrawFuncs} to draw to.
+   * @param drawData User data to pass to draw callbacks.
+   * @returns `true` if the glyph was drawn, `false` otherwise.
+   */
+  drawGlyphOrFail(
+    glyphId: number,
+    drawFuncs: DrawFuncs,
+    drawData?: unknown,
+  ): boolean {
+    const drawDataPtr = register_callback_data_pointer(drawData);
+    try {
+      return !!exports.hb_font_draw_glyph_or_fail(
+        this.ptr,
+        glyphId,
+        drawFuncs.ptr,
+        drawDataPtr,
+      );
+    } finally {
+      remove_callback_data_pointer(drawDataPtr);
+    }
   }
 
   /**

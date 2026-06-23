@@ -149,3 +149,23 @@ export function typed_array_from_set(setPtr: number): Uint32Array {
   const array = Module.HEAPU32.subarray(arrayOffset, arrayOffset + setCount);
   return array;
 }
+
+const callbackData: unknown[] = [undefined];
+const freeCallbackData: number[] = [];
+
+export function register_callback_data_pointer(data: unknown): number {
+  if (data === undefined) return 0;
+  const dataPtr = freeCallbackData.pop() ?? callbackData.length;
+  callbackData[dataPtr] = data;
+  return dataPtr;
+}
+
+export function get_callback_data(dataPtr: number): unknown {
+  return callbackData[dataPtr];
+}
+
+export function remove_callback_data_pointer(dataPtr: number): void {
+  if (dataPtr === 0) return;
+  callbackData[dataPtr] = undefined;
+  freeCallbackData.push(dataPtr);
+}
