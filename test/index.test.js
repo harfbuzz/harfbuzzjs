@@ -698,6 +698,26 @@ describe("Font", function () {
 64 105,81 45,111L45,29C104,0 166,-10 241,-10C430,-10 515,78 515,203C515,297 459,358 345,372L345,376C435,394 493,451 493,547Z";
     expect(font.glyphToPath(22)).to.equal(expected22);
   });
+
+  it("glyphToJson converts a glyph to path commands", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    let font = new hb.Font(face);
+    expect(font.glyphToJson(font.glyphFromName("period"))).to.deep.equal([
+      { type: "M", values: [72, 54] },
+      { type: "Q", values: [72, 91, 90, 106] },
+      { type: "Q", values: [108, 121, 133, 121] },
+      { type: "Q", values: [159, 121, 177.5, 106] },
+      { type: "Q", values: [196, 91, 196, 54] },
+      { type: "Q", values: [196, 18, 177.5, 2] },
+      { type: "Q", values: [159, -14, 133, -14] },
+      { type: "Q", values: [108, -14, 90, 2] },
+      { type: "Q", values: [72, 18, 72, 54] },
+      { type: "Z", values: [] },
+    ]);
+  });
 });
 
 describe("DrawFuncs", function () {
