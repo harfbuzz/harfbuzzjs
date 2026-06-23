@@ -1,7 +1,7 @@
 import {
   Module,
   exports,
-  registry,
+  track,
   STATIC_ARRAY_SIZE,
   hb_tag,
   utf8_ptr_to_string,
@@ -14,7 +14,7 @@ import type { FontExtents, GlyphExtents, SvgPathCommand } from "./types";
 import type { Direction } from "./buffer";
 import { Face } from "./face";
 import type { FontFuncs } from "./font-funcs";
-import type { DrawFuncs } from "./draw-funcs";
+import { DrawFuncs } from "./draw-funcs";
 import type { Variation } from "./variation";
 
 /**
@@ -81,14 +81,56 @@ export const MetricsTag = {
 } as const;
 export type MetricsTag = ValueOf<typeof MetricsTag>;
 
-interface DrawPtrs {
-  drawFuncsPtr?: number;
-  moveToPtr?: number;
-  lineToPtr?: number;
-  cubicToPtr?: number;
-  quadToPtr?: number;
-  closePathPtr?: number;
-  pathBuffer: string;
+let pathDrawFuncs: DrawFuncs | undefined;
+function getPathDrawFuncs(): DrawFuncs {
+  if (!pathDrawFuncs) {
+    pathDrawFuncs = new DrawFuncs();
+    pathDrawFuncs.setMoveToFunc((x, y, path) => {
+      (path as string[]).push(`M${x},${y}`);
+    });
+    pathDrawFuncs.setLineToFunc((x, y, path) => {
+      (path as string[]).push(`L${x},${y}`);
+    });
+    pathDrawFuncs.setCubicToFunc((c1x, c1y, c2x, c2y, x, y, path) => {
+      (path as string[]).push(`C${c1x},${c1y} ${c2x},${c2y} ${x},${y}`);
+    });
+    pathDrawFuncs.setQuadraticToFunc((cx, cy, x, y, path) => {
+      (path as string[]).push(`Q${cx},${cy} ${x},${y}`);
+    });
+    pathDrawFuncs.setClosePathFunc((path) => {
+      (path as string[]).push("Z");
+    });
+  }
+  return pathDrawFuncs;
+}
+
+let jsonDrawFuncs: DrawFuncs | undefined;
+function getJsonDrawFuncs(): DrawFuncs {
+  if (!jsonDrawFuncs) {
+    jsonDrawFuncs = new DrawFuncs();
+    jsonDrawFuncs.setMoveToFunc((x, y, commands) => {
+      (commands as SvgPathCommand[]).push({ type: "M", values: [x, y] });
+    });
+    jsonDrawFuncs.setLineToFunc((x, y, commands) => {
+      (commands as SvgPathCommand[]).push({ type: "L", values: [x, y] });
+    });
+    jsonDrawFuncs.setCubicToFunc((c1x, c1y, c2x, c2y, x, y, commands) => {
+      (commands as SvgPathCommand[]).push({
+        type: "C",
+        values: [c1x, c1y, c2x, c2y, x, y],
+      });
+    });
+    jsonDrawFuncs.setQuadraticToFunc((cx, cy, x, y, commands) => {
+      (commands as SvgPathCommand[]).push({
+        type: "Q",
+        values: [cx, cy, x, y],
+      });
+    });
+    jsonDrawFuncs.setClosePathFunc((commands) => {
+      (commands as SvgPathCommand[]).push({ type: "Z", values: [] });
+    });
+  }
+  return jsonDrawFuncs;
 }
 
 /**
@@ -100,9 +142,6 @@ interface DrawPtrs {
 export class Font {
   readonly ptr: number;
   private _face?: Face;
-  private drawPtrs: DrawPtrs = {
-    pathBuffer: "",
-  };
 
   /**
    * @param face A Face to create the font from.
@@ -117,19 +156,7 @@ export class Font {
       this.ptr = exports.hb_font_create(arg.ptr);
       this._face = arg;
     }
-    const ptr = this.ptr;
-    const drawState = this.drawPtrs;
-    registry.register(this, () => {
-      exports.hb_font_destroy(ptr);
-      if (drawState.drawFuncsPtr) {
-        exports.hb_draw_funcs_destroy(drawState.drawFuncsPtr);
-        Module.removeFunction(drawState.moveToPtr!);
-        Module.removeFunction(drawState.lineToPtr!);
-        Module.removeFunction(drawState.cubicToPtr!);
-        Module.removeFunction(drawState.quadToPtr!);
-        Module.removeFunction(drawState.closePathPtr!);
-      }
-    });
+    track(this, exports.hb_font_destroy);
   }
 
   /** The {@link Face} associated with this font. */
@@ -252,104 +279,9 @@ export class Font {
    * @returns SVG path data string.
    */
   glyphToPath(glyphId: number): string {
-    const ds = this.drawPtrs;
-    if (!ds.drawFuncsPtr) {
-      const moveTo = (
-        dfuncs: number,
-        draw_data: number,
-        draw_state: number,
-        to_x: number,
-        to_y: number,
-        user_data: number,
-      ) => {
-        ds.pathBuffer += `M${to_x},${to_y}`;
-      };
-      const lineTo = (
-        dfuncs: number,
-        draw_data: number,
-        draw_state: number,
-        to_x: number,
-        to_y: number,
-        user_data: number,
-      ) => {
-        ds.pathBuffer += `L${to_x},${to_y}`;
-      };
-      const cubicTo = (
-        dfuncs: number,
-        draw_data: number,
-        draw_state: number,
-        c1_x: number,
-        c1_y: number,
-        c2_x: number,
-        c2_y: number,
-        to_x: number,
-        to_y: number,
-        user_data: number,
-      ) => {
-        ds.pathBuffer += `C${c1_x},${c1_y} ${c2_x},${c2_y} ${to_x},${to_y}`;
-      };
-      const quadTo = (
-        dfuncs: number,
-        draw_data: number,
-        draw_state: number,
-        c_x: number,
-        c_y: number,
-        to_x: number,
-        to_y: number,
-        user_data: number,
-      ) => {
-        ds.pathBuffer += `Q${c_x},${c_y} ${to_x},${to_y}`;
-      };
-      const closePath = (
-        dfuncs: number,
-        draw_data: number,
-        draw_state: number,
-        user_data: number,
-      ) => {
-        ds.pathBuffer += "Z";
-      };
-
-      ds.moveToPtr = Module.addFunction(moveTo, "viiiffi");
-      ds.lineToPtr = Module.addFunction(lineTo, "viiiffi");
-      ds.cubicToPtr = Module.addFunction(cubicTo, "viiiffffffi");
-      ds.quadToPtr = Module.addFunction(quadTo, "viiiffffi");
-      ds.closePathPtr = Module.addFunction(closePath, "viiii");
-      ds.drawFuncsPtr = exports.hb_draw_funcs_create();
-      exports.hb_draw_funcs_set_move_to_func(
-        ds.drawFuncsPtr,
-        ds.moveToPtr,
-        0,
-        0,
-      );
-      exports.hb_draw_funcs_set_line_to_func(
-        ds.drawFuncsPtr,
-        ds.lineToPtr,
-        0,
-        0,
-      );
-      exports.hb_draw_funcs_set_cubic_to_func(
-        ds.drawFuncsPtr,
-        ds.cubicToPtr,
-        0,
-        0,
-      );
-      exports.hb_draw_funcs_set_quadratic_to_func(
-        ds.drawFuncsPtr,
-        ds.quadToPtr,
-        0,
-        0,
-      );
-      exports.hb_draw_funcs_set_close_path_func(
-        ds.drawFuncsPtr,
-        ds.closePathPtr,
-        0,
-        0,
-      );
-    }
-
-    ds.pathBuffer = "";
-    exports.hb_font_draw_glyph(this.ptr, glyphId, ds.drawFuncsPtr, 0);
-    return ds.pathBuffer;
+    const path: string[] = [];
+    this.drawGlyph(glyphId, getPathDrawFuncs(), path);
+    return path.join("");
   }
 
   /**
@@ -539,15 +471,9 @@ export class Font {
    * @returns An array of path segment objects with type and values.
    */
   glyphToJson(glyphId: number): SvgPathCommand[] {
-    const path = this.glyphToPath(glyphId);
-    return path
-      .replace(/([MLQCZ])/g, "|$1 ")
-      .split("|")
-      .filter((x) => x.length)
-      .map((x) => {
-        const [type, ...values] = x.split(/[ ,]/g).filter((s) => s.length);
-        return { type, values: values.map(Number) };
-      });
+    const commands: SvgPathCommand[] = [];
+    this.drawGlyph(glyphId, getJsonDrawFuncs(), commands);
+    return commands;
   }
 
   /**
