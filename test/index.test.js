@@ -379,6 +379,85 @@ describe("Face", function () {
     expect(colr.hasColorPalettes()).to.equal(true);
     expect(noto.hasColorPalettes()).to.equal(false);
   });
+
+  it("getColorPalettes returns the CPAL palettes", function () {
+    const colr = new hb.Face(
+      new hb.Blob(
+        fs.readFileSync(
+          path.join(__dirname, "fonts/test_glyphs-glyf_colr_1.ttf"),
+        ),
+      ),
+    );
+    const palettes = colr.getColorPalettes();
+    expect(palettes).to.have.lengthOf(3);
+    expect(palettes).to.deep.equal([
+      {
+        colors: [
+          { red: 255, green: 0, blue: 0, alpha: 255 },
+          { red: 255, green: 165, blue: 0, alpha: 255 },
+          { red: 255, green: 255, blue: 0, alpha: 255 },
+          { red: 0, green: 128, blue: 0, alpha: 255 },
+          { red: 0, green: 0, blue: 255, alpha: 255 },
+          { red: 75, green: 0, blue: 130, alpha: 255 },
+          { red: 238, green: 130, blue: 238, alpha: 255 },
+          { red: 250, green: 240, blue: 230, alpha: 255 },
+          { red: 47, green: 79, blue: 79, alpha: 255 },
+          { red: 255, green: 255, blue: 255, alpha: 255 },
+          { red: 0, green: 0, blue: 0, alpha: 255 },
+          { red: 104, green: 199, blue: 232, alpha: 255 },
+          { red: 255, green: 220, blue: 1, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+        ],
+        flags: hb.ColorPaletteFlags.DEFAULT,
+      },
+      {
+        colors: [
+          { red: 42, green: 41, blue: 74, alpha: 255 },
+          { red: 36, green: 65, blue: 99, alpha: 255 },
+          { red: 27, green: 99, blue: 136, alpha: 255 },
+          { red: 21, green: 125, blue: 163, alpha: 255 },
+          { red: 14, green: 154, blue: 194, alpha: 255 },
+          { red: 5, green: 190, blue: 232, alpha: 255 },
+          { red: 0, green: 212, blue: 255, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+        ],
+        flags: hb.ColorPaletteFlags.USABLE_WITH_DARK_BACKGROUND,
+      },
+      {
+        colors: [
+          { red: 252, green: 113, blue: 24, alpha: 255 },
+          { red: 251, green: 129, blue: 21, alpha: 255 },
+          { red: 250, green: 149, blue: 17, alpha: 255 },
+          { red: 250, green: 168, blue: 13, alpha: 255 },
+          { red: 249, green: 190, blue: 9, alpha: 255 },
+          { red: 248, green: 211, blue: 4, alpha: 255 },
+          { red: 248, green: 231, blue: 0, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+          { red: 128, green: 128, blue: 128, alpha: 255 },
+        ],
+        flags: hb.ColorPaletteFlags.USABLE_WITH_LIGHT_BACKGROUND,
+      },
+    ]);
+    const noto = new hb.Face(
+      new hb.Blob(
+        fs.readFileSync(
+          path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf"),
+        ),
+      ),
+    );
+    expect(noto.getColorPalettes()).to.deep.equal([]);
+  });
 });
 
 describe("Font", function () {

@@ -76,10 +76,72 @@ export interface ColorStop {
 
 /** Color information for a gradient. */
 export interface ColorLine {
-  /** How color values outside the defined interval are determined. */
+  /** The extend mode of the color line. */
   extend: PaintExtend;
-  /** The color stops. */
+  /**
+   * The color stops.
+   *
+   * Note that due to variations being applied, the color stops may be out of
+   * order; it is the caller's responsibility to ensure they are sorted by their
+   * offset before they are used.
+   */
   colorStops: ColorStop[];
+}
+
+/** Flags that describe the properties of a color palette. */
+export const ColorPaletteFlags = {
+  /**
+   * Default indicating that there is nothing special to note about a color
+   * palette.
+   */
+  DEFAULT: 0x00000000,
+  /**
+   * Flag indicating that the color palette is appropriate to use when displaying
+   * the font on a light background such as white.
+   */
+  USABLE_WITH_LIGHT_BACKGROUND: 0x00000001,
+  /**
+   * Flag indicating that the color palette is appropriate to use when displaying
+   * the font on a dark background such as black.
+   */
+  USABLE_WITH_DARK_BACKGROUND: 0x00000002,
+} as const;
+export type ColorPaletteFlags = ValueOf<typeof ColorPaletteFlags>;
+
+/** A {@link Color} from a font's color palette, together with its name ID. */
+export interface PaletteColor extends Color {
+  /**
+   * The `name` table Name ID that provides display names for the color, or
+   * `undefined` if the color has no name.
+   *
+   * Display names can be generic (e.g., "Background") or specific (e.g., "Eye
+   * color").
+   */
+  nameId?: number;
+}
+
+/** A color palette from a font's `CPAL` table. */
+export interface ColorPalette {
+  /**
+   * The colors that make up the palette. The RGBA values are unpremultiplied;
+   * see the OpenType spec
+   * [CPAL](https://learn.microsoft.com/en-us/typography/opentype/spec/cpal)
+   * section for details.
+   */
+  colors: PaletteColor[];
+  /**
+   * The `name` table Name ID that provides display names for the palette, or
+   * `undefined` if the palette has no name.
+   *
+   * Palette display names can be generic (e.g., "Default") or provide specific,
+   * themed names (e.g., "Spring", "Summer", "Fall", and "Winter").
+   */
+  nameId?: number;
+  /**
+   * The flags defined for the palette, a combination of
+   * {@link ColorPaletteFlags} values.
+   */
+  flags: number;
 }
 
 /**
