@@ -458,6 +458,25 @@ describe("Face", function () {
     );
     expect(noto.getColorPalettes()).to.deep.equal([]);
   });
+
+  it("hasColorLayers reports a COLRv0 table", function () {
+    const colr = new hb.Face(
+      new hb.Blob(
+        fs.readFileSync(
+          path.join(__dirname, "fonts/test_glyphs-glyf_colr_1.ttf"),
+        ),
+      ),
+    );
+    const noto = new hb.Face(
+      new hb.Blob(
+        fs.readFileSync(
+          path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf"),
+        ),
+      ),
+    );
+    expect(colr.hasColorLayers()).to.equal(true);
+    expect(noto.hasColorLayers()).to.equal(false);
+  });
 });
 
 describe("Font", function () {

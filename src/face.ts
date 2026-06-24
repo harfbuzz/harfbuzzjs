@@ -462,4 +462,12 @@ export class Face {
     Module.stackRestore(sp);
     return palettes;
   }
+
+  /**
+   * Tests whether a face includes a `COLR` table with data according to COLRv0.
+   * @returns `true` if data found, `false` otherwise.
+   */
+  hasColorLayers(): boolean {
+    return !!exports.hb_ot_color_has_layers(this.ptr);
+  }
 }
