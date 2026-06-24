@@ -530,6 +530,23 @@ describe("Face", function () {
     expect(colr.glyphHasColorPaint(10)).to.equal(true);
     expect(colr.glyphHasColorPaint(2)).to.equal(false);
   });
+
+  it("hasColorPng reports CBDT/sbix PNG glyph images", function () {
+    const cbdt = new hb.Face(
+      new hb.Blob(
+        fs.readFileSync(path.join(__dirname, "fonts/chromacheck-cbdt.ttf")),
+      ),
+    );
+    const noto = new hb.Face(
+      new hb.Blob(
+        fs.readFileSync(
+          path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf"),
+        ),
+      ),
+    );
+    expect(cbdt.hasColorPng()).to.equal(true);
+    expect(noto.hasColorPng()).to.equal(false);
+  });
 });
 
 describe("Font", function () {

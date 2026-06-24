@@ -524,4 +524,13 @@ export class Face {
   glyphHasColorPaint(glyph: number): boolean {
     return !!exports.hb_ot_color_glyph_has_paint(this.ptr, glyph);
   }
+
+  /**
+   * Tests whether a face has PNG glyph images (either in `CBDT` or `sbix`
+   * tables).
+   * @returns `true` if data found, `false` otherwise.
+   */
+  hasColorPng(): boolean {
+    return !!exports.hb_ot_color_has_png(this.ptr);
+  }
 }
