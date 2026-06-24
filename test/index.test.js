@@ -846,6 +846,98 @@ describe("DrawFuncs", function () {
   });
 });
 
+describe("PaintFuncs", function () {
+  function colrFont() {
+    const blob = new hb.Blob(
+      fs.readFileSync(
+        path.join(__dirname, "fonts/test_glyphs-glyf_colr_1.ttf"),
+      ),
+    );
+    return new hb.Font(new hb.Face(blob));
+  }
+
+  function recordPaint(font, gid) {
+    const ops = [];
+    const funcs = new hb.PaintFuncs();
+    funcs.setPushTransformFunc((xx, yx, xy, yy, dx, dy) =>
+      ops.push(["pushTransform", xx, yx, xy, yy, dx, dy]),
+    );
+    funcs.setPopTransformFunc(() => ops.push(["popTransform"]));
+    funcs.setPushClipGlyphFunc((glyph) => ops.push(["pushClipGlyph", glyph]));
+    funcs.setPushClipRectangleFunc((xmin, ymin, xmax, ymax) =>
+      ops.push(["pushClipRectangle", xmin, ymin, xmax, ymax]),
+    );
+    funcs.setPopClipFunc(() => ops.push(["popClip"]));
+    funcs.setColorFunc((isForeground, color) =>
+      ops.push(["color", isForeground, color]),
+    );
+    funcs.setLinearGradientFunc((colorLine) =>
+      ops.push(["linearGradient", colorLine]),
+    );
+    funcs.setColorGlyphFunc(() => false);
+    font.paintGlyph(gid, funcs);
+    return ops;
+  }
+
+  it("paintGlyph falls back to the outline for a non-color glyph", function () {
+    expect(recordPaint(colrFont(), 2)).to.deep.equal([
+      ["pushClipGlyph", 2],
+      ["color", true, { red: 0, green: 0, blue: 0, alpha: 255 }],
+      ["popClip"],
+    ]);
+  });
+
+  it("paintGlyphOrFail reports whether a glyph has color", function () {
+    const font = colrFont();
+    const funcs = new hb.PaintFuncs();
+    funcs.setPushTransformFunc(() => {});
+    funcs.setPopTransformFunc(() => {});
+    funcs.setPushClipGlyphFunc(() => {});
+    funcs.setPushClipRectangleFunc(() => {});
+    funcs.setPopClipFunc(() => {});
+    funcs.setLinearGradientFunc(() => {});
+    expect(font.paintGlyphOrFail(10, funcs)).to.equal(true);
+    expect(font.paintGlyphOrFail(2, funcs)).to.equal(false);
+  });
+
+  it("paintGlyph reports a linear-gradient COLR glyph", function () {
+    const ops = recordPaint(colrFont(), 10);
+    const gradient = ops.find((op) => op[0] === "linearGradient");
+    expect(gradient).to.not.equal(undefined);
+    const colorLine = gradient[1];
+    expect(colorLine.extend).to.equal(hb.PaintExtend.REPEAT);
+    expect(colorLine.colorStops).to.deep.equal([
+      {
+        offset: 0,
+        isForeground: false,
+        color: { red: 255, green: 0, blue: 0, alpha: 255 },
+      },
+      {
+        offset: 1.5,
+        isForeground: false,
+        color: { red: 0, green: 0, blue: 255, alpha: 255 },
+      },
+    ]);
+  });
+
+  it("paintGlyph forwards paintData and per-callback userData", function () {
+    const font = colrFont();
+    const funcs = new hb.PaintFuncs();
+    const seen = [];
+    const colorUser = { cb: "color" };
+    const state = { state: 1 };
+    funcs.setPushClipGlyphFunc(() => {});
+    funcs.setPopClipFunc(() => {});
+    funcs.setColorFunc(
+      (isForeground, color, paintData, userData) =>
+        seen.push([paintData, userData]),
+      colorUser,
+    );
+    font.paintGlyph(2, funcs, state);
+    expect(seen).to.deep.equal([[state, colorUser]]);
+  });
+});
+
 describe("FontFuncs", function () {
   it("setGlyphExtentsFunc", function () {
     let blob = new hb.Blob(

@@ -8,13 +8,15 @@ import {
   string_to_utf8_ptr,
   register_callback_data_pointer,
   remove_callback_data_pointer,
+  color_to_int,
   type ValueOf,
 } from "./helpers";
-import type { FontExtents, GlyphExtents, SvgPathCommand } from "./types";
+import type { Color, FontExtents, GlyphExtents, SvgPathCommand } from "./types";
 import type { Direction } from "./buffer";
 import { Face } from "./face";
 import type { FontFuncs } from "./font-funcs";
 import { DrawFuncs } from "./draw-funcs";
+import type { PaintFuncs } from "./paint-funcs";
 import type { Variation } from "./variation";
 
 /**
@@ -270,6 +272,86 @@ export class Font {
       );
     } finally {
       remove_callback_data_pointer(drawDataPtr);
+    }
+  }
+
+  /**
+   * Paints the glyph. This function is similar to {@link Font.paintGlyphOrFail},
+   * but if painting a color glyph failed, it will fall back to painting an
+   * outline monochrome glyph.
+   *
+   * The painting instructions are returned by way of calls to the callbacks of
+   * the `paintFuncs` object, with `paintData` passed to them.
+   *
+   * If the font has color palettes, then `paletteIndex` selects the palette to
+   * use. If the font only has one palette, this will be 0.
+   * @param glyphId The glyph ID.
+   * @param paintFuncs The {@link PaintFuncs} to paint with.
+   * @param paintData User data to pass to paint callbacks.
+   * @param paletteIndex The index of the font's color palette to use.
+   * @param foreground The foreground color, unpremultiplied.
+   */
+  paintGlyph(
+    glyphId: number,
+    paintFuncs: PaintFuncs,
+    paintData?: unknown,
+    paletteIndex: number = 0,
+    foreground: Color = { red: 0, green: 0, blue: 0, alpha: 255 },
+  ): void {
+    const paintDataPtr = register_callback_data_pointer(paintData);
+    try {
+      exports.hb_font_paint_glyph(
+        this.ptr,
+        glyphId,
+        paintFuncs.ptr,
+        paintDataPtr,
+        paletteIndex,
+        color_to_int(foreground),
+      );
+    } finally {
+      remove_callback_data_pointer(paintDataPtr);
+    }
+  }
+
+  /**
+   * Paints a color glyph.
+   *
+   * Succeeds if the glyph has color paint layers (COLRv0), a color paint graph
+   * (COLRv1), or a bitmap image that the font's callbacks render successfully.
+   * Returns `false` if the font has no color data for the glyph; the client can
+   * then fall back to {@link Font.drawGlyphOrFail} for the monochrome outline.
+   *
+   * The painting instructions are returned by way of calls to the callbacks of
+   * the `paintFuncs` object, with `paintData` passed to them.
+   *
+   * If the font has color palettes, then `paletteIndex` selects the palette to
+   * use. If the font only has one palette, this will be 0.
+   * @param glyphId The glyph ID.
+   * @param paintFuncs The {@link PaintFuncs} to paint with.
+   * @param paintData User data to pass to paint callbacks.
+   * @param paletteIndex The index of the font's color palette to use.
+   * @param foreground The foreground color, unpremultiplied.
+   * @returns `true` if the glyph was painted, `false` otherwise.
+   */
+  paintGlyphOrFail(
+    glyphId: number,
+    paintFuncs: PaintFuncs,
+    paintData?: unknown,
+    paletteIndex: number = 0,
+    foreground: Color = { red: 0, green: 0, blue: 0, alpha: 255 },
+  ): boolean {
+    const paintDataPtr = register_callback_data_pointer(paintData);
+    try {
+      return !!exports.hb_font_paint_glyph_or_fail(
+        this.ptr,
+        glyphId,
+        paintFuncs.ptr,
+        paintDataPtr,
+        paletteIndex,
+        color_to_int(foreground),
+      );
+    } finally {
+      remove_callback_data_pointer(paintDataPtr);
     }
   }
 
