@@ -517,6 +517,19 @@ describe("Face", function () {
     expect(colr.hasColorPaint()).to.equal(true);
     expect(noto.hasColorPaint()).to.equal(false);
   });
+
+  it("glyphHasColorPaint reports COLRv1 paint for a glyph", function () {
+    const colr = new hb.Face(
+      new hb.Blob(
+        fs.readFileSync(
+          path.join(__dirname, "fonts/test_glyphs-glyf_colr_1.ttf"),
+        ),
+      ),
+    );
+    // Glyph 10 has a COLRv1 paint; glyph 2 is a plain outline.
+    expect(colr.glyphHasColorPaint(10)).to.equal(true);
+    expect(colr.glyphHasColorPaint(2)).to.equal(false);
+  });
 });
 
 describe("Font", function () {

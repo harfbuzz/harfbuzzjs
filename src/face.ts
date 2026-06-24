@@ -515,4 +515,13 @@ export class Face {
   hasColorPaint(): boolean {
     return !!exports.hb_ot_color_has_paint(this.ptr);
   }
+
+  /**
+   * Tests whether a face includes COLRv1 paint data for a glyph.
+   * @param glyph The glyph index to query.
+   * @returns `true` if data found, `false` otherwise.
+   */
+  glyphHasColorPaint(glyph: number): boolean {
+    return !!exports.hb_ot_color_glyph_has_paint(this.ptr, glyph);
+  }
 }
