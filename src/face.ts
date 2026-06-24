@@ -9,9 +9,16 @@ import {
   language_to_string,
   language_from_string,
   typed_array_from_set,
+  color_from_int,
   type ValueOf,
 } from "./helpers";
-import type { AxisInfo, NameEntry, FeatureNameIds } from "./types";
+import type {
+  AxisInfo,
+  NameEntry,
+  FeatureNameIds,
+  PaletteColor,
+  ColorPalette,
+} from "./types";
 import type { Blob } from "./blob";
 
 const HB_OT_NAME_ID_INVALID = 0xffff;
@@ -405,5 +412,54 @@ export class Face {
    */
   hasColorPalettes(): boolean {
     return !!exports.hb_ot_color_has_palettes(this.ptr);
+  }
+
+  /**
+   * Fetches the color palettes in the face's `CPAL` table.
+   * @returns An array of the face's {@link ColorPalette | color palettes}.
+   */
+  getColorPalettes(): ColorPalette[] {
+    const count = exports.hb_ot_color_palette_get_count(this.ptr);
+    const palettes: ColorPalette[] = [];
+    const sp = Module.stackSave();
+    const countPtr = Module.stackAlloc(4);
+    const colorsPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 4);
+    for (let i = 0; i < count; i++) {
+      const colors: PaletteColor[] = [];
+      let startOffset = 0;
+      let colorCount = STATIC_ARRAY_SIZE;
+      while (colorCount === STATIC_ARRAY_SIZE) {
+        Module.HEAPU32[countPtr / 4] = colorCount;
+        exports.hb_ot_color_palette_get_colors(
+          this.ptr,
+          i,
+          startOffset,
+          countPtr,
+          colorsPtr,
+        );
+        colorCount = Module.HEAPU32[countPtr / 4];
+        for (let j = 0; j < colorCount; j++) {
+          const color: PaletteColor = color_from_int(
+            Module.HEAPU32[colorsPtr / 4 + j],
+          );
+          const nameId = exports.hb_ot_color_palette_color_get_name_id(
+            this.ptr,
+            startOffset + j,
+          );
+          if (nameId != HB_OT_NAME_ID_INVALID) color.nameId = nameId;
+          colors.push(color);
+        }
+        startOffset += colorCount;
+      }
+      const palette: ColorPalette = {
+        colors,
+        flags: exports.hb_ot_color_palette_get_flags(this.ptr, i),
+      };
+      const nameId = exports.hb_ot_color_palette_get_name_id(this.ptr, i);
+      if (nameId != HB_OT_NAME_ID_INVALID) palette.nameId = nameId;
+      palettes.push(palette);
+    }
+    Module.stackRestore(sp);
+    return palettes;
   }
 }
