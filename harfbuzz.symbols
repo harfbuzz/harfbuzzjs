@@ -105,6 +105,7 @@ _hb_ot_color_has_layers
 _hb_ot_color_glyph_get_layers
 _hb_ot_color_has_paint
 _hb_ot_color_glyph_has_paint
+_hb_ot_color_has_png
 _hb_glyph_info_get_glyph_flags
 _hb_language_from_string
 _hb_ot_layout_table_get_script_tags
