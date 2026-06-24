@@ -6,7 +6,7 @@ interface StringPtr {
 
 export type ValueOf<T> = T[keyof T];
 
-import type { HarfBuzzModule } from "./types";
+import type { HarfBuzzModule, Color } from "./types";
 
 // Module-level WASM state (set once by init)
 export let Module: HarfBuzzModule;
@@ -168,4 +168,23 @@ export function remove_callback_data_pointer(dataPtr: number): void {
   if (dataPtr === 0) return;
   callbackData[dataPtr] = undefined;
   freeCallbackData.push(dataPtr);
+}
+
+export function color_from_int(color: number): Color {
+  return {
+    red: (color >> 8) & 0xff,
+    green: (color >> 16) & 0xff,
+    blue: (color >> 24) & 0xff,
+    alpha: color & 0xff,
+  };
+}
+
+export function color_to_int(color: Color): number {
+  return (
+    ((color.red << 8) |
+      (color.green << 16) |
+      (color.blue << 24) |
+      color.alpha) >>>
+    0
+  );
 }
