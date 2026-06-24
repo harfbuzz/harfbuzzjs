@@ -356,6 +356,27 @@ export class Font {
   }
 
   /**
+   * Fetches the PNG image for a glyph.
+   *
+   * To get an optimally sized PNG blob, the PPEM values must be set on the font.
+   * If PPEM is unset, the blob returned will be the largest PNG available.
+   * @param glyphId A glyph index.
+   * @returns The PNG image for the glyph, or `undefined` if the glyph has no PNG
+   * image.
+   */
+  getGlyphColorPng(glyphId: number): Uint8Array | undefined {
+    const blob = exports.hb_ot_color_glyph_reference_png(this.ptr, glyphId);
+    const length = exports.hb_blob_get_length(blob);
+    let png: Uint8Array | undefined;
+    if (length) {
+      const dataPtr = exports.hb_blob_get_data(blob, 0);
+      png = Module.HEAPU8.slice(dataPtr, dataPtr + length);
+    }
+    exports.hb_blob_destroy(blob);
+    return png;
+  }
+
+  /**
    * Return a glyph as an SVG path string.
    * @param glyphId ID of the requested glyph in the font.
    * @returns SVG path data string.
