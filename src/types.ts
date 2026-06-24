@@ -145,6 +145,19 @@ export interface ColorPalette {
 }
 
 /**
+ * Pairs of glyph and color index.
+ *
+ * A color index of `undefined` does not refer to a palette color, but indicates
+ * that the foreground color should be used.
+ */
+export interface ColorLayer {
+  /** The glyph ID of the layer. */
+  glyph: number;
+  /** The palette color index of the layer. */
+  colorIndex?: number;
+}
+
+/**
  * The values of this enumeration determine how color values outside the minimum
  * and maximum defined offset on a {@link ColorLine} are determined.
  *
