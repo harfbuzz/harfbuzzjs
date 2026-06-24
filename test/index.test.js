@@ -905,6 +905,24 @@ describe("Font", function () {
       { type: "Z", values: [] },
     ]);
   });
+
+  it("getGlyphColorPng returns a glyph's PNG image", function () {
+    const font = new hb.Font(
+      new hb.Face(
+        new hb.Blob(
+          fs.readFileSync(path.join(__dirname, "fonts/chromacheck-cbdt.ttf")),
+        ),
+      ),
+    );
+    const png = font.getGlyphColorPng(1);
+    expect(png).to.be.instanceOf(Uint8Array);
+    // PNG file signature.
+    expect([...png.slice(0, 8)]).to.deep.equal([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ]);
+    // A glyph with no PNG image returns undefined.
+    expect(font.getGlyphColorPng(0)).to.equal(undefined);
+  });
 });
 
 describe("DrawFuncs", function () {
