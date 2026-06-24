@@ -95,6 +95,7 @@ _hb_font_paint_glyph
 _hb_font_paint_glyph_or_fail
 _hb_color_line_get_color_stops
 _hb_color_line_get_extend
+_hb_ot_color_has_palettes
 _hb_glyph_info_get_glyph_flags
 _hb_language_from_string
 _hb_ot_layout_table_get_script_tags
