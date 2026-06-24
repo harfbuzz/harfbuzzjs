@@ -360,6 +360,25 @@ describe("Face", function () {
       paramUiLabelNameIds: [259, 260],
     });
   });
+
+  it("hasColorPalettes reports a CPAL table", function () {
+    const colr = new hb.Face(
+      new hb.Blob(
+        fs.readFileSync(
+          path.join(__dirname, "fonts/test_glyphs-glyf_colr_1.ttf"),
+        ),
+      ),
+    );
+    const noto = new hb.Face(
+      new hb.Blob(
+        fs.readFileSync(
+          path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf"),
+        ),
+      ),
+    );
+    expect(colr.hasColorPalettes()).to.equal(true);
+    expect(noto.hasColorPalettes()).to.equal(false);
+  });
 });
 
 describe("Font", function () {

@@ -398,4 +398,12 @@ export class Face {
     Module.stackRestore(sp);
     return names;
   }
+
+  /**
+   * Tests whether a face includes a `CPAL` color-palette table.
+   * @returns `true` if data found, `false` otherwise.
+   */
+  hasColorPalettes(): boolean {
+    return !!exports.hb_ot_color_has_palettes(this.ptr);
+  }
 }
