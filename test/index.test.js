@@ -477,6 +477,27 @@ describe("Face", function () {
     expect(colr.hasColorLayers()).to.equal(true);
     expect(noto.hasColorLayers()).to.equal(false);
   });
+
+  it("getGlyphColorLayers returns a COLRv0 glyph's layers", function () {
+    const colr = new hb.Face(
+      new hb.Blob(
+        fs.readFileSync(
+          path.join(__dirname, "fonts/test_glyphs-glyf_colr_1.ttf"),
+        ),
+      ),
+    );
+    expect(colr.getGlyphColorLayers(168)).to.deep.equal([
+      { glyph: 176, colorIndex: 0 },
+      { glyph: 175, colorIndex: 1 },
+      { glyph: 174, colorIndex: 2 },
+      { glyph: 173, colorIndex: 3 },
+      { glyph: 172, colorIndex: 4 },
+      { glyph: 171, colorIndex: 5 },
+      { glyph: 170, colorIndex: 6 },
+      { glyph: 5, colorIndex: 10 },
+    ]);
+    expect(colr.getGlyphColorLayers(0)).to.deep.equal([]);
+  });
 });
 
 describe("Font", function () {

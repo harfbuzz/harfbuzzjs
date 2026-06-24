@@ -18,6 +18,7 @@ import type {
   FeatureNameIds,
   PaletteColor,
   ColorPalette,
+  ColorLayer,
 } from "./types";
 import type { Blob } from "./blob";
 
@@ -469,5 +470,41 @@ export class Face {
    */
   hasColorLayers(): boolean {
     return !!exports.hb_ot_color_has_layers(this.ptr);
+  }
+
+  /**
+   * Fetches a list of all color layers for the specified glyph index in the
+   * specified face.
+   * @param glyph The glyph index to query.
+   * @returns An array of the glyph's {@link ColorLayer | color layers}.
+   */
+  getGlyphColorLayers(glyph: number): ColorLayer[] {
+    const layers: ColorLayer[] = [];
+    const sp = Module.stackSave();
+    const countPtr = Module.stackAlloc(4);
+    const layersPtr = Module.stackAlloc(STATIC_ARRAY_SIZE * 8);
+    let startOffset = 0;
+    let layerCount = STATIC_ARRAY_SIZE;
+    while (layerCount === STATIC_ARRAY_SIZE) {
+      Module.HEAPU32[countPtr / 4] = layerCount;
+      exports.hb_ot_color_glyph_get_layers(
+        this.ptr,
+        glyph,
+        startOffset,
+        countPtr,
+        layersPtr,
+      );
+      layerCount = Module.HEAPU32[countPtr / 4];
+      for (let i = 0; i < layerCount; i++) {
+        const o = layersPtr / 4 + i * 2;
+        const layer: ColorLayer = { glyph: Module.HEAPU32[o] };
+        const colorIndex = Module.HEAPU32[o + 1];
+        if (colorIndex != 0xffff) layer.colorIndex = colorIndex;
+        layers.push(layer);
+      }
+      startOffset += layerCount;
+    }
+    Module.stackRestore(sp);
+    return layers;
   }
 }
