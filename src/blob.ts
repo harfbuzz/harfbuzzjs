@@ -11,7 +11,7 @@ export class Blob {
    * @param data Binary font data.
    */
   constructor(data: Uint8Array | ArrayBuffer) {
-    const array = data instanceof Uint8Array ? data : new Uint8Array(data)
+    const array = data instanceof Uint8Array ? data : new Uint8Array(data);
     const blobPtr = exports.malloc(array.byteLength);
     Module.HEAPU8.set(array, blobPtr);
     this.ptr = exports.hb_blob_create(
