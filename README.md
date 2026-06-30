@@ -54,17 +54,15 @@ for (const glyph of buffer.getGlyphInfosAndPositions()) {
 
 ### Alternative browser example
 
-```
-npx pad.js
-```
+See [examples/harfbuzz.example.html](examples/harfbuzz.example.html). To quickly run it in a browser:
 
-Then open http://127.0.0.1/examples/harfbuzz.example.html.
+```
+npx http-server -o /examples/harfbuzz.example.html
+```
 
 ### Node.js example
 
-```
-node examples/harfbuzz.example.node.js
-```
+See [examples/harfbuzz.example.node.js](examples/harfbuzz.example.node.js).
 
 ## Development
 
