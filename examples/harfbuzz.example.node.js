@@ -1,29 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { Blob, Face, Font, Buffer, shape } from "../dist/index.mjs";
+import * as hb from "harfbuzzjs";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-function example(fontPath, text) {
-  var blob = new Blob(fs.readFileSync(fontPath));
-  var face = new Face(blob, 0);
-  var font = new Font(face);
-
-  var buffer = new Buffer();
-  buffer.addText(text || "abc");
-  buffer.guessSegmentProperties();
-  shape(font, buffer);
-
-  return buffer.getGlyphInfosAndPositions();
-}
-
-console.log(
-  example(path.resolve(__dirname, "../test/fonts/noto/NotoSans-Regular.ttf")),
+const nodeBuffer = fs.readFileSync(
+  path.join(import.meta.dirname, "../test/fonts/noto/NotoSans-Regular.ttf"),
 );
-console.log(
-  example(
-    path.resolve(__dirname, "../test/fonts/noto/NotoSansArabic-Variable.ttf"),
-    "أبجد",
-  ),
-);
+
+const blob = new hb.Blob(nodeBuffer);
+const face = new hb.Face(blob);
+const font = new hb.Font(face);
+
+const buffer = new hb.Buffer();
+buffer.addText("abc");
+buffer.guessSegmentProperties();
+hb.shape(font, buffer);
+
+console.log(buffer.getGlyphInfosAndPositions());
