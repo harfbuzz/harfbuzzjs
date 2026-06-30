@@ -45,10 +45,14 @@ buffer.guessSegmentProperties();
 hb.shape(font, buffer);
 
 // Enumerate the resulted glyphs in the buffer:
-for (const glyph of buffer.getGlyphInfosAndPositions()) {
+const infos = buffer.getGlyphInfos();
+const positions = buffer.getGlyphPositions();
+for (const [index, glyph] of infos.entries()) {
   const gid = glyph.codepoint; // Glyph ID despite the property name
-  const { xAdvance, yAdvance, xOffset, yOffset } = glyph;
-  const svgPath = font.glyphToPath(gid);
+  console.log(
+    font.glyphToPath(gid), // SVG path
+    positions[index], // xAdvance, yAdvance, xOffset, yOffset
+  );
 }
 ```
 
