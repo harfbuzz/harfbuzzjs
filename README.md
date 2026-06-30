@@ -1,11 +1,10 @@
 # harfbuzzjs
 
 <div align="center">
-<p><img src="logo.png" alt="harfbuzzjs Logo" width="256" align="center"/></p>
+  <p><img src="logo.png" alt="harfbuzzjs Logo" width="256" align="center"/></p>
 
-[![Build](https://github.com/harfbuzz/harfbuzzjs/actions/workflows/build.yml/badge.svg)](https://github.com/harfbuzz/harfbuzzjs/actions/workflows/build.yml)
-[![NPM Version](https://img.shields.io/npm/v/harfbuzzjs)](https://www.npmjs.com/package/harfbuzzjs)
-
+  [![Build](https://github.com/harfbuzz/harfbuzzjs/actions/workflows/build.yml/badge.svg)](https://github.com/harfbuzz/harfbuzzjs/actions/workflows/build.yml)
+  [![NPM Version](https://img.shields.io/npm/v/harfbuzzjs)](https://www.npmjs.com/package/harfbuzzjs)
 </div>
 
 Providing [HarfBuzz](https://github.com/harfbuzz/harfbuzz) shaping
@@ -13,22 +12,19 @@ library for client/server side JavaScript projects.
 
 See the demo [here](https://harfbuzz.github.io/harfbuzzjs/demo/).
 
-## Building
-1. Install emscripten
-2. `make`
-
-## Testing
-1. `make test`
-
 ## Download
-Download from the [releases tab](https://github.com/harfbuzz/harfbuzzjs/releases).
+
+From the repo's [releases](https://github.com/harfbuzz/harfbuzzjs/releases), or npm:
+
+```
+npm install harfbuzzjs
+```
 
 ## Migrating from v0.x
+
 The v1 release introduced several API-breaking changes. See [MIGRATING](MIGRATING.md) for migrating from v0.x.
 
-## Usage
-
-### TL;DR
+## Usage examples
 
 ```js
 import * as hb from "harfbuzzjs";
@@ -56,20 +52,35 @@ for (const glyph of buffer.getGlyphInfosAndPositions()) {
 }
 ```
 
-More examples:
+### Alternative browser example
 
-### Browser
+```
+npx pad.js
+```
 
-1. `npx pad.js`
-2. Open `http://127.0.0.1/examples/harfbuzz.example.html`
+Then open http://127.0.0.1/examples/harfbuzz.example.html.
 
-### Node.js
+### Node.js example
 
-1. `node examples/harfbuzz.example.node.js`
+```
+node examples/harfbuzz.example.node.js
+```
 
-## [npm](https://www.npmjs.com/package/harfbuzzjs)
-Can be added with `npm i harfbuzzjs` or `yarn add harfbuzzjs`, see the examples for
-how to use it.
+## Development
+
+### Building
+
+First install [emscripten](https://emscripten.org), then:
+
+```
+make
+```
+
+### Testing
+
+```
+make test
+```
 
 ## Need more of the library?
 
