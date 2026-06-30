@@ -30,35 +30,29 @@ The v1 release introduced several API-breaking changes. See [MIGRATING](MIGRATIN
 
 ### TL;DR
 
-```javascript
+```js
 import * as hb from "harfbuzzjs";
 
-const fontdata = await fetch('myfont.ttf').then(r => r.arrayBuffer());
-const blob = new hb.Blob(fontdata);      // Load the font data into Harfbuzz blob
-const face = new hb.Face(blob, 0);       // Select the first font in the file
-const font = new hb.Font(face);          // Create a Harfbuzz font object from the face
-const buffer = new hb.Buffer();          // Make a buffer to hold some text
-buffer.addText('abc');                   // Fill it with some stuff
-buffer.guessSegmentProperties();         // Set script, language and direction
-hb.shape(font, buffer);                  // Shape the text
-const output = buffer.getGlyphInfosAndPositions();
+// Load data from a font file:
+const response = await fetch("font.ttf");
+const arrayBuffer = await response.arrayBuffer();
 
-// Enumerate the glyphs
-var xCursor = 0;
-var yCursor = 0;
-for (var glyph of output) {
-    var glyphId = glyph.codepoint;
-    var xAdvance = glyph.xAdvance;
-    var yAdvance = glyph.yAdvance;
-    var xDisplacement = glyph.xOffset;
-    var yDisplacement = glyph.yOffset;
+// Create a HarfBuzz font object from the data:
+const blob = new hb.Blob(arrayBuffer);
+const face = new hb.Face(blob);
+const font = new hb.Font(face);
 
-    var svgPath = font.glyphToPath(glyphId);
-    // You need to supply this bit
-    drawAGlyph(svgPath, xCursor + xDisplacement, yCursor + yDisplacement);
+// Shape text in a HarfBuzz buffer with the font:
+const buffer = new hb.Buffer();
+buffer.addText("abc");
+buffer.guessSegmentProperties();
+hb.shape(font, buffer);
 
-    xCursor += xAdvance;
-    yCursor += yAdvance;
+// Enumerate the resulted glyphs in the buffer:
+for (const glyph of buffer.getGlyphInfosAndPositions()) {
+  const gid = glyph.codepoint; // Glyph ID despite the property name
+  const { xAdvance, yAdvance, xOffset, yOffset } = glyph;
+  const svgPath = font.glyphToPath(gid);
 }
 ```
 
