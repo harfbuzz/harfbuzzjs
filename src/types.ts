@@ -273,9 +273,37 @@ export const PaintCompositeMode = {
 } as const;
 export type PaintCompositeMode = ValueOf<typeof PaintCompositeMode>;
 
+/** Flags for {@link AxisInfo}. */
+export const AxisFlags = {
+  /** The axis should not be exposed directly in user interfaces. */
+  HIDDEN: 0x00000001,
+} as const;
+export type AxisFlags = ValueOf<typeof AxisFlags>;
+
+/**
+ * Data type for holding variation-axis values.
+ *
+ * The minimum, default, and maximum values are in un-normalized, user scales.
+ */
 export interface AxisInfo {
+  /** Index of the axis in the variation-axis array. */
+  axisIndex: number;
+  /** The tag identifying the design variation of the axis. */
+  tag: string;
+  /** The `name` table Name ID that provides display names for the axis. */
+  nameId: number;
+  /**
+   * The {@link AxisFlags} flags for the axis.
+   *
+   * Note: at present, the only flag defined for `flags` is
+   * {@link AxisFlags.HIDDEN}.
+   */
+  flags: number;
+  /** The minimum value on the variation axis that the font covers. */
   min: number;
+  /** The position on the variation axis corresponding to the font's defaults. */
   default: number;
+  /** The maximum value on the variation axis that the font covers. */
   max: number;
 }
 

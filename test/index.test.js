@@ -33,8 +33,24 @@ describe("Face", function () {
     );
     let face = new hb.Face(blob);
     expect(face.getAxisInfos()).to.deep.equal({
-      wght: { min: 100, default: 400, max: 900 },
-      wdth: { min: 62.5, default: 100, max: 100 },
+      wght: {
+        axisIndex: 0,
+        tag: "wght",
+        nameId: 256,
+        flags: 0,
+        min: 100,
+        default: 400,
+        max: 900,
+      },
+      wdth: {
+        axisIndex: 1,
+        tag: "wdth",
+        nameId: 257,
+        flags: 0,
+        min: 62.5,
+        default: 100,
+        max: 100,
+      },
     });
   });
 
