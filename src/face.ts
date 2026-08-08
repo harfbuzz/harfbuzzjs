@@ -77,7 +77,7 @@ export class Face {
 
   /**
    * Return variation axis infos.
-   * @returns A dictionary mapping axis tags to {min, default, max} values.
+   * @returns A dictionary mapping axis tags to {@link AxisInfo} values.
    */
   getAxisInfos(): Record<string, AxisInfo> {
     const sp = Module.stackSave();
@@ -87,11 +87,16 @@ export class Face {
     exports.hb_ot_var_get_axis_infos(this.ptr, 0, c, axis);
     const result: Record<string, AxisInfo> = {};
     Array.from({ length: Module.HEAPU32[c / 4] }).forEach((_, i) => {
-      result[hb_untag(Module.HEAPU32[axis / 4 + i * 8 + 1])] = {
+      const info: AxisInfo = {
+        axisIndex: Module.HEAPU32[axis / 4 + i * 8],
+        tag: hb_untag(Module.HEAPU32[axis / 4 + i * 8 + 1]),
+        nameId: Module.HEAPU32[axis / 4 + i * 8 + 2],
+        flags: Module.HEAPU32[axis / 4 + i * 8 + 3],
         min: Module.HEAPF32[axis / 4 + i * 8 + 4],
         default: Module.HEAPF32[axis / 4 + i * 8 + 5],
         max: Module.HEAPF32[axis / 4 + i * 8 + 6],
       };
+      result[info.tag] = info;
     });
     Module.stackRestore(sp);
     return result;
