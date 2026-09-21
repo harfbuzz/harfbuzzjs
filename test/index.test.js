@@ -1940,7 +1940,7 @@ describe("shape", function () {
       0,
       hb.TracePhase.DONT_STOP,
     );
-    expect(result).to.have.lengthOf(59);
+    expect(result).to.have.lengthOf(60);
     expect(result[2]).to.deep.equal({
       m: "start table GSUB script tag 'latn'",
       glyphs: true,
@@ -1950,7 +1950,7 @@ describe("shape", function () {
         { cl: 2, g: 70 },
       ],
     });
-    expect(result[58]).to.deep.equal({
+    expect(result[59]).to.deep.equal({
       m: "end table GPOS script tag 'latn'",
       glyphs: true,
       t: [
@@ -1977,7 +1977,7 @@ describe("shape", function () {
       0,
       hb.TracePhase.DONT_STOP,
     );
-    expect(result).to.have.lengthOf(46);
+    expect(result).to.have.lengthOf(48);
     expect(result[2]).to.deep.equal({
       m: "start table GSUB script tag 'latn'",
       glyphs: true,
@@ -1989,7 +1989,7 @@ describe("shape", function () {
         { cl: 4, g: 57 },
       ],
     });
-    expect(result[45]).to.deep.equal({
+    expect(result[47]).to.deep.equal({
       m: "end table GPOS script tag 'latn'",
       glyphs: true,
       t: [
