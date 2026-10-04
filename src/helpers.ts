@@ -53,12 +53,12 @@ export function hb_tag(s: string): number {
 }
 
 export function hb_untag(tag: number): string {
-  return [
-    String.fromCharCode((tag >> 24) & 0xff),
-    String.fromCharCode((tag >> 16) & 0xff),
-    String.fromCharCode((tag >> 8) & 0xff),
-    String.fromCharCode((tag >> 0) & 0xff),
-  ].join("");
+  return String.fromCharCode(
+    (tag >> 24) & 0xff,
+    (tag >> 16) & 0xff,
+    (tag >> 8) & 0xff,
+    (tag >> 0) & 0xff,
+  );
 }
 
 export function utf8_ptr_to_string(ptr: number, length?: number): string {
