@@ -4,6 +4,7 @@ import {
   hb_tag,
   hb_untag,
   utf8_ptr_to_string,
+  string_to_ascii_ptr,
   language_to_string,
   type ValueOf,
 } from "./helpers";
@@ -135,7 +136,7 @@ export function versionString(): string {
 }
 
 /**
- * Convert an OpenType script tag to HarfBuzz script.
+ * Convert an OpenType script tag to HarfBuzz script (ISO 15924).
  * @param tag The tag to convert.
  * @returns The script.
  */
@@ -146,7 +147,7 @@ export function otTagToScript(tag: string): string {
 }
 
 /**
- * Convert an OpenType language tag to HarfBuzz language.
+ * Convert an OpenType language tag to HarfBuzz language (BCP 47).
  * @param tag The tag to convert.
  * @returns The language.
  */
@@ -154,4 +155,85 @@ export function otTagToLanguage(tag: string): string {
   const hbTag = hb_tag(tag);
   const language = exports.hb_ot_tag_to_language(hbTag);
   return language_to_string(language);
+}
+
+/** https://harfbuzz.github.io/harfbuzz-hb-ot-layout.html#HB-OT-MAX-TAGS-PER-LANGUAGE:CAPS */
+const HB_OT_MAX_TAGS_PER_LANGUAGE = 3;
+/** https://harfbuzz.github.io/harfbuzz-hb-ot-layout.html#HB-OT-MAX-TAGS-PER-SCRIPT:CAPS */
+const HB_OT_MAX_TAGS_PER_SCRIPT = 3;
+
+/**
+ * Convert a HarfBuzz script (ISO 15924) and a HarfBuzz language (BCP 47) to OpenType script tags and OpenType language tags.
+ * @param script An HarfBuzz script to convert.
+ * @param language An HarfBuzz language to convert.
+ * @returns An object with the OpenType script tags and the OpenType language tags.
+ */
+export function otTagsFromScriptAndLanguage(
+  script: string,
+  language: string,
+): {
+  scriptTags: string[];
+  languageTags: string[];
+} {
+  const sp = Module.stackSave();
+  const scriptStr = string_to_ascii_ptr(script);
+  const languageStr = string_to_ascii_ptr(language);
+  const scriptCountPtr = Module.stackAlloc(4);
+  const scriptTagsPtr = Module.stackAlloc(HB_OT_MAX_TAGS_PER_SCRIPT * 4);
+  const languageCountPtr = Module.stackAlloc(4);
+  const languageTagsPtr = Module.stackAlloc(HB_OT_MAX_TAGS_PER_LANGUAGE * 4);
+  exports.hb_ot_tags_from_script_and_language(
+    exports.hb_script_from_string(scriptStr.ptr, -1),
+    exports.hb_language_from_string(languageStr.ptr, -1),
+    scriptCountPtr,
+    scriptTagsPtr,
+    languageCountPtr,
+    languageTagsPtr,
+  );
+  scriptStr.free();
+  languageStr.free();
+  const scriptTags = Module.HEAPU32.subarray(
+    scriptTagsPtr / 4,
+    scriptTagsPtr / 4 + Module.HEAPU32[scriptCountPtr / 4],
+  );
+  const languageTags = Module.HEAPU32.subarray(
+    languageTagsPtr / 4,
+    languageTagsPtr / 4 + Module.HEAPU32[languageCountPtr / 4],
+  );
+  Module.stackRestore(sp);
+  return {
+    scriptTags: [...scriptTags].map(hb_untag),
+    languageTags: [...languageTags].map(hb_untag),
+  };
+}
+
+/**
+ * Convert an OpenType script tag and an OpenType language tag to a HarfBuzz script (ISO 15924) and a HarfBuzz language (BCP 47).
+ * @param scriptTag An OpenType script tag.
+ * @param languageTag An OpenType language tag.
+ * @returns An object with the HarfBuzz script and the HarfBuzz language.
+ */
+export function otTagsToScriptAndLanguage(
+  scriptTag: string,
+  languageTag: string,
+): {
+  script: string | undefined;
+  language: string | undefined;
+} {
+  const sp = Module.stackSave();
+  const scriptPtr = Module.stackAlloc(4);
+  const languagePtr = Module.stackAlloc(4);
+  exports.hb_ot_tags_to_script_and_language(
+    hb_tag(scriptTag),
+    hb_tag(languageTag),
+    scriptPtr,
+    languagePtr,
+  );
+  const script = Module.HEAPU32[scriptPtr / 4];
+  const language = Module.HEAPU32[languagePtr / 4];
+  Module.stackRestore(sp);
+  return {
+    script: hb_untag(script),
+    language: language_to_string(language),
+  };
 }

@@ -2084,6 +2084,32 @@ describe("misc", function () {
     expect(hb.otTagToLanguage("SYRE")).to.equal("und-syre");
   });
 
+  it(hb.otTagsFromScriptAndLanguage, () => {
+    // Single script to multiple tags:
+    expect(hb.otTagsFromScriptAndLanguage("Deva", "hin")).to.deep.equal({
+      scriptTags: ["dev3", "dev2", "deva"],
+      languageTags: ["HIN "],
+    });
+    // Single language to multiple tags:
+    expect(hb.otTagsFromScriptAndLanguage("Syrc", "syr-")).to.deep.equal({
+      scriptTags: ["syrc"],
+      languageTags: ["SYR "], // In register: "SYR ", SYRE, SYRJ, SYRN
+    });
+  });
+
+  it(hb.otTagsToScriptAndLanguage, () => {
+    // Multiple tags to single script:
+    expect(hb.otTagsToScriptAndLanguage("dev2", "HIN ")).to.deep.equal({
+      script: "Deva",
+      language: "hi-x-hbsc-64657632", // Private disambiguation
+    });
+    // Single tag to multiple languages:
+    expect(hb.otTagsToScriptAndLanguage("syrc", "SYR ")).to.deep.equal({
+      script: "Syrc",
+      language: "syr", // In register: aii, amw, cld, syc, syr, tru
+    });
+  });
+
   it("test that calling functions repeatedly doesn't exhaust memory", function () {
     let blob = new hb.Blob(
       fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
