@@ -164,8 +164,8 @@ const HB_OT_MAX_TAGS_PER_SCRIPT = 3;
 
 /**
  * Convert a HarfBuzz script (ISO 15924) and a HarfBuzz language (BCP 47) to OpenType script tags and OpenType language tags.
- * @param script An HarfBuzz script to convert.
- * @param language An HarfBuzz language to convert.
+ * @param script A HarfBuzz script to convert.
+ * @param language A HarfBuzz language to convert.
  * @returns An object with the OpenType script tags and the OpenType language tags.
  */
 export function otTagsFromScriptAndLanguage(
