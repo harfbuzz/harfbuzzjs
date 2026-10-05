@@ -2091,9 +2091,9 @@ describe("misc", function () {
       languageTags: ["HIN "],
     });
     // Single language to multiple tags:
-    expect(hb.otTagsFromScriptAndLanguage("Syrc", "syr-")).to.deep.equal({
+    expect(hb.otTagsFromScriptAndLanguage("Syrc", "syr")).to.deep.equal({
       scriptTags: ["syrc"],
-      languageTags: ["SYR "], // In register: "SYR ", SYRE, SYRJ, SYRN
+      languageTags: ["SYR "], // In registry: "SYR ", SYRE, SYRJ, SYRN
     });
   });
 
@@ -2106,7 +2106,7 @@ describe("misc", function () {
     // Single tag to multiple languages:
     expect(hb.otTagsToScriptAndLanguage("syrc", "SYR ")).to.deep.equal({
       script: "Syrc",
-      language: "syr", // In register: aii, amw, cld, syc, syr, tru
+      language: "syr", // In registry: aii, amw, cld, syc, syr, tru
     });
   });
 
