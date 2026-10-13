@@ -1,6 +1,7 @@
 import {
   Module,
   exports,
+  malloc,
   track,
   STATIC_ARRAY_SIZE,
   hb_tag,
@@ -343,8 +344,8 @@ export class Face {
     const languagePtr = language_from_string(language);
     const nameLen =
       exports.hb_ot_name_get_utf16(this.ptr, nameId, languagePtr, 0, 0) + 1;
+    const textPtr = malloc(nameLen * 2);
     const textSizePtr = Module.stackAlloc(4);
-    const textPtr = exports.malloc(nameLen * 2);
     Module.HEAPU32[textSizePtr / 4] = nameLen;
     exports.hb_ot_name_get_utf16(
       this.ptr,

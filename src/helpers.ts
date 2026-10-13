@@ -31,6 +31,17 @@ export function track(
 }
 
 /**
+ * Allocate `size` bytes in the WASM memory. Unlike `exports.malloc()`, throws
+ * if the allocation fails instead of returning 0, which the callers would
+ * write through, overwriting the module's own data at the start of the memory.
+ */
+export function malloc(size: number): number {
+  const ptr = exports.malloc(size);
+  if (!ptr && size) throw new Error(`Failed to allocate ${size} bytes`);
+  return ptr;
+}
+
+/**
  * Initialize the HarfBuzz module.
  * @param module The Emscripten module instance created with {@link
  * createHarfBuzz}.
@@ -78,7 +89,7 @@ export function utf16_ptr_to_string(ptr: number, length: number): string {
  * Faster than encoding to UTF-8
  */
 export function string_to_ascii_ptr(text: string): StringPtr {
-  const ptr = exports.malloc(text.length + 1);
+  const ptr = malloc(text.length + 1);
   for (let i = 0; i < text.length; ++i) {
     const char = text.charCodeAt(i);
     if (char > 127) throw new Error("Expected ASCII text");
@@ -95,7 +106,7 @@ export function string_to_ascii_ptr(text: string): StringPtr {
 }
 
 export function string_to_utf8_ptr(text: string): StringPtr {
-  const ptr = exports.malloc(text.length);
+  const ptr = malloc(text.length);
   utf8Encoder.encodeInto(text, Module.HEAPU8.subarray(ptr, ptr + text.length));
   return {
     ptr,
@@ -107,7 +118,7 @@ export function string_to_utf8_ptr(text: string): StringPtr {
 }
 
 export function string_to_utf16_ptr(text: string): StringPtr {
-  const ptr = exports.malloc(text.length * 2);
+  const ptr = malloc(text.length * 2);
   const words = Module.HEAPU16.subarray(ptr / 2, ptr / 2 + text.length);
   for (let i = 0; i < words.length; ++i) words[i] = text.charCodeAt(i);
   return {
@@ -138,7 +149,7 @@ export function language_from_string(str: string): number {
  */
 export function typed_array_from_set(setPtr: number): Uint32Array {
   const setCount = exports.hb_set_get_population(setPtr);
-  const arrayPtr = exports.malloc(setCount << 2);
+  const arrayPtr = malloc(setCount << 2);
   const arrayOffset = arrayPtr >> 2;
   exports.hb_set_next_many(
     setPtr,

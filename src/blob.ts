@@ -1,4 +1,4 @@
-import { Module, exports, freeFuncPtr, track } from "./helpers";
+import { Module, exports, freeFuncPtr, malloc, track } from "./helpers";
 
 /**
  * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-blob.html | HarfBuzz blob}.
@@ -12,7 +12,7 @@ export class Blob {
    */
   constructor(data: Uint8Array | ArrayBuffer) {
     const array = data instanceof Uint8Array ? data : new Uint8Array(data);
-    const blobPtr = exports.malloc(array.byteLength);
+    const blobPtr = malloc(array.byteLength);
     Module.HEAPU8.set(array, blobPtr);
     this.ptr = exports.hb_blob_create(
       blobPtr,
