@@ -146,7 +146,10 @@ export function typed_array_from_set(setPtr: number): Uint32Array {
     arrayPtr,
     setCount,
   );
-  const array = Module.HEAPU32.subarray(arrayOffset, arrayOffset + setCount);
+  // Copy out of the WASM memory: a view of it would be detached when the
+  // memory grows, and would keep the allocation from being freed.
+  const array = Module.HEAPU32.slice(arrayOffset, arrayOffset + setCount);
+  exports.free(arrayPtr);
   return array;
 }
 
