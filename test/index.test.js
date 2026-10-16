@@ -17,6 +17,19 @@ describe("Face", function () {
     expect(codepoints).not.to.include("ا".codePointAt(0));
   });
 
+  it("collectUnicodes result survives WASM memory growth", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    const codepoints = face.collectUnicodes();
+    const expected = [...codepoints];
+    expect(expected).to.include("a".codePointAt(0));
+    // Large enough to grow the WASM memory, which detaches views of the old one.
+    new hb.Blob(new Uint8Array(64 * 1024 * 1024));
+    expect([...codepoints]).to.deep.equal(expected);
+  });
+
   it("exposes upem", function () {
     let blob = new hb.Blob(
       fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
