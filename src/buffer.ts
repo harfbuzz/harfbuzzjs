@@ -1,6 +1,7 @@
 import {
   Module,
   exports,
+  malloc,
   track,
   hb_tag,
   utf8_ptr_to_string,
@@ -134,7 +135,7 @@ export class Buffer {
     itemOffset: number = 0,
     itemLength?: number,
   ): void {
-    const codePointsPtr = exports.malloc(codePoints.length * 4);
+    const codePointsPtr = malloc(codePoints.length * 4);
     const codePointsArray = Module.HEAPU32.subarray(
       codePointsPtr / 4,
       codePointsPtr / 4 + codePoints.length,
@@ -411,7 +412,7 @@ export class Buffer {
     const sp = Module.stackSave();
     const endPos = end ?? this.getLength();
     const bufLen = 32 * 1024;
-    const bufPtr = exports.malloc(bufLen);
+    const bufPtr = malloc(bufLen);
     const bufConsumedPtr = Module.stackAlloc(4);
     let result = "";
     while (start < endPos) {
