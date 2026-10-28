@@ -14,6 +14,7 @@ import {
 } from "./helpers";
 import type {
   AxisInfo,
+  NamedInstance,
   NameEntry,
   FeatureNameIds,
   PaletteColor,
@@ -100,6 +101,57 @@ export class Face {
     });
     Module.stackRestore(sp);
     return result;
+  }
+
+  /**
+   * Return the named instances of a variable font.
+   * @returns An array of {@link NamedInstance} values, empty for a non-variable
+   *  font.
+   */
+  getNamedInstances(): NamedInstance[] {
+    const count = exports.hb_ot_var_get_named_instance_count(this.ptr);
+    if (!count) {
+      return [];
+    }
+    // getAxisInfos() keeps the last axis of a repeated tag, leaving holes
+    // for the others, whose coordinates are skipped
+    const axisTags: string[] = [];
+    for (const axis of Object.values(this.getAxisInfos()))
+      axisTags[axis.axisIndex] = axis.tag;
+    const sp = Module.stackSave();
+    const coordsLengthPtr = Module.stackAlloc(4);
+    const coordsPtr = Module.stackAlloc(axisTags.length * 4);
+    const instances: NamedInstance[] = [];
+    for (let i = 0; i < count; i++) {
+      Module.HEAPU32[coordsLengthPtr / 4] = axisTags.length;
+      exports.hb_ot_var_named_instance_get_design_coords(
+        this.ptr,
+        i,
+        coordsLengthPtr,
+        coordsPtr,
+      );
+      const coords: Record<string, number> = {};
+      const coordsLength = Module.HEAPU32[coordsLengthPtr / 4];
+      for (let j = 0; j < coordsLength; j++) {
+        if (axisTags[j] !== undefined)
+          coords[axisTags[j]] = Module.HEAPF32[coordsPtr / 4 + j];
+      }
+      const instance: NamedInstance = {
+        instanceIndex: i,
+        subfamilyNameId: exports.hb_ot_var_named_instance_get_subfamily_name_id(
+          this.ptr,
+          i,
+        ),
+        coords,
+      };
+      const postScriptNameId =
+        exports.hb_ot_var_named_instance_get_postscript_name_id(this.ptr, i);
+      if (postScriptNameId != HB_OT_NAME_ID_INVALID)
+        instance.postScriptNameId = postScriptNameId;
+      instances.push(instance);
+    }
+    Module.stackRestore(sp);
+    return instances;
   }
 
   /**
