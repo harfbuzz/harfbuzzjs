@@ -38,9 +38,7 @@ export function track(
 export function init(module: HarfBuzzModule) {
   Module = module;
   exports = Module.wasmExports;
-  freeFuncPtr = Module.addFunction((ptr: number) => {
-    exports.free(ptr);
-  }, "vi");
+  freeFuncPtr = Module.addFunction(exports.free, "vi");
 }
 
 export function hb_tag(s: string): number {
