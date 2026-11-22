@@ -1,7 +1,8 @@
 import {
   Module,
   exports,
-  registry,
+  track,
+  untrack,
   STATIC_ARRAY_SIZE,
   hb_untag,
   register_callback_data_pointer,
@@ -392,21 +393,29 @@ export type PaintCustomPaletteColorFunc = (
  * The custom-palette-color callback is only necessary if you want to override
  * colors from the font palette with custom colors.
  */
-export class PaintFuncs {
+export class PaintFuncs implements Disposable {
   readonly ptr: number;
   private funcPtrs: number[] = [];
   private userDataPtrs: number[] = [];
 
   constructor() {
     this.ptr = exports.hb_paint_funcs_create();
-    const ptr = this.ptr;
     const funcPtrs = this.funcPtrs;
     const userDataPtrs = this.userDataPtrs;
-    registry.register(this, () => {
+    track(this, (ptr) => {
       exports.hb_paint_funcs_destroy(ptr);
       for (const ptr of funcPtrs) Module.removeFunction(ptr);
       for (const ptr of userDataPtrs) remove_callback_data_pointer(ptr);
     });
+  }
+
+  /**
+   * Free the paint functions now instead of when they are garbage collected,
+   * as at the end of a `using` declaration's scope. Idempotent; using them
+   * afterwards throws.
+   */
+  [Symbol.dispose](): void {
+    untrack(this);
   }
 
   /**

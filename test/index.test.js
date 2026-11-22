@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { expect, describe, it } from "vitest";
+import { expect, describe, it, vi } from "vitest";
 import * as hb from "../dist/index.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -2137,5 +2137,119 @@ describe("misc", function () {
         }
       }
     }
+  });
+});
+
+describe("dispose", function () {
+  function createObjects() {
+    const blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    const face = new hb.Face(blob);
+    const font = new hb.Font(face);
+    return {
+      blob,
+      face,
+      font,
+      fontFuncs: new hb.FontFuncs(),
+      buffer: new hb.Buffer(),
+      drawFuncs: new hb.DrawFuncs(),
+      paintFuncs: new hb.PaintFuncs(),
+    };
+  }
+
+  it("[Symbol.dispose]() unregisters the object from the finalization registry", function () {
+    const unregister = vi.spyOn(FinalizationRegistry.prototype, "unregister");
+    try {
+      for (const [name, object] of Object.entries(createObjects())) {
+        unregister.mockClear();
+        object[Symbol.dispose]();
+        expect(unregister.mock.calls, name).to.have.lengthOf(1);
+        expect(unregister.mock.calls[0][0] === object, name).to.equal(true);
+        expect(unregister.mock.results[0].value, name).to.equal(true);
+        object[Symbol.dispose]();
+        expect(unregister.mock.calls, name).to.have.lengthOf(1);
+      }
+    } finally {
+      unregister.mockRestore();
+    }
+  });
+
+  it("using a disposed object throws", function () {
+    const objects = createObjects();
+    for (const [name, object] of Object.entries(objects)) {
+      object[Symbol.dispose]();
+      expect(() => object.ptr, name).to.throw(
+        `${object.constructor.name} has been disposed`,
+      );
+    }
+    const { blob, face, font, fontFuncs, buffer, drawFuncs, paintFuncs } =
+      objects;
+    expect(() => new hb.Face(blob)).to.throw("Blob has been disposed");
+    expect(() => face.collectUnicodes()).to.throw("Face has been disposed");
+    expect(() => font.glyphFromName("a")).to.throw("Font has been disposed");
+    expect(() => buffer.addText("a")).to.throw("Buffer has been disposed");
+    expect(() => drawFuncs.setMoveToFunc(() => {})).to.throw(
+      "DrawFuncs has been disposed",
+    );
+    expect(() => paintFuncs.setPopTransformFunc(() => {})).to.throw(
+      "PaintFuncs has been disposed",
+    );
+    const { font: liveFont } = createObjects();
+    expect(() => liveFont.setFuncs(fontFuncs)).to.throw(
+      "FontFuncs has been disposed",
+    );
+    expect(() => hb.shape(liveFont, buffer)).to.throw(
+      "Buffer has been disposed",
+    );
+  });
+
+  it("disposing an object keeps the objects created from it working", function () {
+    const { blob, face, font, buffer } = createObjects();
+    blob[Symbol.dispose]();
+    face[Symbol.dispose]();
+    buffer.addText("abc");
+    buffer.guessSegmentProperties();
+    hb.shape(font, buffer);
+    expect(buffer.getGlyphInfos().map((info) => info.codepoint)).to.deep.equal([
+      68, 69, 70,
+    ]);
+  });
+
+  it("disposing frees memory without waiting for garbage collection", function () {
+    // 40 blobs of 64 MiB exceed the 2 GiB WASM memory unless each is freed.
+    const data = new Uint8Array(64 * 1024 * 1024);
+    for (let i = 0; i < 40; i++) {
+      const blob = new hb.Blob(data);
+      const face = new hb.Face(blob);
+      const font = new hb.Font(face);
+      font[Symbol.dispose]();
+      face[Symbol.dispose]();
+      blob[Symbol.dispose]();
+    }
+    expect(hb.versionString()).to.match(/^\d+\.\d+\.\d+$/);
+  });
+
+  // Built from a string, since this file must also parse where `using` is not
+  // supported (Node.js before 24).
+  let usingDeclarations;
+  try {
+    usingDeclarations = new Function(
+      "hb",
+      "data",
+      `using blob = new hb.Blob(data);
+      using face = new hb.Face(blob);
+      return { blob, face, unicodes: [...face.collectUnicodes()] };`,
+    );
+  } catch {}
+
+  it.runIf(usingDeclarations)("works with using declarations", function () {
+    const { blob, face, unicodes } = usingDeclarations(
+      hb,
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    expect(unicodes).to.include("a".codePointAt(0));
+    expect(() => blob.ptr).to.throw("Blob has been disposed");
+    expect(() => face.ptr).to.throw("Face has been disposed");
   });
 });

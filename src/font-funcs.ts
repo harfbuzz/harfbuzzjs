@@ -1,4 +1,4 @@
-import { Module, exports, track, utf8_ptr_to_string } from "./helpers";
+import { Module, exports, track, untrack, utf8_ptr_to_string } from "./helpers";
 import type { FontExtents, GlyphExtents } from "./types";
 import { Font } from "./font";
 
@@ -8,12 +8,21 @@ import { Font } from "./font";
  * like glyph advances and extents. HarfBuzz provides built-in default
  * implementations which can be selectively overridden.
  */
-export class FontFuncs {
+export class FontFuncs implements Disposable {
   readonly ptr: number;
 
   constructor() {
     this.ptr = exports.hb_font_funcs_create();
     track(this, exports.hb_font_funcs_destroy);
+  }
+
+  /**
+   * Free the font functions now instead of when they are garbage collected,
+   * as at the end of a `using` declaration's scope. Idempotent; using them
+   * afterwards throws. A {@link Font} they were set on keeps them alive.
+   */
+  [Symbol.dispose](): void {
+    untrack(this);
   }
 
   /**

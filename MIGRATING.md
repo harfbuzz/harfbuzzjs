@@ -24,7 +24,7 @@ Instead of using factory functions, we now export classes with constructors.
 
 ## Automatic memory cleanup
 
-Instead of manually calling `.destroy()`, WASM objects are now reclaimed automatically using `FinalizationRegistry`. There are no longer any `.destroy()` methods.
+Instead of manually calling `.destroy()`, WASM objects are now reclaimed automatically using `FinalizationRegistry`. There are no longer any `.destroy()` methods. Objects can be freed early with `[Symbol.dispose]()` or `using`. Runtimes without `Symbol.dispose` need `Symbol.dispose ??= Symbol("Symbol.dispose");` run before importing harfbuzzjs.
 
 ## String/number arguments replaced with enums
 

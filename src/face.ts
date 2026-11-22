@@ -2,6 +2,7 @@ import {
   Module,
   exports,
   track,
+  untrack,
   STATIC_ARRAY_SIZE,
   hb_tag,
   hb_untag,
@@ -38,7 +39,7 @@ export type GlyphClass = ValueOf<typeof GlyphClass>;
  * A face represents a single face in a binary font file and is the
  * foundation for creating Font objects used in text shaping.
  */
-export class Face {
+export class Face implements Disposable {
   readonly ptr: number;
   readonly upem: number;
 
@@ -58,6 +59,16 @@ export class Face {
     }
     this.upem = exports.hb_face_get_upem(this.ptr);
     track(this, exports.hb_face_destroy);
+  }
+
+  /**
+   * Free the face now instead of when it is garbage collected, as at the end
+   * of a `using` declaration's scope. Idempotent; using the face afterwards
+   * throws. A {@link Font} created from the face keeps it alive until it is
+   * freed too.
+   */
+  [Symbol.dispose](): void {
+    untrack(this);
   }
 
   /**

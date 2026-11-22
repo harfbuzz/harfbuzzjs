@@ -1,10 +1,10 @@
-import { Module, exports, freeFuncPtr, track } from "./helpers";
+import { Module, exports, freeFuncPtr, track, untrack } from "./helpers";
 
 /**
  * An object representing a {@link https://harfbuzz.github.io/harfbuzz-hb-blob.html | HarfBuzz blob}.
  * A blob wraps a chunk of binary data, typically the contents of a font file.
  */
-export class Blob {
+export class Blob implements Disposable {
   readonly ptr: number;
 
   /**
@@ -22,5 +22,15 @@ export class Blob {
       freeFuncPtr,
     );
     track(this, exports.hb_blob_destroy);
+  }
+
+  /**
+   * Free the blob now instead of when it is garbage collected, as at the end
+   * of a `using` declaration's scope. Idempotent; using the blob afterwards
+   * throws. A {@link Face} created from the blob keeps the font data alive
+   * until it is freed too.
+   */
+  [Symbol.dispose](): void {
+    untrack(this);
   }
 }

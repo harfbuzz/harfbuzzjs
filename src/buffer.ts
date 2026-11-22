@@ -2,6 +2,7 @@ import {
   Module,
   exports,
   track,
+  untrack,
   hb_tag,
   utf8_ptr_to_string,
   string_to_ascii_ptr,
@@ -74,7 +75,7 @@ export type BufferSerializeFormat = ValueOf<typeof BufferSerializeFormat>;
  * A buffer holds the input text and its properties before shaping, and the
  * output glyphs and their information after shaping.
  */
-export class Buffer {
+export class Buffer implements Disposable {
   readonly ptr: number;
 
   /**
@@ -87,6 +88,15 @@ export class Buffer {
       this.ptr = exports.hb_buffer_create();
     }
     track(this, exports.hb_buffer_destroy);
+  }
+
+  /**
+   * Free the buffer now instead of when it is garbage collected, as at the
+   * end of a `using` declaration's scope. Idempotent; using the buffer
+   * afterwards throws.
+   */
+  [Symbol.dispose](): void {
+    untrack(this);
   }
 
   /**

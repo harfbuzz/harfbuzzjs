@@ -2,6 +2,7 @@ import {
   Module,
   exports,
   track,
+  untrack,
   STATIC_ARRAY_SIZE,
   hb_tag,
   utf8_ptr_to_string,
@@ -141,7 +142,7 @@ function getJsonDrawFuncs(): DrawFuncs {
  * parameters (pixels-per-em, variation settings) specified. Fonts are the
  * primary input to the shaping process.
  */
-export class Font {
+export class Font implements Disposable {
   readonly ptr: number;
   private _face?: Face;
 
@@ -159,6 +160,15 @@ export class Font {
       this._face = arg;
     }
     track(this, exports.hb_font_destroy);
+  }
+
+  /**
+   * Free the font now instead of when it is garbage collected, as at the end
+   * of a `using` declaration's scope. Idempotent; using the font afterwards
+   * throws. Its {@link Face} is not freed.
+   */
+  [Symbol.dispose](): void {
+    untrack(this);
   }
 
   /** The {@link Face} associated with this font. */

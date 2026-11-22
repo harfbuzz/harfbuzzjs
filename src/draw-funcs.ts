@@ -1,7 +1,8 @@
 import {
   Module,
   exports,
-  registry,
+  track,
+  untrack,
   register_callback_data_pointer,
   get_callback_data,
   remove_callback_data_pointer,
@@ -104,21 +105,29 @@ export type DrawClosePathFunc = (drawData: unknown, userData: unknown) => void;
  * defined, but we translate {@link DrawFuncs.setQuadraticToFunc | quadratic-to}
  * calls to cubic-to if the callback isn't defined.
  */
-export class DrawFuncs {
+export class DrawFuncs implements Disposable {
   readonly ptr: number;
   private funcPtrs: number[] = [];
   private userDataPtrs: number[] = [];
 
   constructor() {
     this.ptr = exports.hb_draw_funcs_create();
-    const ptr = this.ptr;
     const funcPtrs = this.funcPtrs;
     const userDataPtrs = this.userDataPtrs;
-    registry.register(this, () => {
+    track(this, (ptr) => {
       exports.hb_draw_funcs_destroy(ptr);
       for (const ptr of funcPtrs) Module.removeFunction(ptr);
       for (const ptr of userDataPtrs) remove_callback_data_pointer(ptr);
     });
+  }
+
+  /**
+   * Free the draw functions now instead of when they are garbage collected,
+   * as at the end of a `using` declaration's scope. Idempotent; using them
+   * afterwards throws.
+   */
+  [Symbol.dispose](): void {
+    untrack(this);
   }
 
   /**

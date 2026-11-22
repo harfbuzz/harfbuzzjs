@@ -18,16 +18,37 @@ const utf8Encoder = new TextEncoder();
 
 export const STATIC_ARRAY_SIZE = 128;
 
-export const registry = new FinalizationRegistry<() => void>((cleanup) => {
+const registry = new FinalizationRegistry<() => void>((cleanup) => {
   cleanup();
 });
+
+const cleanups = new WeakMap<object, () => void>();
 
 export function track(
   obj: { ptr: number },
   destroy: (ptr: number) => void,
 ): void {
   const ptr = obj.ptr;
-  registry.register(obj, () => destroy(ptr));
+  const cleanup = () => destroy(ptr);
+  registry.register(obj, cleanup, obj);
+  cleanups.set(obj, cleanup);
+}
+
+/**
+ * Free a tracked object now instead of when it is garbage collected.
+ * Idempotent; any use of the object's `ptr` afterwards throws.
+ */
+export function untrack(obj: { ptr: number }): void {
+  const cleanup = cleanups.get(obj);
+  if (!cleanup) return;
+  cleanups.delete(obj);
+  registry.unregister(obj);
+  Object.defineProperty(obj, "ptr", {
+    get() {
+      throw new Error(`${obj.constructor.name} has been disposed`);
+    },
+  });
+  cleanup();
 }
 
 /**
