@@ -307,6 +307,27 @@ export interface AxisInfo {
   max: number;
 }
 
+/**
+ * Data type for holding a named instance of a variable font, such as "Bold"
+ * or "Condensed Light".
+ */
+export interface NamedInstance {
+  /** Index of the instance in the named-instance array. */
+  instanceIndex: number;
+  /** The `name` table Name ID that provides display names for the instance. */
+  subfamilyNameId: number;
+  /**
+   * The `name` table Name ID that provides the PostScript name of the
+   * instance, if the font has one.
+   */
+  postScriptNameId?: number;
+  /**
+   * The design coordinates of the instance, in un-normalized, user scales,
+   * keyed by axis tag.
+   */
+  coords: Record<string, number>;
+}
+
 export interface NameEntry {
   nameId: number;
   language: string;

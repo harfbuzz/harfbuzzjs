@@ -62,6 +62,59 @@ describe("Face", function () {
     expect(Object.keys(face.getAxisInfos())).to.have.lengthOf(0);
   });
 
+  it("getNamedInstances returns the named instances of a variable font", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(
+        path.join(__dirname, "fonts/noto/NotoSansArabic-Variable.ttf"),
+      ),
+    );
+    let face = new hb.Face(blob);
+    const instances = face.getNamedInstances();
+    expect(instances).to.have.lengthOf(36);
+    expect(instances[0]).to.deep.equal({
+      instanceIndex: 0,
+      subfamilyNameId: 258,
+      coords: { wght: 100, wdth: 100 },
+    });
+    expect(instances[11]).to.deep.equal({
+      instanceIndex: 11,
+      subfamilyNameId: 269,
+      coords: { wght: 300, wdth: 75 },
+    });
+    expect(face.getName(instances[11].subfamilyNameId, "en")).to.equal(
+      "Condensed Light",
+    );
+    expect(instances[35].coords).to.deep.equal({ wght: 900, wdth: 62.5 });
+  });
+
+  it("getNamedInstances keys coordinates like getAxisInfos for repeated axis tags", function () {
+    const data = fs.readFileSync(
+      path.join(__dirname, "fonts/noto/NotoSansArabic-Variable.ttf"),
+    );
+    // Rename the second axis (wdth) to wght
+    const numTables = data.readUInt16BE(4);
+    for (let i = 0; i < numTables; i++) {
+      const record = 12 + i * 16;
+      if (data.toString("latin1", record, record + 4) === "fvar") {
+        const fvar = data.readUInt32BE(record + 8);
+        const axes = fvar + data.readUInt16BE(fvar + 4);
+        data.write("wght", axes + 20, "latin1");
+      }
+    }
+    let face = new hb.Face(new hb.Blob(data));
+    expect(Object.keys(face.getAxisInfos())).to.deep.equal(["wght"]);
+    expect(face.getAxisInfos().wght.axisIndex).to.equal(1);
+    expect(face.getNamedInstances()[11].coords).to.deep.equal({ wght: 75 });
+  });
+
+  it("getNamedInstances returns an empty array for a non-variable font", function () {
+    let blob = new hb.Blob(
+      fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
+    );
+    let face = new hb.Face(blob);
+    expect(face.getNamedInstances()).to.deep.equal([]);
+  });
+
   it("getTableScriptTags returns tags for a font", function () {
     let blob = new hb.Blob(
       fs.readFileSync(path.join(__dirname, "fonts/noto/NotoSans-Regular.ttf")),
